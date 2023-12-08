@@ -230,7 +230,7 @@ class AddonUpdaterInstallPopup(bpy.types.Operator):
 
 # User preference check-now operator
 class AddonUpdaterCheckNow(bpy.types.Operator):
-    bl_label = "Check now for KEN Blender Pipeline Addon update"
+    bl_label = "Check now for addon update"
     bl_idname = updater.addon + ".updater_check_now"
     bl_description = "Check now for an update to the {} addon".format(
         updater.addon)
@@ -985,7 +985,6 @@ def update_settings_ui(self, context, element=None):
         sub_col.enabled = False
     sub_row = sub_col.row()
     sub_row.label(text="Interval between checks")
-    sub_row = sub_col.row(align=True)
     check_col = sub_row.column(align=True)
     check_col.prop(settings, "updater_interval_months")
     check_col = sub_row.column(align=True)
