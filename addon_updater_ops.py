@@ -871,7 +871,7 @@ def show_reload_popup():
 # -----------------------------------------------------------------------------
 # Example UI integrations
 # -----------------------------------------------------------------------------
-def update_notice_box_ui(self, context):
+def update_notice_box_ui(self, context, row):
     """Update notice draw, to add to the end or beginning of a panel.
 
     After a check for update has occurred, this function will draw a box
@@ -903,8 +903,7 @@ def update_notice_box_ui(self, context):
     if not updater.update_ready:
         return
 
-    layout = self.layout
-    box = layout.box()
+    box = row.box()
     col = box.column(align=True)
     col.alert = True
     col.label(text="Latest update is ready!", icon="ERROR")
@@ -920,7 +919,6 @@ def update_notice_box_ui(self, context):
     if not updater.manual_only:
         colR.operator(AddonUpdaterUpdateNow.bl_idname,
                       text="Update", icon="LOOP_FORWARDS")
-        col.operator("wm.url_open", text="Open website").url = updater.website
         # ops = col.operator("wm.url_open",text="Direct download")
         # ops.url=updater.update_link
         col.operator(AddonUpdaterInstallManually.bl_idname,

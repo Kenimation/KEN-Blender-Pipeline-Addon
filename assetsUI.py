@@ -594,12 +594,14 @@ class Assets_UI(bpy.types.Panel):
         scene = context.scene
         obj = context.view_layer.objects.active
         layout.label(text = "UI for Quick Tools Pipeline")
-        row = layout.box().row()
+        box = layout.box()
+        row = box.row()
         row.label(text = "Create by KEN", icon = 'RIGHTARROW')
         assetsDraw.drawheader(scene, row, obj)
         row.operator("open.addonprefsofaddon", icon = "SETTINGS", text = "")
-        addon_updater_ops.check_for_update_background()
-        addon_updater_ops.update_notice_box_ui(self, context)
+        row = box.row()
+        addon_updater_ops.check_for_update_background(context)
+        addon_updater_ops.update_notice_box_ui(self, context, row)
         box = layout.box()
         row = box.row()
         row.prop(scene, "myProps", expand = True)
