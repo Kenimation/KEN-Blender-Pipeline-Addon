@@ -5,7 +5,7 @@ import os
 import bmesh
 from .AssetsUI import assetsDraw
 from .Anime import AnimeProperties
-from . import addonPreferences
+from . import addonPreferences, addon_updater_ops
 from . import icons
 
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -598,6 +598,8 @@ class Assets_UI(bpy.types.Panel):
         row.label(text = "Create by KEN", icon = 'RIGHTARROW')
         assetsDraw.drawheader(scene, row, obj)
         row.operator("open.addonprefsofaddon", icon = "SETTINGS", text = "")
+        addon_updater_ops.check_for_update_background()
+        addon_updater_ops.update_notice_box_ui(self, context)
         box = layout.box()
         row = box.row()
         row.prop(scene, "myProps", expand = True)

@@ -129,7 +129,7 @@ def get_user_preferences(context=None):
 # Simple popup to prompt use to check for update & offer install if available.
 class AddonUpdaterInstallPopup(bpy.types.Operator):
     """Check and install update if available"""
-    bl_label = "Update {x} addon".format(x=updater.addon)
+    bl_label = "Update KEN Blender Pipeline Addon".format(x=updater.addon)
     bl_idname = updater.addon + ".updater_install_popup"
     bl_description = "Popup to check and display current updates available"
     bl_options = {'REGISTER', 'INTERNAL'}
@@ -227,7 +227,6 @@ class AddonUpdaterInstallPopup(bpy.types.Operator):
             updater.print_verbose("Doing nothing, not ready for update")
         return {'FINISHED'}
 
-
 # User preference check-now operator
 class AddonUpdaterCheckNow(bpy.types.Operator):
     bl_label = "Check now for addon update"
@@ -267,9 +266,8 @@ class AddonUpdaterCheckNow(bpy.types.Operator):
 
         return {'FINISHED'}
 
-
 class AddonUpdaterUpdateNow(bpy.types.Operator):
-    bl_label = "Update " + updater.addon + " addon now"
+    bl_label = "Update KEN Blender Pipeline Addon"
     bl_idname = updater.addon + ".updater_update_now"
     bl_description = "Update to the latest version of the {x} addon".format(
         x=updater.addon)
@@ -329,9 +327,8 @@ class AddonUpdaterUpdateNow(bpy.types.Operator):
 
         return {'FINISHED'}
 
-
 class AddonUpdaterUpdateTarget(bpy.types.Operator):
-    bl_label = updater.addon + " version target"
+    bl_label = "KEN Blender Pipeline Addon Version"
     bl_idname = updater.addon + ".updater_update_target"
     bl_description = "Install a targeted version of the {x} addon".format(
         x=updater.addon)
@@ -382,7 +379,7 @@ class AddonUpdaterUpdateTarget(bpy.types.Operator):
             return
         split = layout_split(layout, factor=0.5)
         sub_col = split.column()
-        sub_col.label(text="Select install version")
+        sub_col.label(text="Select Version")
         sub_col = split.column()
         sub_col.prop(self, "target", text="")
 
@@ -406,7 +403,6 @@ class AddonUpdaterUpdateTarget(bpy.types.Operator):
             return {'CANCELLED'}
 
         return {'FINISHED'}
-
 
 class AddonUpdaterInstallManually(bpy.types.Operator):
     """As a fallback, direct the user to download the addon manually"""
@@ -472,7 +468,6 @@ class AddonUpdaterInstallManually(bpy.types.Operator):
 
     def execute(self, context):
         return {'FINISHED'}
-
 
 class AddonUpdaterUpdatedSuccessful(bpy.types.Operator):
     """Addon in place, popup telling user it completed or what went wrong"""
@@ -558,12 +553,11 @@ class AddonUpdaterUpdatedSuccessful(bpy.types.Operator):
     def execute(self, context):
         return {'FINISHED'}
 
-
 class AddonUpdaterRestoreBackup(bpy.types.Operator):
     """Restore addon from backup"""
-    bl_label = "Restore backup"
+    bl_label = "Restore addon backup version"
     bl_idname = updater.addon + ".updater_restore_backup"
-    bl_description = "Restore addon from backup"
+    bl_description = "Restore addon version from backup"
     bl_options = {'REGISTER', 'INTERNAL'}
 
     @classmethod
@@ -913,7 +907,7 @@ def update_notice_box_ui(self, context):
     box = layout.box()
     col = box.column(align=True)
     col.alert = True
-    col.label(text="Update ready!", icon="ERROR")
+    col.label(text="Latest update is ready!", icon="ERROR")
     col.alert = False
     col.separator()
     row = col.row(align=True)
@@ -1082,11 +1076,11 @@ def update_settings_ui(self, context, element=None):
         if updater.include_branches and len(updater.include_branch_list) > 0:
             branch = updater.include_branch_list[0]
             col.operator(AddonUpdaterUpdateTarget.bl_idname,
-                         text="Install {}".format(branch))
+                         text="Install {} / older version".format(branch))
         else:
             col.operator(AddonUpdaterUpdateTarget.bl_idname,
                          text="(Re)install addon version")
-        last_date = "none found"
+        last_date = "None"
         backup_path = os.path.join(updater.stage_path, "backup")
         if "backup_date" in updater.json and os.path.isdir(backup_path):
             if updater.json["backup_date"] == "":

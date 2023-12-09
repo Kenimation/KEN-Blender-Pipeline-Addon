@@ -131,7 +131,7 @@ class AddonPref(bpy.types.AddonPreferences):
                                 items = [('one', 'Rig Settings', ''),
                                         ('two', 'Functions', ''),
                                         ('three', 'Contact / Contributors', ''),
-                                        ('four', 'Addon Info', ''),
+                                        ('four', 'Update', ''),
                                         ])
 
     #━━━━━━━━━━━━━
