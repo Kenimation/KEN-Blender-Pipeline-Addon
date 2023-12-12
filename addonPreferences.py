@@ -8,9 +8,10 @@ from bpy.props import (StringProperty,
 )
 from enum import Enum
 from .Operations import uv_drag
-from .Minecraft import minecraftProperties, minecraftDefs
-from . import addon_updater_ops
-from . import icons
+from .AssetsUI import assetsDefs
+from .Minecraft import minecraftDefs
+from .Anime import AnimeProperties, AnimeDefs
+from . import addon_updater_ops, icons
 
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -69,12 +70,61 @@ class UVDRAG_OT_AddHotkey(bpy.types.Operator):
 
 #━━━━━━━━━━━━━
 
+class SyncAddonPrefs(bpy.types.Operator):
+    bl_idname = "addonprefs.sync"
+    bl_label = "sync. addon prefs"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        preferences = context.preferences
+        addon_prefs = preferences.addons[__package__].preferences
+        if assetsDefs.readTextPrefs(4) == "True":
+            addon_prefs.flip_bone = True
+        else:
+            addon_prefs.flip_bone = False
+        addon_prefs.armIK = assetsDefs.readTextPrefs(7)
+        addon_prefs.legIK = assetsDefs.readTextPrefs(10)
+        addon_prefs.finger = assetsDefs.readTextPrefs(13)
+        addon_prefs.rig_scale = float(assetsDefs.readTextPrefs(16))
+
+        return {'FINISHED'}
+
+class OPEN_ADDON_PREFS_OF_ADDON(bpy.types.Operator):
+    """Tooltip"""
+    bl_idname = "open.addonprefsofaddon"
+    bl_label = ""
+    bl_description = "opens the user preferences for this addon"
+
+    id_name: bpy.props.StringProperty()
+
+    def execute(self, context):
+        bpy.ops.screen.userpref_show()
+        bpy.context.preferences.active_section = 'ADDONS'
+        bpy.data.window_managers['WinMan']['addon_search'] = "KEN Pipeline"
+        bpy.ops.preferences.addon_show(module = "KEN Blender Pipeline")
+        bpy.ops.preferences.addon_expand(module = "KEN Blender Pipeline")
+        
+        return {'FINISHED'}
+
 class AddonPref(bpy.types.AddonPreferences):
     bl_idname = __package__
 
     bktemplate_setting_bool : bpy.props.BoolProperty(default=True, name = "Bool", description = "Bool")
-    compact_panel : BoolProperty(default = True)
-    flip_bone : BoolProperty(update = minecraftDefs.write_flip_bone)
+    compact_panel : bpy.props.BoolProperty(default = True, description = "Compact Ppanel")
+    scene_material_panel : bpy.props.BoolProperty(default = True, description = "Turn on scene material panel in material priperties.")
+    flip_bone : bpy.props.BoolProperty(default=True, update = assetsDefs.write_flip_bone)
+
+    rig_scale : bpy.props.FloatProperty(
+		name='Rig Scale',
+		description="Rig Scale of Anime Rig",
+        update = AnimeDefs.write_rig_scale,
+		default=1,
+		min=0)
+
+    registered_name : bpy.props.StringProperty(
+		name="Registered Name",
+		description="Input registered Name to enable registered function",
+		default="")
 
     auto_check_update : bpy.props.BoolProperty(
 		name="Auto-check for Update",
@@ -109,37 +159,31 @@ class AddonPref(bpy.types.AddonPreferences):
 		max=59)
 
     armIK : EnumProperty(
-                                update = minecraftDefs.write_armIK,
+                                update = assetsDefs.write_armIK,
                                 items = [('FK', 'FK', ''),
-                                        ('IK', 'IK', '')])
+                                        ('IK', 'IK', '')],
+                                        default='FK')
 
     legIK : EnumProperty(
-                                update = minecraftDefs.write_legIK,
+                                update = assetsDefs.write_legIK,
                                 items = [('FK', 'FK', ''),
-                                        ('IK', 'IK', '')])
+                                        ('IK', 'IK', '')],
+                                        default='IK')
     
     finger : EnumProperty(
                                 update = minecraftDefs.write_finger,
                                 items = [('Off', 'Off', ''),
-                                        ('On', 'On', '')])
-
-
+                                        ('On', 'On', '')],
+                                        default='On')
 
     #━━━━━━━━━━━━━
 
     subClasses : EnumProperty(default = "one",
-                                items = [('one', 'Rig Settings', ''),
+                                items = [('one', 'Settings', ''),
                                         ('two', 'Functions', ''),
                                         ('three', 'Contact / Contributors', ''),
                                         ('four', 'Update', ''),
                                         ])
-
-    #━━━━━━━━━━━━━
-
-    StringFileRename : StringProperty()
-    directory_select : StringProperty(maxlen=1024, subtype='FILE_PATH', options={'HIDDEN', 'SKIP_SAVE'})
-    filePath : StringProperty(maxlen=1024, subtype='FILE_PATH')
-    addRemoveEnum : EnumProperty(items = [('one', 'Add', ''), ('two', 'Remove', '')])
 
     #━━━━━━━━━━━━━
     
@@ -159,21 +203,31 @@ class AddonPref(bpy.types.AddonPreferences):
         if self.subClasses == 'one':
             box = layout.box()
             box.label(text = "Default settings:")
-            
+            row = box.row()
+            box.label(text = "Registered Name:")
+            row = box.row()
+            row.prop(self, "registered_name", text = "")
             row = box.row()
             row.label(text = "UI Settings:")
-            row = box.row()
-            row.prop(self, "compact_panel", text = "Compact Panel")
             row.operator("addonprefs.sync", text = "", icon = "FILE_REFRESH")
             row = box.row()
+            row.prop(self, "compact_panel", text = "Compact Panel")
+            row = box.row()
+            row.prop(self, "scene_material_panel", text = "Scene Material Panel")
+            row = box.row()
 
-            lb = layout.box()
-            box = lb.box()
+            box = layout.box()
             row = box.row()
             row.label(text = "Rig Settings:")
 
-            box = lb.box()
-            row.prop(self, "flip_bone", text = "Flip bone")
+            if  self.registered_name == AnimeProperties.registered_name[1]:
+                row = box.row()
+                row.label(text = "Rig Scale:")
+                row.prop(self, "rig_scale", text = "Rig Scale")
+
+            row = box.row()
+            row.label(text = "Flip bone:")
+            row.prop(self, "flip_bone", text = "Flip bone", toggle = True)
             
             row = box.row()
             row.label(text = "Arms:")
@@ -194,7 +248,7 @@ class AddonPref(bpy.types.AddonPreferences):
             col = box.column()
             col.label(text='Setup Hotkey')
             col.separator()
-            wm = bpy.context.window_manager
+            wm = context.window_manager
             kc = wm.keyconfigs.user
 
             #########################################
@@ -257,10 +311,16 @@ class AddonPref(bpy.types.AddonPreferences):
             layout = self.layout
             addon_updater_ops.update_settings_ui(self, context)
         #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            
+
+def getAddonPreferences(context):
+    preferences = context.preferences
+    addon_prefs = preferences.addons[__package__].preferences
+    return addon_prefs
+
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #                   (un)register
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 
 preview_collections = {}
@@ -268,6 +328,8 @@ addon_keymaps = []
 
 classes = (
             UVDRAG_OT_AddHotkey,
+            OPEN_ADDON_PREFS_OF_ADDON,
+            SyncAddonPrefs,
             AddonPref,
           )
           
@@ -276,14 +338,16 @@ def register():
     for cls in classes:
         register_class(cls)
         
- 
     add_hotkey()
     icon = icons.icons("icons")
     pcoll = icon.getColl()
     icon.load(pcoll)
     preview_collections["main"] = pcoll
+
   
 def unregister():
+    
+    remove_hotkey()
     from bpy.utils import unregister_class
     for cls in reversed(classes):
         unregister_class(cls)
