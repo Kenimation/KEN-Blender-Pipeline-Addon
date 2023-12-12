@@ -220,6 +220,20 @@ def update_SmoothShadow(self, context):
     material_obj.material_slots[2].material.node_tree.nodes['Metal Shader'].inputs[inputs].default_value = value
     material_obj.material_slots[3].material.node_tree.nodes['Hair Shader'].inputs[inputs].default_value = value
 
+def update_AnimeEyeType(self, context):
+    rig = context.active_object
+    material_obj = rig.children[0]
+    if self.AnimeEyeType == "one":
+        material_obj.material_slots[4].material.node_tree.nodes['Eyes Shader'].inputs['HD'].default_value = 0
+        material_obj.material_slots[4].material.node_tree.nodes['Eyes Shader'].inputs['Auto HD'].default_value = 0
+    elif self.AnimeEyeType == "two":
+        material_obj.material_slots[4].material.node_tree.nodes['Eyes Shader'].inputs['HD'].default_value = 1
+        material_obj.material_slots[4].material.node_tree.nodes['Eyes Shader'].inputs['Auto HD'].default_value = 0
+    elif self.AnimeEyeType == "three":
+        material_obj.material_slots[4].material.node_tree.nodes['Eyes Shader'].inputs['HD'].default_value = 0
+        material_obj.material_slots[4].material.node_tree.nodes['Eyes Shader'].inputs['Auto HD'].default_value = 1
+
+
 def update_rig_scale(self,context):
     rig = context.active_object
     value = rig.get('RigScale')

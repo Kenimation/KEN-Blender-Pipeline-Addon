@@ -554,8 +554,8 @@ def drawrigmaterial(self, context):
         row = eyelist.row()
         row.label(text = "Texture Type:")
         row = eyelist.row()
-        row.prop(rig, "EyeType", expand = True)
-        if rig.EyeType != "one":
+        row.prop(rig, "AnimeEyeType", expand = True)
+        if rig.AnimeEyeType != "one":
             row = eyelist.row()
             row.label(text = "Texture:")
             row = eyelist.row()

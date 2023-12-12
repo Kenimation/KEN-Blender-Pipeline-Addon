@@ -315,12 +315,13 @@ bpy.types.Object.NoseShadow = EnumProperty(
             ('three', 'Left', ''),
             ])
 
-bpy.types.Object.EyeType = EnumProperty(
+bpy.types.Object.AnimeEyeType = EnumProperty(
     default='three',
     items=[('one', 'LD', ''),
             ('two', 'HD', ''),
             ('three', 'Auto', ''),
-            ])
+            ],
+        update=AnimeDefs.update_AnimeEyeType)
 
 bpy.types.Object.SubShadow = EnumProperty(
     default='one',
