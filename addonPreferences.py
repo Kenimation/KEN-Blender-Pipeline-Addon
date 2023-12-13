@@ -216,30 +216,31 @@ class AddonPref(bpy.types.AddonPreferences):
             row.prop(self, "scene_material_panel", text = "Scene Material Panel")
             row = box.row()
 
-            box = layout.box()
-            row = box.row()
-            row.label(text = "Rig Settings:")
-
-            if  self.registered_name == AnimeProperties.registered_name[1]:
+            if  self.registered_name in AnimeProperties.registered_name:
+                box = layout.box()
                 row = box.row()
-                row.label(text = "Rig Scale:")
-                row.prop(self, "rig_scale", text = "Rig Scale")
+                row.label(text = "Rig Settings:")
 
-            row = box.row()
-            row.label(text = "Flip bone:")
-            row.prop(self, "flip_bone", text = "Flip bone", toggle = True)
-            
-            row = box.row()
-            row.label(text = "Arms:")
-            row.prop(self, "armIK", expand = True)
-            
-            row = box.row()
-            row.label(text = "Legs:")
-            row.prop(self, "legIK", expand = True, text = "Legs")
+                if  self.registered_name == AnimeProperties.registered_name[1]:
+                    row = box.row()
+                    row.label(text = "Rig Scale:")
+                    row.prop(self, "rig_scale", text = "Rig Scale")
 
-            row = box.row()
-            row.label(text = "Fingers:")
-            row.prop(self, "finger", expand = True, text = "Fingers")
+                row = box.row()
+                row.label(text = "Flip bone:")
+                row.prop(self, "flip_bone", text = "Flip bone", toggle = True)
+                
+                row = box.row()
+                row.label(text = "Arms:")
+                row.prop(self, "armIK", expand = True)
+                
+                row = box.row()
+                row.label(text = "Legs:")
+                row.prop(self, "legIK", expand = True, text = "Legs")
+
+                row = box.row()
+                row.label(text = "Fingers:")
+                row.prop(self, "finger", expand = True, text = "Fingers")
 
         #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         
