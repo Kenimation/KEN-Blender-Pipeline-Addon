@@ -5,6 +5,7 @@ from bpy.props import (StringProperty,
                         EnumProperty,
                         BoolProperty,
                         IntProperty,
+                        CollectionProperty,
 )
 from enum import Enum
 from .Operations import uv_drag
@@ -16,6 +17,11 @@ from . import addon_updater_ops, icons
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 addon_keymaps = []
+
+def getAddonPreferences(context):
+    preferences = context.preferences
+    addon_prefs = preferences.addons[__package__].preferences
+    return addon_prefs
 
 def add_hotkey():
 
@@ -56,7 +62,6 @@ def remove_hotkey():
 		km.keymap_items.remove(kmi)
 		wm.keyconfigs.addon.keymaps.remove(km)
 	addon_keymaps.clear()
-
 
 class UVDRAG_OT_AddHotkey(bpy.types.Operator):
 	''' Add hotkey entry '''
@@ -106,6 +111,58 @@ class OPEN_ADDON_PREFS_OF_ADDON(bpy.types.Operator):
         
         return {'FINISHED'}
 
+class REGISTERED_NAME(bpy.types.PropertyGroup):
+    registered_name: bpy.props.StringProperty()
+
+class REGISTERED_NAME_LIST(bpy.types.UIList):
+    # The draw_item function is called for each item of the collection that is visible in the list.
+    #   data is the RNA object containing the collection,
+    #   item is the current drawn item of the collection,
+    #   icon is the "computed" icon for the item (as an integer, because some objects like materials or textures
+    #   have custom icons ID, which are not available as enum items).
+    #   active_data is the RNA object containing the active property for the collection (i.e. integer pointing to the
+    #   active item of the collection).
+    #   active_propname is the name of the active property (use 'getattr(active_data, active_propname)').
+    #   index is index of the current item in the collection.
+    #   flt_flag is the result of the filtering process for this item.
+    #   Note: as index and flt_flag are optional arguments, you do not have to use/declare them here if you don't
+    #         need them.
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
+        registered_name = item
+        # draw_item must handle the three layout types... Usually 'DEFAULT' and 'COMPACT' can share the same code.
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            # You should always start your row layout by a label (icon + text), or a non-embossed text field,
+            # this will also make the row easily selectable in the list! The later also enables ctrl-click rename.
+            # We use icon_value of label, as our given icon is an integer value, not an enum ID.
+            # Note "data" names should never be translated!
+            layout.prop(registered_name, "registered_name", text = "", emboss = False)
+
+        # 'GRID' layout type should be as compact as possible (typically a single icon!).
+        elif self.layout_type == 'GRID':
+            layout.alignment = 'CENTER'
+            layout.label(text="", icon_value=icon)
+
+class ADDREGISTERED_NAME(bpy.types.Operator):
+    bl_idname = "add.registered_name"
+    bl_label = "Add Registered Name"
+
+    def execute(self, context):
+        addon_prefs = getAddonPreferences(context)
+        item = addon_prefs.registered_name.add()
+        item.registered_name = "New Registered Name"
+        return {'FINISHED'}
+    
+class REMOVEREGISTERED_NAME(bpy.types.Operator):
+    bl_idname = "remove.registered_name"
+    bl_label = "Remove Registered Name"
+
+    def execute(self, context):
+        addon_prefs = getAddonPreferences(context)
+        index = addon_prefs.registered_name_index
+        if index >= 0 and index < len(addon_prefs.registered_name):
+            addon_prefs.registered_name.remove(index)
+        return {'FINISHED'}
+
 class AddonPref(bpy.types.AddonPreferences):
     bl_idname = __package__
 
@@ -119,12 +176,17 @@ class AddonPref(bpy.types.AddonPreferences):
 		description="Rig Scale of Anime Rig",
         update = AnimeDefs.write_rig_scale,
 		default=1,
-		min=0)
+		min=1)
+    
+    registered_name_index : bpy.props.IntProperty(
+    name="registered_name_index",
+    description="registered_name_index",
+    )
 
-    registered_name : bpy.props.StringProperty(
-		name="Registered Name",
-		description="Input registered Name to enable registered function",
-		default="")
+    registered_name : bpy.props.CollectionProperty(
+         name="Registered Name",
+         description="Input registered Name to enable registered function",
+         type=REGISTERED_NAME)
 
     auto_check_update : bpy.props.BoolProperty(
 		name="Auto-check for Update",
@@ -187,13 +249,11 @@ class AddonPref(bpy.types.AddonPreferences):
 
     #━━━━━━━━━━━━━
     
-    #━━━━━━━━━━━━━
-    
     def draw(self, context):
         layout = self.layout
         script_file = os.path.realpath(__file__)
         script_directory = os.path.dirname(script_file)
-        
+
         row = layout.row()
         row.prop(self, "subClasses", expand = True)
         row.scale_y = 1.25
@@ -206,7 +266,11 @@ class AddonPref(bpy.types.AddonPreferences):
             row = box.row()
             box.label(text = "Registered Name:")
             row = box.row()
-            row.prop(self, "registered_name", text = "")
+            row.template_list("REGISTERED_NAME_LIST", "", self, "registered_name", self, "registered_name_index")
+            col = row.column(align=True)
+            col.separator()
+            col.operator("add.registered_name", text = "", icon = "ADD")
+            col.operator("remove.registered_name", text = "", icon = "REMOVE")
             row = box.row()
             row.label(text = "UI Settings:")
             row.operator("addonprefs.sync", text = "", icon = "FILE_REFRESH")
@@ -215,32 +279,32 @@ class AddonPref(bpy.types.AddonPreferences):
             row = box.row()
             row.prop(self, "scene_material_panel", text = "Scene Material Panel")
             row = box.row()
-
-            if  self.registered_name in AnimeProperties.registered_name:
-                box = layout.box()
-                row = box.row()
-                row.label(text = "Rig Settings:")
-
-                if  self.registered_name == AnimeProperties.registered_name[1]:
+            if self.registered_name:
+                if all(item.registered_name in AnimeProperties.registered_name for item in self.registered_name):
+                    box = layout.box()
                     row = box.row()
-                    row.label(text = "Rig Scale:")
-                    row.prop(self, "rig_scale", text = "Rig Scale")
+                    row.label(text = "Rig Settings:")
+                    for item in self.registered_name:
+                        if  item.registered_name == AnimeProperties.registered_name[1]:
+                            row = box.row()
+                            row.label(text = "Rig Scale:")
+                            row.prop(self, "rig_scale", text = "Rig Scale")
 
-                row = box.row()
-                row.label(text = "Flip bone:")
-                row.prop(self, "flip_bone", text = "Flip bone", toggle = True)
-                
-                row = box.row()
-                row.label(text = "Arms:")
-                row.prop(self, "armIK", expand = True)
-                
-                row = box.row()
-                row.label(text = "Legs:")
-                row.prop(self, "legIK", expand = True, text = "Legs")
+                    row = box.row()
+                    row.label(text = "Flip bone:")
+                    row.prop(self, "flip_bone", text = "Flip bone", toggle = True)
+                    
+                    row = box.row()
+                    row.label(text = "Arms:")
+                    row.prop(self, "armIK", expand = True)
+                    
+                    row = box.row()
+                    row.label(text = "Legs:")
+                    row.prop(self, "legIK", expand = True, text = "Legs")
 
-                row = box.row()
-                row.label(text = "Fingers:")
-                row.prop(self, "finger", expand = True, text = "Fingers")
+                    row = box.row()
+                    row.label(text = "Fingers:")
+                    row.prop(self, "finger", expand = True, text = "Fingers")
 
         #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         
@@ -313,16 +377,9 @@ class AddonPref(bpy.types.AddonPreferences):
             addon_updater_ops.update_settings_ui(self, context)
         #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-def getAddonPreferences(context):
-    preferences = context.preferences
-    addon_prefs = preferences.addons[__package__].preferences
-    return addon_prefs
-
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #                   (un)register
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-
 
 preview_collections = {}
 addon_keymaps = []
@@ -331,6 +388,10 @@ classes = (
             UVDRAG_OT_AddHotkey,
             OPEN_ADDON_PREFS_OF_ADDON,
             SyncAddonPrefs,
+            REGISTERED_NAME,
+            REGISTERED_NAME_LIST,
+            ADDREGISTERED_NAME,
+            REMOVEREGISTERED_NAME,
             AddonPref,
           )
           

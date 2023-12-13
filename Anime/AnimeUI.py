@@ -36,43 +36,46 @@ def draw_ken_animerig(self, context, obj):
             row = box.row()
             row.label(text = "KEN Anime Rig v1.0 (Female)", icon = "OUTLINER_OB_ARMATURE")
             row.prop(scene, "object_properties", icon = "ARMATURE_DATA", text = "")
-            if addon_prefs.registered_name == AnimeProperties.registered_name[1]:
-                if rig.mode == 'EDIT':
-                    assetsDraw.drawbone_properties(box, context, obj)
-                else:
-                    row = box.row()
-                    row.prop(rig, "AntiLag", text = "Subdivision", icon = 'MOD_SUBSURF')
-                    row.prop(rig, "SmoothShade", text = "Smooth Shade", icon = 'MESH_DATA')
-                    if rig.MeshSelect == True:
-                        icon = "RESTRICT_SELECT_OFF"
+            for item in addon_prefs.registered_name:
+                if  item.registered_name == AnimeProperties.registered_name[1]:
+                    if rig.mode == 'EDIT':
+                        assetsDraw.drawbone_properties(box, context, obj)
                     else:
-                        icon = "RESTRICT_SELECT_ON"
-                    row.prop(rig, "MeshSelect", text = "", icon = icon, emboss = False)
-                    row = box.row()
-                    row.prop(rig, "LineArt", icon = 'MOD_LINEART')
-                    row.prop(rig, "LineArtMesh", text = "", icon = "HIDE_OFF")
-                    if rig.LineArt == True:
                         row = box.row()
-                        row.label(text = "Bake LineArt")
-                        row = box.row()
-                        row.operator("object.lineart_bake_strokes_all", text="Bake All Lineart")
-                        row.operator("object.lineart_clear_all", text="Clear All Lineart")
-                    row = box.row()
-                    row.prop(scene, rig_class, expand = True)
-                    if rig_get_class == "one":
-                        drawrigdesign(self, context)
-                    if rig_get_class == "two":
-                        drawrigmaterial(self, context)
-                    if rig_get_class == "three":
-                        if rig_class != "myanimerigAddition":
-                            drawrigposing(self, context)
+                        row.prop(rig, "AntiLag", text = "Subdivision", icon = 'MOD_SUBSURF')
+                        row.prop(rig, "SmoothShade", text = "Smooth Shade", icon = 'MESH_DATA')
+                        if rig.MeshSelect == True:
+                            icon = "RESTRICT_SELECT_OFF"
                         else:
+                            icon = "RESTRICT_SELECT_ON"
+                        row.prop(rig, "MeshSelect", text = "", icon = icon, emboss = False)
+                        row = box.row()
+                        row.prop(rig, "LineArt", icon = 'MOD_LINEART')
+                        row.prop(rig, "LineArtMesh", text = "", icon = "HIDE_OFF")
+                        if rig.LineArt == True:
+                            row = box.row()
+                            row.label(text = "Bake LineArt")
+                            row = box.row()
+                            row.operator("object.lineart_bake_strokes_all", text="Bake All Lineart")
+                            row.operator("object.lineart_clear_all", text="Clear All Lineart")
+                        row = box.row()
+                        row.prop(scene, rig_class, expand = True)
+                        if rig_get_class == "one":
+                            drawrigdesign(self, context)
+                        if rig_get_class == "two":
+                            drawrigmaterial(self, context)
+                        if rig_get_class == "three":
+                            if rig_class != "myanimerigAddition":
+                                drawrigposing(self, context)
+                            else:
+                                AnimeExtraProperties.drawrigAddition(self, context)
+                        if rig_get_class == "four":
                             AnimeExtraProperties.drawrigAddition(self, context)
-                    if rig_get_class == "four":
-                        AnimeExtraProperties.drawrigAddition(self, context)
-            else:
-                row = box.row()
-                row.label(text = "Registered name is not available to edit the rig.")
+                else:
+                    layout = self.layout
+                    box = layout.box()
+                    row = box.row()
+                    row.label(text = "Registered name is not available to edit the rig.")
     
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -644,8 +647,9 @@ def menu_func_anime(self, context):
     pcoll = preview_collections["main"]
     ken_icon = pcoll["Dual"]
     addon_prefs = addonPreferences.getAddonPreferences(context)
-    if addon_prefs.registered_name in AnimeProperties.registered_name:
-        self.layout.menu("Anime_RIG_Menu", text = "KEN Anime RIG Presnt", icon_value = ken_icon.icon_id)
+    if addon_prefs.registered_name:
+        if all(item.registered_name in AnimeProperties.registered_name for item in addon_prefs.registered_name):
+            self.layout.menu("Anime_RIG_Menu", text = "KEN Anime RIG Presnt", icon_value = ken_icon.icon_id)
 
 class Anime_RIG_Menu(bpy.types.Menu):
     bl_idname = "Anime_RIG_Menu"
@@ -656,17 +660,18 @@ class Anime_RIG_Menu(bpy.types.Menu):
         script_file = os.path.dirname(script_file)
 
         addon_prefs = addonPreferences.getAddonPreferences(context)
-        if addon_prefs.registered_name in AnimeProperties.registered_name[1]:
+        for item in addon_prefs.registered_name:
+            if  item.registered_name == AnimeProperties.registered_name[1]:
 
-            layout = self.layout
+                layout = self.layout
 
-            split = layout.split()
-            col = split.column()
+                split = layout.split()
+                col = split.column()
 
-            pcoll = preview_collections["main"]
-            ken_icon = pcoll["Dual"]
+                pcoll = preview_collections["main"]
+                ken_icon = pcoll["Dual"]
 
-            col.operator("append.kenanimefemale", icon_value = ken_icon.icon_id)
+                col.operator("append.kenanimefemale", icon_value = ken_icon.icon_id)
 
 preview_collections = {}
 

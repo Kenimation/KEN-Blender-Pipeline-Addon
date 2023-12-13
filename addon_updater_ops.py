@@ -574,7 +574,6 @@ class AddonUpdaterRestoreBackup(bpy.types.Operator):
         updater.restore_backup()
         return {'FINISHED'}
 
-
 class AddonUpdaterIgnore(bpy.types.Operator):
     """Ignore update to prevent future popups"""
     bl_label = "Ignore update"
@@ -598,7 +597,6 @@ class AddonUpdaterIgnore(bpy.types.Operator):
         updater.ignore_update()
         self.report({"INFO"}, "Open addon preferences for updater options")
         return {'FINISHED'}
-
 
 class AddonUpdaterEndBackground(bpy.types.Operator):
     """Stop checking for update in the background"""
@@ -764,7 +762,7 @@ def ui_refresh(update_status):
                 area.tag_redraw()
 
 
-def check_for_update_background():
+def check_for_update_background(context):
     """Function for asynchronous background check.
 
     *Could* be called on register, but would be bad practice as the bare
@@ -782,7 +780,7 @@ def check_for_update_background():
         return
 
     # Apply the UI settings.
-    settings = get_user_preferences(bpy.context)
+    settings = get_user_preferences(context)
     if not settings:
         return
     updater.set_check_interval(enabled=settings.auto_check_update,

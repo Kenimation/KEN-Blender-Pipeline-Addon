@@ -147,6 +147,9 @@ bpy.types.Object.DirtLine = BoolProperty(
 bpy.types.Object.FingerLine = BoolProperty(
     default=True, name = "Finger Line")
 
+bpy.types.Object.ClothLine = BoolProperty(
+    default=True, name = "Cloth Line")
+
 bpy.types.Object.ArmorLine = BoolProperty(
     default=True, name = "Armor Line")
 

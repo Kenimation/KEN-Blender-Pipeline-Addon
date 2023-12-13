@@ -312,19 +312,20 @@ def draw_properties(addon_prefs, context, row, obj, pcoll):
         row.label(text = "", icon = "OUTLINER_OB_ARMATURE")
         row.prop(obj, "name", text = "Name")
 
-        if addon_prefs.registered_name in AnimeProperties.registered_name:
-            if obj.mode != 'EDIT' and context.active_object.RIG_ID in AnimeProperties.kenriglist:
-                if context.active_object.RIG_ID == AnimeProperties.kenriglist[2]:
-                    ken_icon = pcoll["Dual"]
-                    ken_icon02 = pcoll["Dual_02"]
-                else:
-                    ken_icon = pcoll["Minecraft"]
-                    ken_icon02 = pcoll["Minecraft_02"]
-                if scene.ken_rig == True:
-                    rig_icon = ken_icon02
-                else:
-                    rig_icon = ken_icon
-                row.prop(scene, "ken_rig", icon_value = rig_icon.icon_id, text = "", emboss=False)
+        if addon_prefs.registered_name:
+            if all(item.registered_name in AnimeProperties.registered_name for item in addon_prefs.registered_name):
+                if obj.mode != 'EDIT' and context.active_object.RIG_ID in AnimeProperties.kenriglist:
+                    if context.active_object.RIG_ID == AnimeProperties.kenriglist[2]:
+                        ken_icon = pcoll["Dual"]
+                        ken_icon02 = pcoll["Dual_02"]
+                    else:
+                        ken_icon = pcoll["Minecraft"]
+                        ken_icon02 = pcoll["Minecraft_02"]
+                    if scene.ken_rig == True:
+                        rig_icon = ken_icon02
+                    else:
+                        rig_icon = ken_icon
+                    row.prop(scene, "ken_rig", icon_value = rig_icon.icon_id, text = "", emboss=False)
         else:
             row.prop(scene, "object_properties", icon = "ARMATURE_DATA", text = "")
     else:

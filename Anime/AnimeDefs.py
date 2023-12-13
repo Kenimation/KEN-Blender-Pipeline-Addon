@@ -233,14 +233,16 @@ def update_AnimeEyeType(self, context):
         material_obj.material_slots[4].material.node_tree.nodes['Eyes Shader'].inputs['HD'].default_value = 0
         material_obj.material_slots[4].material.node_tree.nodes['Eyes Shader'].inputs['Auto HD'].default_value = 1
 
-
 def update_rig_scale(self,context):
     rig = context.active_object
+    material_obj = rig.children[0]
     value = rig.get('RigScale')
     value = float(value)
     scale = [value, value, value]
     rig.pose.bones["Rig.Scale"].scale = scale
     rig.pose.bones["Root"].custom_shape_scale_xyz = scale
+    material_obj.material_slots[3].material.node_tree.nodes['Hair Shader'].inputs["Rig_Scale"].default_value = value
+
 
 def write_rig_scale(self, context):
     addon_prefs = addonPreferences.getAddonPreferences(context)

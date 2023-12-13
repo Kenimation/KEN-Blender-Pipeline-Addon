@@ -599,7 +599,7 @@ class Assets_UI(bpy.types.Panel):
         assetsDraw.drawheader(scene, row, obj)
         row.operator("open.addonprefsofaddon", icon = "SETTINGS", text = "")
         row = box.row()
-        addon_updater_ops.check_for_update_background()
+        addon_updater_ops.check_for_update_background(context)
         addon_updater_ops.update_notice_box_ui(self, context, row)
         box = layout.box()
         row = box.row()
@@ -635,11 +635,12 @@ class Assets_UI(bpy.types.Panel):
                 if scene.advanced_option == True:
                     if obj:
                         assetsDraw.draw_data(self, context, obj)
-
-                if addon_prefs.registered_name in AnimeProperties.registered_name:
-                    minecraftUI.draw_ken_mcrig(self, context, obj)
-                if addon_prefs.registered_name == AnimeProperties.registered_name[1]:
-                    AnimeUI.draw_ken_animerig(self, context, obj)
+                if addon_prefs.registered_name:
+                    if all(item.registered_name in AnimeProperties.registered_name for item in addon_prefs.registered_name):
+                        minecraftUI.draw_ken_mcrig(self, context, obj)
+                for item in addon_prefs.registered_name:
+                    if  item.registered_name == AnimeProperties.registered_name[1]:
+                        AnimeUI.draw_ken_animerig(self, context, obj)
                 if obj.RIG_ID in AnimeProperties.kenriglist:
                     if scene.object_properties == True:
                         assetsDraw.drawobj_properties(self,context, obj)

@@ -386,7 +386,6 @@ bpy.types.Object.Arm_Stretch = FloatProperty(
 bpy.types.Object.Leg_Stretch = FloatProperty(
     min = 0, max = 1, default = 1, name = "Leg Stretch")
 
-
 bpy.types.Object.Facial = EnumProperty(
     default='two',
     items=[('one', 'No Face', ''),
