@@ -279,6 +279,8 @@ def drawrigdesign(self, context):
             row.prop(rig, "HairLine", toggle = True)
             if rig.Sub_ID in AnimeExtraProperties.ArmorList:
                 row = box.row()
+                row.prop(rig, "ClothLine", toggle = True)
+                row = box.row()
                 row.prop(rig, "ArmorLine", toggle = True)
         if rig.Facial == 'two':
             row = box.row()
@@ -573,6 +575,7 @@ def drawrigposing(self, context):
     layout = self.layout
     rig = context.active_object
     box = layout.box().column()
+    scene =  context.scene
     box.prop(rig, "show_in_front", icon = "HIDE_OFF", text = "Show bones in front")
     box.prop(rig, "flipBone", text = "Flip Bone", toggle = True)
     row = box.row()
@@ -628,8 +631,8 @@ def drawrigposing(self, context):
     row.label(text = "Quick Parent:")
     col = row.column()
     cl = col.row()
-    cl.prop(context.scene, "boneName", icon = "BONE_DATA", text = "")
-    cl.prop(rig, "AnimeParentBones", text = "")
+    cl.prop(scene, "boneName", icon = "BONE_DATA", text = "")
+    cl.prop(rig, "ParentBones", text = "")
     row = box.row()
     row.operator("parent.rig", text = "Parent object to rig")
 
