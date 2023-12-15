@@ -30,6 +30,21 @@ bpy.types.Scene.img_fake_use = bpy.props.BoolProperty(
     update = assetsDefs.update_img_fake_use
 )
 
+bpy.types.Scene.light_group = bpy.props.BoolProperty(
+    name="Light Group",
+    description="Light Group",
+)
+
+bpy.types.Scene.light_linking = bpy.props.BoolProperty(
+    name="Light Linking",
+    description="Light Linking",
+)
+
+bpy.types.Scene.shadow_linking = bpy.props.BoolProperty(
+    name="Shadow Linking",
+    description="Shadow Linking",
+)
+
 bpy.types.Scene.cam_save = bpy.props.BoolProperty(
     name="Enable Camera Save List",
     description="Enable Camera Save List",
@@ -44,11 +59,6 @@ bpy.types.Scene.cam_quick = bpy.props.BoolProperty(
     name="Enable Quick Camera",
     description="Enable Quick Camera",
     default= True
-)
-
-bpy.types.Scene.tools = bpy.props.BoolProperty(
-    name="Enable Tools",
-    description="Enable Tools",
 )
 bpy.types.Scene.scene_mat = bpy.props.BoolProperty(
     name="Switch Materials",
@@ -205,7 +215,17 @@ bpy.types.Scene.mat = bpy.props.BoolProperty(
 bpy.types.Scene.view = bpy.props.BoolProperty(
     name="View",
     description="View",
-    default=True,
+    default= True,
+)
+bpy.types.Scene.advanced_option = bpy.props.BoolProperty(
+    name="Advanced Option",
+    description="Advanced Option",
+    default= True,
+)
+bpy.types.Scene.tools = bpy.props.BoolProperty(
+    name="Enable Tools",
+    description="Enable Tools",
+    default= False,
 )
 bpy.types.Scene.object_properties = bpy.props.BoolProperty(
     name="Object Propertie",
@@ -216,11 +236,6 @@ bpy.types.Scene.particles_properties = bpy.props.BoolProperty(
     name="Particles Propertie",
     description="Particles Propertie",
     default=False,
-)
-bpy.types.Scene.advanced_option = bpy.props.BoolProperty(
-    name="Advanced Option",
-    description="Advanced Option",
-    default=True,
 )
 bpy.types.Scene.simulation = bpy.props.BoolProperty(
     name="Simulation Mode",

@@ -250,7 +250,7 @@ def write_rig_scale(self, context):
     with open(text_file, 'r') as file:
         # read a list of lines into data
         data = file.readlines()
-        data[15] = str(addon_prefs.rig_scale) + "\n"
+        data[12] = str(addon_prefs.rig_scale) + "\n"
 
     # and write everything back
     with open(text_file, 'w') as file:

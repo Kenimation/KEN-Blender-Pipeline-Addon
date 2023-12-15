@@ -227,14 +227,14 @@ def readTextPrefs(line):
         data = file.read().splitlines()
         data = data[line-1]
         return data
-    
+
 def write_flip_bone(self, context):
     addon_prefs = addonPreferences.getAddonPreferences(context)
     text_file = getPath("preferencesSettings.cfg")
     with open(text_file, 'r') as file:
         # read a list of lines into data
         data = file.readlines()
-        data[3] = str(addon_prefs.flip_bone) + "\n"
+        data[15] = str(addon_prefs.flip_bone) + "\n"
         print(addon_prefs.flip_bone)
 
     # and write everything back
@@ -247,7 +247,7 @@ def write_armIK(self, context):
     with open(text_file, 'r') as file:
         # read a list of lines into data
         data = file.readlines()
-        data[6] = addon_prefs.armIK + "\n"
+        data[18] = addon_prefs.armIK + "\n"
 
     # and write everything back
     with open(text_file, 'w') as file:
@@ -259,7 +259,7 @@ def write_legIK(self, context):
     with open(text_file, 'r') as file:
         # read a list of lines into data
         data = file.readlines()
-        data[9] = addon_prefs.legIK + "\n"
+        data[21] = addon_prefs.legIK + "\n"
 
     # and write everything back
     with open(text_file, 'w') as file:

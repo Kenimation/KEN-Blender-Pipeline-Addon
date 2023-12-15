@@ -12,13 +12,13 @@ def anime_rig_get_preference(type):
         # props from user preferencesSettings.cfg
             #   arm ik
             #   flip bone
-    flip_bone = assetsDefs.readTextPrefs(4)
+    flip_bone = assetsDefs.readTextPrefs(16)
     if flip_bone == "False":
         rig.flipBone = 0
     else:
         rig.flipBone = 1
             #   arm ik
-    arm_ik = assetsDefs.readTextPrefs(7)
+    arm_ik = assetsDefs.readTextPrefs(19)
     if arm_ik == "IK":
         arm_ik = 1
     else:
@@ -26,7 +26,7 @@ def anime_rig_get_preference(type):
     rig.Arm_IK_Left = arm_ik
     rig.Arm_IK_Right = arm_ik
         # leg ik
-    leg_ik = assetsDefs.readTextPrefs(10)
+    leg_ik = assetsDefs.readTextPrefs(22)
     if leg_ik == "IK":
         leg_ik = 1
     else:
@@ -34,7 +34,7 @@ def anime_rig_get_preference(type):
     rig.Leg_IK_Left = leg_ik
     rig.Leg_IK_Right = leg_ik
 
-    rig_scale = assetsDefs.readTextPrefs(16)
+    rig_scale = assetsDefs.readTextPrefs(13)
     rig.RigScale = float(rig_scale)
 
 class Append_TheAnimeRigKENFemale(bpy.types.Operator):

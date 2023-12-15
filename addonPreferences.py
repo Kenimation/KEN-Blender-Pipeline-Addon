@@ -23,6 +23,45 @@ def getAddonPreferences(context):
     addon_prefs = preferences.addons[__package__].preferences
     return addon_prefs
 
+def write_view(self, context):
+    addon_prefs = getAddonPreferences(context)
+    text_file = assetsDefs.getPath("preferencesSettings.cfg")
+    with open(text_file, 'r') as file:
+        # read a list of lines into data
+        data = file.readlines()
+        data[3] = str(addon_prefs.view) + "\n"
+        print(addon_prefs.view)
+
+    # and write everything back
+    with open(text_file, 'w') as file:
+        file.writelines(data)
+
+def write_advanced_option(self, context):
+    addon_prefs = getAddonPreferences(context)
+    text_file = assetsDefs.getPath("preferencesSettings.cfg")
+    with open(text_file, 'r') as file:
+        # read a list of lines into data
+        data = file.readlines()
+        data[6] = str(addon_prefs.advanced_option) + "\n"
+        print(addon_prefs.advanced_option)
+
+    # and write everything back
+    with open(text_file, 'w') as file:
+        file.writelines(data)
+
+def write_tools(self, context):
+    addon_prefs = getAddonPreferences(context)
+    text_file = assetsDefs.getPath("preferencesSettings.cfg")
+    with open(text_file, 'r') as file:
+        # read a list of lines into data
+        data = file.readlines()
+        data[9] = str(addon_prefs.tools) + "\n"
+        print(addon_prefs.tools)
+
+    # and write everything back
+    with open(text_file, 'w') as file:
+        file.writelines(data)
+
 def add_hotkey():
 
 	wm = bpy.context.window_manager
@@ -84,13 +123,29 @@ class SyncAddonPrefs(bpy.types.Operator):
         preferences = context.preferences
         addon_prefs = preferences.addons[__package__].preferences
         if assetsDefs.readTextPrefs(4) == "True":
+            addon_prefs.view = True
+        else:
+            addon_prefs.view = False
+
+        if assetsDefs.readTextPrefs(7) == "True":
+            addon_prefs.advanced_option = True
+        else:
+            addon_prefs.advanced_option = False
+
+        if assetsDefs.readTextPrefs(10) == "True":
+            addon_prefs.tools= True
+        else:
+            addon_prefs.tools = False
+
+        if assetsDefs.readTextPrefs(16) == "True":
             addon_prefs.flip_bone = True
         else:
             addon_prefs.flip_bone = False
-        addon_prefs.armIK = assetsDefs.readTextPrefs(7)
-        addon_prefs.legIK = assetsDefs.readTextPrefs(10)
-        addon_prefs.finger = assetsDefs.readTextPrefs(13)
-        addon_prefs.rig_scale = float(assetsDefs.readTextPrefs(16))
+
+        addon_prefs.rig_scale = float(assetsDefs.readTextPrefs(13))
+        addon_prefs.armIK = assetsDefs.readTextPrefs(19)
+        addon_prefs.legIK = assetsDefs.readTextPrefs(22)
+        addon_prefs.finger = assetsDefs.readTextPrefs(25)
 
         return {'FINISHED'}
 
@@ -170,6 +225,9 @@ class AddonPref(bpy.types.AddonPreferences):
     compact_panel : bpy.props.BoolProperty(default = True, description = "Compact Ppanel")
     scene_material_panel : bpy.props.BoolProperty(default = True, description = "Turn on scene material panel in material priperties.")
     flip_bone : bpy.props.BoolProperty(default=True, update = assetsDefs.write_flip_bone)
+    view : bpy.props.BoolProperty(default=True, update = write_view)
+    advanced_option : bpy.props.BoolProperty(default=True, update = write_advanced_option)
+    tools : bpy.props.BoolProperty(default=False, update = write_tools)
 
     rig_scale : bpy.props.FloatProperty(
 		name='Rig Scale',
@@ -256,14 +314,13 @@ class AddonPref(bpy.types.AddonPreferences):
 
         row = layout.row()
         row.prop(self, "subClasses", expand = True)
+        row.operator("addonprefs.sync", text = "", icon = "FILE_REFRESH")
         row.scale_y = 1.25
 
         #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
         if self.subClasses == 'one':
             box = layout.box()
-            box.label(text = "Default settings:")
-            row = box.row()
             box.label(text = "Registered Name:")
             row = box.row()
             row.template_list("REGISTERED_NAME_LIST", "", self, "registered_name", self, "registered_name_index")
@@ -273,7 +330,10 @@ class AddonPref(bpy.types.AddonPreferences):
             col.operator("remove.registered_name", text = "", icon = "REMOVE")
             row = box.row()
             row.label(text = "UI Settings:")
-            row.operator("addonprefs.sync", text = "", icon = "FILE_REFRESH")
+            row = box.row()
+            row.prop(self, "view", icon = "VIEW3D", text = "")
+            row.prop(self, "advanced_option", icon = "OUTLINER", text = "")
+            row.prop(self, "tools", icon = "TOOL_SETTINGS", text = "")
             row = box.row()
             row.prop(self, "compact_panel", text = "Compact Panel")
             row = box.row()
@@ -303,7 +363,7 @@ class AddonPref(bpy.types.AddonPreferences):
                     row.prop(self, "legIK", expand = True, text = "Legs")
 
                     row = box.row()
-                    row.label(text = "Fingers:")
+                    row.label(text = "Fingers(Minecraft):")
                     row.prop(self, "finger", expand = True, text = "Fingers")
 
         #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -311,7 +371,7 @@ class AddonPref(bpy.types.AddonPreferences):
         if self.subClasses == 'two':
             box = layout.box()
             col = box.column()
-            col.label(text='Setup Hotkey')
+            col.label(text='Setup Hotkey:')
             col.separator()
             wm = context.window_manager
             kc = wm.keyconfigs.user

@@ -592,11 +592,12 @@ class Assets_UI(bpy.types.Panel):
         layout = self.layout
         scene = context.scene
         obj = context.view_layer.objects.active
+
         layout.label(text = "UI for Quick Tools Pipeline")
         box = layout.box()
         row = box.row()
         row.label(text = "Create by KEN", icon = 'RIGHTARROW')
-        assetsDraw.drawheader(scene, row, obj)
+        assetsDraw.drawheader(context, addon_prefs, row, obj)
         row.operator("open.addonprefsofaddon", icon = "SETTINGS", text = "")
         row = box.row()
         addon_updater_ops.check_for_update_background(context)
@@ -607,9 +608,10 @@ class Assets_UI(bpy.types.Panel):
         row.scale_y = 1.25
         if scene.myProps == 'one':
             row = box.row()
-            if scene.view == True:
-                assetsDraw.draw_view(addon_prefs, context, box, row, obj)
-                row = box.row()
+            if addon_prefs.view == True:
+                if scene.view == True:
+                    assetsDraw.draw_view(addon_prefs, context, box, row, obj)
+                    row = box.row()
             if obj:
                 assetsDraw.draw_properties(addon_prefs, context, row, obj, pcoll)
 
@@ -625,16 +627,18 @@ class Assets_UI(bpy.types.Panel):
                     
                 assetsDraw.draw_edit(scene, box)
 
-                if scene.tools == True:
-                    assetsDraw.draw_tools(scene, obj, self)
+                if addon_prefs.tools == True:
+                    if scene.tools == True:
+                        assetsDraw.draw_tools(scene, obj, self)
 
                 if scene.mat == True:
                     if obj.type == 'MESH':
                         assetsDraw.drawmaterial_properties(self, context)
 
-                if scene.advanced_option == True:
-                    if obj:
-                        assetsDraw.draw_data(self, context, obj)
+                if addon_prefs.advanced_option == True:
+                    if scene.advanced_option == True:
+                        if obj:
+                            assetsDraw.draw_data(self, context, obj)
                 if addon_prefs.registered_name:
                     if all(item.registered_name in AnimeProperties.registered_name for item in addon_prefs.registered_name):
                         minecraftUI.draw_ken_mcrig(self, context, obj)
@@ -727,7 +731,6 @@ class Assets_UI(bpy.types.Panel):
                 if obj and obj.type == "MESH":
                     row.prop(scene, "scene_mat", icon = "SCENE_DATA", text = "")
                 row.label(text = state)
-
                 assetsDraw.drawmaterial(scene, box, row, obj, mat, state)
 
             if scene.mytools == 'two':
@@ -743,9 +746,6 @@ class Assets_UI(bpy.types.Panel):
                     for light in bpy.data.objects:
                         light_list.append(light)
                     lights = light_list[scene.light_index]
-                except:
-                    pass
-                try:
                     duplicate = row.operator("bpy.ops", text = "", icon = "DUPLICATE", emboss=False)
                     duplicate.id = "duplicate"
                     duplicate.object = lights.name
@@ -765,22 +765,41 @@ class Assets_UI(bpy.types.Panel):
                 row.template_list("LIGHT", "", bpy.data, "objects", scene, "light_index")
 
                 try:
-                    row = box.row()
-                    row.prop(scene, "light_type", icon = "OBJECT_DATA", text = "")
-                    if scene.light_type == True:
-                        if obj.type == 'LIGHT':
-                            text = "Object Light Data"
-                            lights = obj.data
+                    if lights:
+                        row = box.row()
+                        row.prop(scene, "light_type", icon = "OBJECT_DATA", text = "")
+                        if scene.light_type == True:
+                            if obj.type == 'LIGHT':
+                                text = "Object Light Data"
+                                lights = obj
+                            else:
+                                text = "List Light Data"
+                                lights = lights
                         else:
                             text = "List Light Data"
-                            lights = lights.data
-                    else:
-                        lights = lights.data
-                        text = "List Light Data"
-                    row.label(text = text)
-                    assetsDraw.drawlight(box, lights)
+                            lights = lights
+                        row.label(text = text)
+                        assetsDraw.drawlight(box, lights.data)
+                        if scene.render.engine in ["CYCLES"]:
+                            row = box.row()
+                            row.label(text = "Shading Linking", icon = "LINKED")
+                            light_linking_box = box.box()
+
+                            view_layer = context.view_layer
+                            row = light_linking_box.row(align=True)
+                            row.use_property_decorate = False
+
+                            sub = row.column(align=True)
+                            sub.prop_search(lights, "lightgroup", view_layer, "lightgroups", text="Light Group", results_are_suggestions=True)
+
+                            sub = row.column(align=True)
+                            sub.enabled = bool(lights.lightgroup) and not any(lg.name == lights.lightgroup for lg in view_layer.lightgroups)
+                            sub.operator("scene.view_layer_add_lightgroup", icon='ADD', text="").name = lights.lightgroup
+                            
+                            assetsDraw.drawlight_linking(scene, light_linking_box, lights)
                 except:
                     box.label(text = "Scene has No Light")
+                    box.operator("object.light_add", text = "Add Light")
 
                 assetsDraw.draw_world(context, box)
 
@@ -832,8 +851,8 @@ class Assets_UI(bpy.types.Panel):
                         icon = "DOWNARROW_HLT"
                     else:
                         icon = "RIGHTARROW"
-                    box.prop(context.scene, "cam_shake", text = "Camera Shakify", icon = icon, emboss=False)
-                    if context.scene.cam_shake == True:
+                    box.prop(scene, "cam_shake", text = "Camera Shakify", icon = icon, emboss=False)
+                    if scene.cam_shake == True:
                         assetsDraw.draw_cam_shake(box, cam)
 
 
@@ -841,8 +860,8 @@ class Assets_UI(bpy.types.Panel):
                         icon = "DOWNARROW_HLT"
                     else:
                         icon = "RIGHTARROW"
-                    box.prop(context.scene, "cam_save", text = "Camera Save List", icon = icon, emboss=False)
-                    if context.scene.cam_save == True:
+                    box.prop(scene, "cam_save", text = "Camera Save List", icon = icon, emboss=False)
+                    if scene.cam_save == True:
                         assetsDraw.draw_save_cam(context, box)
 
                 else:

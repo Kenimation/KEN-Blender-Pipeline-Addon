@@ -497,14 +497,6 @@ class CameraShakeAdd(bpy.types.Operator):
 
     camera : bpy.props.StringProperty()
 
-    @classmethod
-    def poll(cls, self):
-        try:
-            camera = bpy.data.objects[self.camera]
-            return camera is not None and camera.type == 'CAMERA'
-        except:
-            pass
-
     def execute(self, context):
         camera = bpy.data.objects[self.camera]
         shake = camera.camera_shakes.add()
@@ -520,14 +512,6 @@ class CameraShakeRemove(bpy.types.Operator):
     bl_options = {'UNDO'}
 
     camera : bpy.props.StringProperty()
-
-    @classmethod
-    def poll(cls, self):
-        try:
-            camera = bpy.data.objects[self.camera]
-            return camera is not None and camera.type == 'CAMERA' and len(camera.camera_shakes) > 0
-        except:
-            pass
 
     def execute(self, context):
         camera = bpy.data.objects[self.camera]
@@ -551,14 +535,6 @@ class CameraShakeMove(bpy.types.Operator):
         ('UP', "", ""),
         ('DOWN', "", ""),
     ])
-
-    @classmethod
-    def poll(cls, self):
-        try:
-            camera = bpy.data.objects[self.camera]
-            return camera is not None and camera.type == 'CAMERA' and len(camera.camera_shakes) > 1
-        except:
-            pass
 
     def execute(self, context):
         camera = bpy.data.objects[self.camera]
@@ -637,40 +613,30 @@ class CameraShakeInstance(bpy.types.PropertyGroup):
         step=100.0,
     )
 
-
 #========================================================
 
+classes = (
+    CameraShakifyPanel,
+    OBJECT_UL_camera_shake_items,
+    CameraShakeInstance,
+    CameraShakeAdd,
+    CameraShakeRemove,
+    CameraShakeMove,
+    CameraShakesFixGlobal,
+)
 
 def register():
-    bpy.utils.register_class(CameraShakifyPanel)
-    bpy.utils.register_class(OBJECT_UL_camera_shake_items)
-    bpy.utils.register_class(CameraShakeInstance)
-    bpy.utils.register_class(CameraShakeAdd)
-    bpy.utils.register_class(CameraShakeRemove)
-    bpy.utils.register_class(CameraShakeMove)
-    bpy.utils.register_class(CameraShakesFixGlobal)
-    #bpy.utils.register_class(ActionToPythonData)
-    #bpy.types.VIEW3D_MT_object.append(
-    #    lambda self, context : self.layout.operator(ActionToPythonData.bl_idname)
-    #)
-
-    # The list of camera shakes active on an camera, along with each shake's parameters.
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(cls)
     bpy.types.Object.camera_shakes = bpy.props.CollectionProperty(type=CameraShakeInstance)
     bpy.types.Object.camera_shakes_active_index = bpy.props.IntProperty(name="Camera Shake List Active Item Index")
-
     bpy.types.WindowManager.camera_shake_show_utils = bpy.props.BoolProperty(name="Show Camera Shake Utils UI", default=False)
 
-
 def unregister():
-    bpy.utils.unregister_class(CameraShakifyPanel)
-    bpy.utils.unregister_class(OBJECT_UL_camera_shake_items)
-    bpy.utils.unregister_class(CameraShakeInstance)
-    bpy.utils.unregister_class(CameraShakeAdd)
-    bpy.utils.unregister_class(CameraShakeRemove)
-    bpy.utils.unregister_class(CameraShakeMove)
-    bpy.utils.unregister_class(CameraShakesFixGlobal)
-    #bpy.utils.unregister_class(ActionToPythonData)
-
+    from bpy.utils import unregister_class
+    for cls in reversed(classes):
+        unregister_class(cls)
 
 if __name__ == "__main__":
     register()

@@ -6,16 +6,20 @@ from . import assetsDefs, assetsProperties
 from ..Anime import AnimeProperties
 from .. import addonPreferences
 
-def drawheader(scene, row, obj):
+def drawheader(context, addon_prefs, row, obj):
+    scene = context.scene
     if scene.myProps == 'one':
-        row.prop(scene, "view", icon = "VIEW3D", text = "")
-        if scene.advanced_option == True:
-            if obj:
-                if obj.type == 'MESH': 
-                    row.prop(scene, "simulation", icon = "PHYSICS", text = "")
-                    row.prop(scene, "particles_properties", icon = "PARTICLES", text = "")
-        row.prop(scene, "advanced_option", icon = "OUTLINER", text = "")
-        row.prop(scene, "tools", icon = "TOOL_SETTINGS", text = "")
+        if addon_prefs.view == True:
+            row.prop(scene, "view", icon = "VIEW3D", text = "")
+        if addon_prefs.advanced_option == True:
+            if scene.advanced_option == True:
+                if obj:
+                    if obj.type == 'MESH': 
+                        row.prop(scene, "simulation", icon = "PHYSICS", text = "")
+                        row.prop(scene, "particles_properties", icon = "PARTICLES", text = "")
+            row.prop(scene, "advanced_option", icon = "OUTLINER", text = "")
+        if addon_prefs.tools == True:
+            row.prop(scene, "tools", icon = "TOOL_SETTINGS", text = "")
 
     if scene.myProps == 'two':
         if scene.mytools == 'three':
@@ -312,22 +316,24 @@ def draw_properties(addon_prefs, context, row, obj, pcoll):
         row.label(text = "", icon = "OUTLINER_OB_ARMATURE")
         row.prop(obj, "name", text = "Name")
 
-        if addon_prefs.registered_name:
-            if all(item.registered_name in AnimeProperties.registered_name for item in addon_prefs.registered_name):
-                if obj.mode != 'EDIT' and context.active_object.RIG_ID in AnimeProperties.kenriglist:
-                    if context.active_object.RIG_ID == AnimeProperties.kenriglist[2]:
-                        ken_icon = pcoll["Dual"]
-                        ken_icon02 = pcoll["Dual_02"]
-                    else:
-                        ken_icon = pcoll["Minecraft"]
-                        ken_icon02 = pcoll["Minecraft_02"]
-                    if scene.ken_rig == True:
-                        rig_icon = ken_icon02
-                    else:
-                        rig_icon = ken_icon
-                    row.prop(scene, "ken_rig", icon_value = rig_icon.icon_id, text = "", emboss=False)
+        if all(item.registered_name in AnimeProperties.registered_name for item in addon_prefs.registered_name):
+            if obj.mode != 'EDIT' and context.active_object.RIG_ID in AnimeProperties.kenriglist:
+                if context.active_object.RIG_ID == AnimeProperties.kenriglist[2]:
+                    ken_icon = pcoll["Dual"]
+                    ken_icon02 = pcoll["Dual_02"]
+                else:
+                    ken_icon = pcoll["Minecraft"]
+                    ken_icon02 = pcoll["Minecraft_02"]
+                if scene.ken_rig == True:
+                    rig_icon = ken_icon02
+                else:
+                    rig_icon = ken_icon
+                row.prop(scene, "ken_rig", icon_value = rig_icon.icon_id, text = "", emboss=False)
+            else:
+                row.prop(scene, "object_properties", icon = "ARMATURE_DATA", text = "")
         else:
             row.prop(scene, "object_properties", icon = "ARMATURE_DATA", text = "")
+            
     else:
         if obj.type == 'MESH':
             objicon = "OUTLINER_OB_MESH"
@@ -439,6 +445,7 @@ def drawbone_properties(box, context, obj):
         sub.operator("armature.collection_deselect", text="Deselect")
 
 def drawmesh_properties(box, context, obj):
+    scene = context.scene
     row = box.row()
     row.prop(obj, "parent", text = "Parent")
     row = box.row()
@@ -451,13 +458,13 @@ def drawmesh_properties(box, context, obj):
     row.prop(obj, "show_in_front", text = "In Front")
     if obj.show_bounds == True or obj.display_type == 'BOUNDS':
         row.prop(obj, "display_bounds_type", text = "")
-    if context.scene.render.engine in ["CYCLES"]:
+    if scene.render.engine in ["CYCLES"]:
         if obj.type == 'MESH':
-            if context.scene.ray_visility == True:
+            if scene.ray_visility == True:
                 icon = "DOWNARROW_HLT"
             else:
                 icon = "RIGHTARROW"
-            box.prop(context.scene, "ray_visility", text = "Ray Visility", icon = icon, emboss=False) 
+            box.prop(scene, "ray_visility", text = "Ray Visility", icon = icon, emboss=False) 
             if context.scene.ray_visility == True:
                 raybox = box.box()
                 raybox.prop(obj, "visible_camera", toggle = True, text = "Camera")
@@ -466,6 +473,24 @@ def drawmesh_properties(box, context, obj):
                 raybox.prop(obj, "visible_transmission", toggle = True, text = "Transmission")
                 raybox.prop(obj, "visible_volume_scatter", toggle = True, text = "Volume Scatter")
                 raybox.prop(obj, "visible_shadow", toggle = True, text = "Shadow")
+            if scene.light_group == True:
+                    icon = "DOWNARROW_HLT"
+            else:
+                icon = "RIGHTARROW"
+            box.prop(scene, "light_group", text = "Light Group", icon = icon, emboss=False)
+            if scene.light_group == True:
+                ob = context.object
+                view_layer = context.view_layer
+                row = box.row(align=True)
+                row.use_property_decorate = False
+
+                sub = row.column(align=True)
+                sub.prop_search(ob, "lightgroup", view_layer, "lightgroups", text="Light Group", results_are_suggestions=True)
+
+                sub = row.column(align=True)
+                sub.enabled = bool(ob.lightgroup) and not any(lg.name == ob.lightgroup for lg in view_layer.lightgroups)
+                sub.operator("scene.view_layer_add_lightgroup", icon='ADD', text="").name = ob.lightgroup
+            drawlight_linking(scene, box, obj)
 
 def drawobj_properties(self, context, obj):
     layout = self.layout
@@ -782,6 +807,66 @@ def drawlight(box, light):
     if light.type == "AREA":
         lightbox.prop(light, "spread", text = "Spread")
 
+def drawlight_linking(scene, box, obj):
+    light_linking = obj.light_linking
+    if scene.light_linking == True:
+            icon = "DOWNARROW_HLT"
+    else:
+        icon = "RIGHTARROW"
+    box.prop(scene, "light_linking", text = "Light Linking", icon = icon, emboss=False)
+    if scene.light_linking == True:
+        light_linking_box = box.box()
+
+        col = light_linking_box.column()
+
+        col.template_ID(
+            light_linking,
+            "receiver_collection",
+            new="object.light_linking_receiver_collection_new")
+
+        if light_linking.receiver_collection:
+
+            row = light_linking_box.row()
+            col = row.column()
+            col.template_light_linking_collection(row, light_linking, "receiver_collection")
+
+            col = row.column()
+            sub = col.column(align=True)
+            prop = sub.operator("object.light_linking_receivers_link", icon='ADD', text="")
+            prop.link_state = 'INCLUDE'
+            sub.operator("object.light_linking_unlink_from_collection", icon='REMOVE', text="")
+            sub = col.column()
+            sub.menu("CYCLES_OBJECT_MT_light_linking_context_menu", icon='DOWNARROW_HLT', text="")
+
+    if scene.shadow_linking == True:
+            icon = "DOWNARROW_HLT"
+    else:
+        icon = "RIGHTARROW"
+    box.prop(scene, "shadow_linking", text = "Shadow Linking", icon = icon, emboss=False)
+    if scene.shadow_linking == True:
+        shadow_linking_box = box.box()
+
+        col = shadow_linking_box.column()
+
+        col.template_ID(
+            light_linking,
+            "blocker_collection",
+            new="object.light_linking_blocker_collection_new")
+
+        if light_linking.blocker_collection:
+
+            row = shadow_linking_box.row()
+            col = row.column()
+            col.template_light_linking_collection(row, light_linking, "blocker_collection")
+
+            col = row.column()
+            sub = col.column(align=True)
+            prop = sub.operator("object.light_linking_blockers_link", icon='ADD', text="")
+            prop.link_state = 'INCLUDE'
+            sub.operator("object.light_linking_unlink_from_collection", icon='REMOVE', text="")
+            sub = col.column()
+            sub.menu("CYCLES_OBJECT_MT_shadow_linking_context_menu", icon='DOWNARROW_HLT', text="")
+
 def drawcam(context, box, cam, type):
     cam = cam.data
     row = box.row()
@@ -882,16 +967,15 @@ def draw_cam_shake(box, cam):
         active_propname="camera_shakes_active_index",
     )
     col = row.column()
-    cam_shake_add = col.operator("object.camera_shake_add", text="", icon='ADD')
-    cam_shake_add.camera = cam.name
-    cam_shake_remove = col.operator("object.camera_shake_remove", text="", icon='REMOVE')
-    cam_shake_remove.camera = cam.name
-    cam_shake_up = col.operator("object.camera_shake_move", text="", icon='TRIA_UP')
-    cam_shake_up.camera = cam.name
-    cam_shake_up.type = 'UP'
-    cam_shake_down = col.operator("object.camera_shake_move", text="", icon='TRIA_DOWN')
-    cam_shake_down.camera = cam.name
-    cam_shake_down.type = 'DOWN'
+    col.operator("object.camera_shake_add", text="", icon='ADD').camera = cam.name
+    col.operator("object.camera_shake_remove", text="", icon='REMOVE').camera = cam.name
+    if len(cam.camera_shakes) > 1:
+        cam_shake_up = col.operator("object.camera_shake_move", text="", icon='TRIA_UP')
+        cam_shake_up.camera = cam.name
+        cam_shake_up.type = 'UP'
+        cam_shake_down = col.operator("object.camera_shake_move", text="", icon='TRIA_DOWN')
+        cam_shake_down.camera = cam.name
+        cam_shake_down.type = 'DOWN'
 
     row = box.row()
     row.operator("object.camera_shakes_fix_global")

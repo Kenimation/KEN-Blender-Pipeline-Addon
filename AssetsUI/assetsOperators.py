@@ -530,15 +530,23 @@ class Operators(bpy.types.Operator):
                     Name = str(scene.VertexGroupPart)
                 else:
                     if scene.VertexGroupLR == 'one':
-                        if scene.FixNameType == 'one':
-                            Name = scene.FixName + "_" + 'L.'+str(scene.VertexGroupPart)
-                        if scene.FixNameType == 'two':
-                            Name = 'L.'+str(scene.VertexGroupPart) + "_" + scene.FixName
+                        name = 'L.'+str(scene.VertexGroupPart)
+                        if scene.FixName != "":
+                            if scene.FixNameType == 'one':
+                                Name = scene.FixName + "_" + name
+                            if scene.FixNameType == 'two':
+                                Name = name + "_" + scene.FixName
+                        else:
+                            Name = 'L.'+str(scene.VertexGroupPart)
                     elif scene.VertexGroupLR == 'two':
-                        if scene.FixNameType == 'one':
-                            Name = scene.FixName + "_" + 'R.'+str(scene.VertexGroupPart)
-                        if scene.FixNameType == 'two':
-                            Name = 'R.'+str(scene.VertexGroupPart) + "_" + scene.FixName
+                        name = 'R.'+str(scene.VertexGroupPart)
+                        if scene.FixName != "":
+                            if scene.FixNameType == 'one':
+                                Name = scene.FixName + "_" + name
+                            if scene.FixNameType == 'two':
+                                Name = name + "_" + scene.FixName
+                        else:
+                            Name = name
 
             new_vertex_group = context.active_object.vertex_groups.new(name=Name)
             mesh = context.active_object.data

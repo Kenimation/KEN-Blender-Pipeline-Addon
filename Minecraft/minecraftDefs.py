@@ -168,7 +168,7 @@ def write_finger(self, context):
     with open(text_file, 'r') as file:
         # read a list of lines into data
         data = file.readlines()
-        data[12] = addon_prefs.finger + "\n"
+        data[24] = addon_prefs.finger + "\n"
 
     # and write everything back
     with open(text_file, 'w') as file:

@@ -519,6 +519,8 @@ def drawrigmaterial(self, context):
         row.prop(hair['Highlight Color'], "default_value", text = "")
         row.prop(hair['Highlight Deep'], "default_value", text = "")
         row = hairlist.row()
+        row.prop(hair['Highlight'], "default_value", text = "Highlight", slider = True)
+        row = hairlist.row()
         row.prop(hair['Highlight Position'], "default_value", text = "Highlight Position", slider = True)
         drawrimlight(list, node)
         drawshadow(list, node)
