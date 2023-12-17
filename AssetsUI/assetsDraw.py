@@ -103,7 +103,7 @@ def draw_tools(scene, obj, self):
             row.prop(scene, "FixName", text = "")
             row.prop(scene, "FixNameType", expand = True)
             row = VertexGroupTool.row()
-            row.operator("bpy.ops", text = "Add").id = "VertexGroupAdd"
+            row.operator("add.vertex_group", text = "Add")
 
             row = VertexGroupTool.row()
             row.label(text = "Add Vertex Group Loop")
@@ -112,7 +112,7 @@ def draw_tools(scene, obj, self):
             row.prop(scene, "VertexGroupCount", text = "")
             row.prop(scene, "VertexGroupMiiror", text = "", icon = "ARROW_LEFTRIGHT")
             row = VertexGroupTool.row()
-            row.operator("bpy.ops", text = "Add Vertex Group Loop").id = "VertexGroupLoop"
+            row.operator("add.vertex_group_loop", text = "Add Vertex Group Loop")
 
     if obj.type == 'ARMATURE':
         if obj.mode == 'POSE':
@@ -128,15 +128,15 @@ def draw_tools(scene, obj, self):
                 row.label(text = "Damped Track Loop")
                 row = BoneTool.row()
                 row.prop(scene, "Track_Prefix", text = "")
-                row.operator("bpy.ops", text = "Add").id = "DampedTrackLoop"
+                row.operator("add.dampedtrackloop", text = "Add")
                 row = BoneTool.row()
                 row.label(text = "Constraints Driver")
                 row = BoneTool.row()
                 row.prop(scene, "Constraints_Type", text = "")
                 row.prop(scene, "Rig_Prop", text = "")
                 row = BoneTool.row()
-                row.operator("bpy.ops", text = "Add").id = "ConstraintsDriver"
-                row.operator("bpy.ops", text = "Remove").id = "ConstraintsDriverRemove"
+                row.operator("add.constraintsdriver", text = "Add")
+                row.operator("remove.constraintsdriver", text = "Remove")
 
 def draw_edit(scene, box):
     if scene.object_properties == False:
@@ -712,6 +712,7 @@ def drawmaterial(scene, box, row, obj, mat, state):
 
 def drawnode_tree(scene, box, mat):
     ntree = mat.node_tree
+    id = len(ntree.nodes)
     node = ntree.get_output_node('EEVEE')
     input = find_node_input(node, "Surface")
     if scene.mat_surface == True:
@@ -721,41 +722,31 @@ def drawnode_tree(scene, box, mat):
     box.prop(scene, "mat_surface", text = "Materials Surface", icon = icon, emboss=False)
     if scene.mat_surface == True:
         node_view = box.box()
+        node_view.operator("add.image", text = "Add Image Texture", icon = "IMAGE_DATA").mat = mat.name
         node_view.template_node_view(ntree, node, input)
     for node in mat.node_tree.nodes:
         if node.name == 'Animated_Texture':
             box.label(text = node.name)
-            box.prop(node.inputs[0], "default_value", text = "Frame Number")
-            row = box.row()
-            row.prop(node.inputs[2], "default_value", text = "Frame Muiltply")
-        if node.name == 'ColorRamp_Specular':
-            box.label(text = "Specular Color Ramp")
-            box.template_color_ramp(node, "color_ramp", expand=True)
-        if node.name == 'ColorRamp_Roughness':
-            box.label(text = "Roughness Color Ramp")
-            box.template_color_ramp(node, "color_ramp", expand=True)
-        if node.name == 'ColorRamp_Bump':
-            box.label(text = "Bump Color Ramp")
-            box.template_color_ramp(node, "color_ramp", expand=True)
-        if node.name == 'Combine Nomral Map':
-            box.label(text = node.name)
-            box.prop(node.inputs[3], "default_value", text = "Bump Strength")
-            row = box.row()
-            row.prop(node.inputs[1], "default_value", text = "Nomral Strength")
-        if node.name == "Glass_Dispersion":
-            box.label(text = node.name)
-            for input in range(inputs):
-                box.prop(node.inputs[input], "default_value", text = node.inputs[input].name)
-        if node.name == "Emission Object":
-            box.label(text = node.name)
-            inputs = len(node.inputs)
-            for input in range(inputs):
-                box.prop(node.inputs[input], "default_value", text = node.inputs[input].name)
-        if node.name == "Illumination Object":
-            box.label(text = node.name)
-            inputs = len(node.inputs)
-            for input in range(inputs):
-                box.prop(node.inputs[input], "default_value", text = node.inputs[input].name)
+            nodebox = box.box()
+            if not node.inputs[input].links:
+                box.prop(node.inputs[0], "default_value", text = "Frame Number")
+                row = nodebox.row()
+                nodebox.prop(node.inputs[2], "default_value", text = "Frame Muiltply")
+
+        drawnoderamp(node, box, 'ColorRamp_Specular', "Specular Color Ramp")
+        drawnoderamp(node, box, 'ColorRamp_Roughness', "Roughness Color Ramp")
+        drawnoderamp(node, box, 'ColorRamp_Bump', "Bump Color Ramp")
+        if node.name.split(".")[0] == 'Combine Nomral Map':
+            if all(len(outputs_socket.links) > 0 for outputs_socket in node.outputs):
+                box.label(text = node.name)
+                nodebox = box.box()
+                nodebox.prop(node.inputs[3], "default_value", text = "Bump Strength")
+                row = nodebox.row()
+                row.prop(node.inputs[1], "default_value", text = "Nomral Strength")
+
+        drawnodelist(box, node, id, "Glass_Dispersion")
+        drawnodelist(box, node, id, "Emission Object")
+        drawnodelist(box, node, id, "Illumination Object")
 
     box.label(text = "Material Settings")
     box.prop(mat, "blend_method")
@@ -763,6 +754,25 @@ def drawnode_tree(scene, box, mat):
     row = box.row()
     row.prop(mat, "show_transparent_back", toggle = True)
     row.prop(mat, "use_screen_refraction", toggle = True)
+
+def drawnoderamp(node, box, name, text):
+    if node.name.split(".")[0] == name:
+        box.label(text = text)
+        nodebox = box.box()
+        nodebox.template_color_ramp(node, "color_ramp", expand=True)
+
+def drawnodelist(box, node, id, name):
+    if node.name.split(".")[0] == name:
+        if all(len(input_socket.links) > 0 for input_socket in node.inputs):
+            return
+        elif all(len(outputs_socket.links) > 0 for outputs_socket in node.outputs):
+            box.label(text = node.name)
+            nodebox = box.box()
+            inputs = len(node.inputs)
+            for input in range(inputs):
+                if not node.inputs[input].links:
+                    nodebox.prop(node.inputs[input], "default_value", text = node.inputs[input].name)
+        
 
 def drawlight(box, light):
     lightbox = box.box()

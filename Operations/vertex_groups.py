@@ -88,6 +88,79 @@ class OBJECT_OT_vertex_group_mirror_prefix(Operator):
                
         return {'FINISHED'}
 
+class VertexGroupAdd(Operator):
+    bl_idname = "add.vertex_group"
+    bl_label = "Vertex Groups Add"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        scene = context.scene
+        if scene.VertexGroupMenu == 'one':
+            if scene.FixName != "":
+                if scene.FixNameType == 'one':
+                    Name = scene.FixName + "_" + scene.VertexGroupName
+                if scene.FixNameType == 'two':
+                    Name = scene.VertexGroupName + "_" + scene.FixName
+            else:
+                Name = scene.VertexGroupName
+
+        if scene.VertexGroupMenu == 'two':
+            Part = ['Head', 'Body']
+            if scene.VertexGroupPart in Part:
+                Name = str(scene.VertexGroupPart)
+            else:
+                if scene.VertexGroupLR == 'one':
+                    name = 'L.'+str(scene.VertexGroupPart)
+                    if scene.FixName != "":
+                        if scene.FixNameType == 'one':
+                            Name = scene.FixName + "_" + name
+                        if scene.FixNameType == 'two':
+                            Name = name + "_" + scene.FixName
+                    else:
+                        Name = 'L.'+str(scene.VertexGroupPart)
+                elif scene.VertexGroupLR == 'two':
+                    name = 'R.'+str(scene.VertexGroupPart)
+                    if scene.FixName != "":
+                        if scene.FixNameType == 'one':
+                            Name = scene.FixName + "_" + name
+                        if scene.FixNameType == 'two':
+                            Name = name + "_" + scene.FixName
+                    else:
+                        Name = name
+
+        new_vertex_group = context.active_object.vertex_groups.new(name=Name)
+        mesh = context.active_object.data
+        vertices = mesh.vertices
+        vertex_indices = [v.index for v in vertices]
+        for index in vertex_indices:
+            new_vertex_group.add([index], 1.0, 'ADD')
+
+        return {'FINISHED'}
+
+class VertexGroupAddLoop(Operator):
+    bl_idname = "add.vertex_group_loop"
+    bl_label = "Vertex Groups Add Loop"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        scene = context.scene
+        Count = scene.VertexGroupCount
+        Name = scene.VertexGroupName
+        if scene.VertexGroupMiiror == True:
+            for num in range(Count*2, 0, 2):
+                pair = [num, num + 1]
+                new_vertex_group = bpy.context.active_object.vertex_groups.new(name=Name)
+                vertex_group_data = pair
+                new_vertex_group.add(vertex_group_data, 1.0, 'ADD')
+        else:
+            for num in range(0, Count*2, 2):
+                pair = [num, num + 1]
+                new_vertex_group = bpy.context.active_object.vertex_groups.new(name=Name)
+                vertex_group_data = pair
+            new_vertex_group.add(vertex_group_data, 1.0, 'ADD')
+
+        return {'FINISHED'}
+
 def draw_func(self, context):
     layout = self.layout
     layout.operator(
@@ -101,6 +174,8 @@ def draw_func(self, context):
 classes = (
     OBJECT_OT_vertex_group_remove_empty,
     OBJECT_OT_vertex_group_mirror_prefix,
+    VertexGroupAdd,
+    VertexGroupAddLoop,
 )
 
 def register():

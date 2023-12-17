@@ -416,52 +416,6 @@ class Disable_constraint(bpy.types.Operator):
                 bone.matrix = mw
         return {"FINISHED"}
 
-class New_Material(bpy.types.Operator):
-    bl_idname = "new.material"
-    bl_label = "New Material"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        try:
-            ob = bpy.context.active_object
-            # Get material
-            mat = bpy.data.materials.new(name="Material")
-            mat.use_nodes = True
-
-            # Assign it to object
-            if ob.data.materials:
-                # assign to 1st material slot
-                slot = bpy.context.object.active_material_index
-                ob.data.materials[slot] = mat
-            else:
-                # no slots
-                ob.data.materials.append(mat)
-            assetsDefs.fixmaterial()
-        except:
-             pass
-        return {"FINISHED"}
-
-class Add_Image(bpy.types.Operator):
-    bl_idname = "add.image"
-    bl_label = "Add Image"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    mat: bpy.props.StringProperty(options={'HIDDEN'})
-
-    def execute(self, context):
-        mat = bpy.data.materials[self.mat]
-        node_tree = mat.node_tree
-        tex_node = node_tree.nodes.new('ShaderNodeTexImage')
-        tex_node.interpolation = 'Closest'
-        tex_node.location = assetsDefs.tex_node_loc
-        for node in mat.node_tree.nodes:
-            if node.name == "Principled BSDF":
-                bsdf = node
-                node_tree.links.new(bsdf.inputs['Base Color'], tex_node.outputs['Color'])
-                node_tree.links.new(bsdf.inputs['Subsurface Color'], tex_node.outputs['Color'])
-
-        return {"FINISHED"}
-
 class Operators(bpy.types.Operator):
     bl_idname = "bpy.ops"
     bl_label = "Bpy Operators"
@@ -476,101 +430,7 @@ class Operators(bpy.types.Operator):
 
             for obj in bpy.context.scene.objects:
                 if obj.type == scene.Object_Type:
-                    obj.select_set(True)
-
-        if self.id == "DampedTrackLoop":
-            rig = context.active_object
-            obj = context.selected_objects
-            prefix = scene.Track_Prefix
-            if rig.mode == 'POSE':
-                selected_bones = context.selected_pose_bones
-                for bone in selected_bones:
-                    constraint = bone.constraints.new(type = 'DAMPED_TRACK')
-                    for obj in context.selected_objects:
-                        if obj != rig:
-                            constraint.target = obj
-                            constraint.subtarget = prefix + bone.name
-
-        if self.id == "ConstraintsDriver":
-            rig = bpy.context.active_object
-            obj = bpy.context.selected_objects
-
-            if rig.mode == 'POSE':                
-                selected_bones = bpy.context.selected_pose_bones     
-                for bone in selected_bones:
-                    constraint = bone.constraints.get(scene.Constraints_Type)
-                    if constraint is not None:
-                        constraint = constraint.driver_add("influence")
-                        constraint.driver.type="AVERAGE"
-                        constraint.driver.variables.new()
-                        constraint.driver.variables[0].targets[0].id = rig
-                        constraint.driver.variables[0].targets[0].data_path = scene.Rig_Prop
-
-        if self.id == "ConstraintsDriverRemove":
-            rig = bpy.context.active_object
-            obj = bpy.context.selected_objects
-
-            if rig.mode == 'POSE':                
-                selected_bones = bpy.context.selected_pose_bones     
-                for bone in selected_bones:
-                    constraint = bone.constraints.get(scene.Constraints_Type)
-                    if constraint is not None:
-                        constraint = constraint.driver_remove("influence")           
-        
-        if self.id == "VertexGroupAdd":
-
-            if scene.VertexGroupMenu == 'one':
-                if scene.FixNameType == 'one':
-                    Name = scene.FixName + "_" + scene.VertexGroupName
-                if scene.FixNameType == 'two':
-                    Name = scene.VertexGroupName + "_" + scene.FixName
-            if scene.VertexGroupMenu == 'two':
-                Part = ['Head', 'Body']
-                if scene.VertexGroupPart in Part:
-                    Name = str(scene.VertexGroupPart)
-                else:
-                    if scene.VertexGroupLR == 'one':
-                        name = 'L.'+str(scene.VertexGroupPart)
-                        if scene.FixName != "":
-                            if scene.FixNameType == 'one':
-                                Name = scene.FixName + "_" + name
-                            if scene.FixNameType == 'two':
-                                Name = name + "_" + scene.FixName
-                        else:
-                            Name = 'L.'+str(scene.VertexGroupPart)
-                    elif scene.VertexGroupLR == 'two':
-                        name = 'R.'+str(scene.VertexGroupPart)
-                        if scene.FixName != "":
-                            if scene.FixNameType == 'one':
-                                Name = scene.FixName + "_" + name
-                            if scene.FixNameType == 'two':
-                                Name = name + "_" + scene.FixName
-                        else:
-                            Name = name
-
-            new_vertex_group = context.active_object.vertex_groups.new(name=Name)
-            mesh = context.active_object.data
-            vertices = mesh.vertices
-            vertex_indices = [v.index for v in vertices]
-            for index in vertex_indices:
-                new_vertex_group.add([index], 1.0, 'ADD')
-
-
-        if self.id == "VertexGroupLoop":
-            Count = scene.VertexGroupCount
-            Name = scene.VertexGroupName
-            if scene.VertexGroupMiiror == True:
-                for num in range(Count*2, 0, 2):
-                    pair = [num, num + 1]
-                    new_vertex_group = bpy.context.active_object.vertex_groups.new(name=Name)
-                    vertex_group_data = pair
-                    new_vertex_group.add(vertex_group_data, 1.0, 'ADD')
-            else:
-                for num in range(0, Count*2, 2):
-                    pair = [num, num + 1]
-                    new_vertex_group = bpy.context.active_object.vertex_groups.new(name=Name)
-                    vertex_group_data = pair
-                    new_vertex_group.add(vertex_group_data, 1.0, 'ADD')
+                    obj.select_set(True)    
              
         if self.id == "jump_frame":
             frame_number = self.object
@@ -1034,8 +894,6 @@ classes = (
             Delete_constraint,
             Apply_constraint,
             Disable_constraint,
-            New_Material,
-            Add_Image,
             Operators,
             Data_Blend,
             Solo_Light,

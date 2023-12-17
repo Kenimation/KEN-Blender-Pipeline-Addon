@@ -155,7 +155,15 @@ def drawrigdesign(self, context):
     row = box.row()
     row.label(text = "Sub_ID(Required)")
     row = box.row()
-    row.prop(rig, "Sub_ID", text = "")
+    col = row.column()
+    if rig.Sub_ID_Lock == True:
+        icon = "LOCKED"
+        col.enabled = False
+    else:
+        icon = "UNLOCKED"
+        col.enabled = True
+    col.prop(rig, "Sub_ID", text = "")
+    row.prop(rig, "Sub_ID_Lock", text = "", icon = icon, emboss = False)
     row = box.row()
     row.label(text = "Character Design:")
     row = box.row()

@@ -1,6 +1,12 @@
 import bpy
 from bpy.props import StringProperty, BoolProperty, FloatProperty, IntProperty, CollectionProperty, EnumProperty
 
+n_map_node_loc= (-1100,-350)
+n_node_loc = (-800,-350)
+ramp_node_h_loc = (-650,-125)
+h_node_loc = (-200,-250)
+tex_node_loc = (-1100, 350)
+
 def fixmaterial(mat):
     node_tree = mat.node_tree
     for node in node_tree.nodes:
@@ -176,8 +182,8 @@ def fixRamp(mat):
                 if getramp_node_r is None:
                     ramp_node_r = node_tree.nodes.new('ShaderNodeValToRGB')
                     ramp_node_r.location = (-400,-25)
-                    ramp_node_r.color_ramp.elements[0].position = 1
-                    ramp_node_r.color_ramp.elements[1].position = 0
+                    ramp_node_r.color_ramp.elements[0].color = (1, 1, 1, 1)
+                    ramp_node_r.color_ramp.elements[1].color = (0, 0, 0, 1)
                     ramp_node_r.name = "ColorRamp_Roughness"
                     node_tree.links.new(ramp_node_r.inputs['Fac'], image_node.outputs['Color'])
                     node_tree.links.new(bsdf.inputs[2], ramp_node_r.outputs['Color'])
@@ -202,8 +208,8 @@ def fixRamp(mat):
                     if getramp_node_r == 1:
                         ramp_node_r = node_tree.nodes.new('ShaderNodeValToRGB')
                         ramp_node_r.location = (-400,-25)
-                        ramp_node_r.color_ramp.elements[0].position = 1
-                        ramp_node_r.color_ramp.elements[1].position = 0
+                        ramp_node_r.color_ramp.elements[0].color = (1, 1, 1, 1)
+                        ramp_node_r.color_ramp.elements[1].color = (0, 0, 0, 1)
                         ramp_node_r.name = "ColorRamp_Roughness.00"+id
                         node_tree.links.new(ramp_node_r.inputs['Fac'], image_node.outputs['Color'])
                         node_tree.links.new(bsdf.inputs[2], ramp_node_r.outputs['Color'])
@@ -319,6 +325,48 @@ def fixBump(mat):
             except:
                 print("No More Mode Found.")
 
+class Add_Image(bpy.types.Operator):
+    bl_idname = "add.image"
+    bl_label = "Add Image"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    mat: bpy.props.StringProperty(options={'HIDDEN'})
+
+    def execute(self, context):
+        mat = bpy.data.materials[self.mat]
+        node_tree = mat.node_tree
+        tex_node = node_tree.nodes.new('ShaderNodeTexImage')
+        tex_node.interpolation = 'Closest'
+        tex_node.location = tex_node_loc
+        for node in mat.node_tree.nodes:
+            if node.name == "Principled BSDF":
+                bsdf = node
+                node_tree.links.new(bsdf.inputs['Base Color'], tex_node.outputs['Color'])
+
+        return {"FINISHED"}
+
+class New_Material(bpy.types.Operator):
+    bl_idname = "new.material"
+    bl_label = "New Material"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        ob = context.active_object
+        # Get material
+        mat = bpy.data.materials.new(name="Material")
+        mat.use_nodes = True
+
+        # Assign it to object
+        if ob.data.materials:
+            # assign to 1st material slot
+            slot = context.object.active_material_index
+            ob.data.materials[slot] = mat
+        else:
+            # no slots
+            ob.data.materials.append(mat)
+        fixmaterial(mat)
+        return {"FINISHED"}
+
 class Fix_Material(bpy.types.Operator):
     bl_idname = "fix.material"
     bl_label = "Fix Material"
@@ -421,6 +469,8 @@ class Fix_Material(bpy.types.Operator):
         return {'FINISHED'}
     
 classes = (
+            Add_Image,
+            New_Material,
             Fix_Material,
           )        
 

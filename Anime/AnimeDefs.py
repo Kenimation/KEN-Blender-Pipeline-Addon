@@ -243,7 +243,6 @@ def update_rig_scale(self,context):
     rig.pose.bones["Root"].custom_shape_scale_xyz = scale
     material_obj.material_slots[3].material.node_tree.nodes['Hair Shader'].inputs["Rig_Scale"].default_value = value
 
-
 def write_rig_scale(self, context):
     addon_prefs = addonPreferences.getAddonPreferences(context)
     text_file = assetsDefs.getPath("preferencesSettings.cfg")

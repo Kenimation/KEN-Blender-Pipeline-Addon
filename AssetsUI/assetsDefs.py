@@ -5,12 +5,6 @@ from ..Anime import AnimeProperties
 from .. import addonPreferences
 
 
-n_map_node_loc= (-1100,-350)
-n_node_loc = (-800,-350)
-ramp_node_h_loc = (-650,-125)
-h_node_loc = (-200,-250)
-tex_node_loc = (-1100, 350)
-
 def users_collection(obj):
 	"""Returns the collections/group of an object"""
 	if hasattr(obj, "users_collection"):

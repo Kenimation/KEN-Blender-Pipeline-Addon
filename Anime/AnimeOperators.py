@@ -66,8 +66,11 @@ class Append_TheAnimeRigKENFemale(bpy.types.Operator):
         self.report({'INFO'}, "KEN Anime Rig has been appended! | Scene Color Space set to Standard")
         return {'FINISHED'}
 
-classes = (Append_TheAnimeRigKENFemale,
+
+classes = (
+            Append_TheAnimeRigKENFemale,
           )
+          
 
 register, unregister = bpy.utils.register_classes_factory(classes)
 

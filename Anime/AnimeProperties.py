@@ -35,6 +35,9 @@ bpy.types.Object.FingerShadow = BoolProperty(
 bpy.types.Object.BodyShadow = BoolProperty(
     default=False, name = "Body")
 
+bpy.types.Object.Sub_ID_Lock = BoolProperty(
+    default=False)
+
 bpy.types.Object.Sub_ID = StringProperty(
     default="Character - Default", name = "Sub_ID", update=AnimeDefs.update_Sub_ID)
 
