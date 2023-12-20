@@ -99,9 +99,6 @@ bpy.types.Object.AllRimlight = BoolProperty(
 bpy.types.Object.AllShadow = BoolProperty(
     default=False, name = "All Shadow")
 
-bpy.types.Object.HeadFFD = BoolProperty(
-    default=False, name = "Head FFD Control")
-
 bpy.types.Object.Blush = BoolProperty(
     default=False, name = "Blush")
 
@@ -113,9 +110,6 @@ bpy.types.Object.LineArtMesh = BoolProperty(
 
 bpy.types.Object.LineArt = BoolProperty(
     default=True, name = "LineArt", update=AnimeDefs.update_LineArt)
-
-bpy.types.Object.HairControl = BoolProperty(
-    default=True, name = "Hair Control")
 
 bpy.types.Object.HairMaterial = BoolProperty(
     default=True, name = "Hair Shader")
@@ -148,7 +142,7 @@ bpy.types.Object.DirtLine = BoolProperty(
     default=False, name = "Dirt Line")
 
 bpy.types.Object.FingerLine = BoolProperty(
-    default=True, name = "Finger Line")
+    default=False, name = "Finger Line")
 
 bpy.types.Object.ClothLine = BoolProperty(
     default=True, name = "Cloth Line")
@@ -255,18 +249,60 @@ bpy.types.Object.LegMuscle = FloatProperty(
 bpy.types.Object.FootSize = FloatProperty(
     min=0.5, max=2, default=1, name = "Foot Length")
 
+bpy.types.Object.PupilSize = FloatProperty(
+    min=0.2, max=1.5, default=1, name = "Pupil Size", update = AnimeDefs.update_PupilSize)
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #                  Bool Property
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-bpy.types.Object.Full_Rigged_Face = BoolProperty(
-    default=False, name = "Full Rigged Face")
+bpy.types.Object.Main_Bone = BoolProperty(
+    default=True, name = "Main Bone", update = AnimeDefs.update_Main_Bone)
 
-bpy.types.Object.MainBone = BoolProperty(
-    default=True, name = "Main Bone")
+bpy.types.Object.Head_Bone = BoolProperty(
+    default=True, name = "Head", update = AnimeDefs.update_Head_Bone)
 
-bpy.types.Object.HeadBone = BoolProperty(
-    default=True, name = "Head Bone")
+bpy.types.Object.Body_Bone = BoolProperty(
+    default=True, name = "Body", update = AnimeDefs.update_Body_Bone)
+
+bpy.types.Object.R_Arm = BoolProperty(
+    default=True, name = "R.Arm", update = AnimeDefs.update_R_Arm)
+
+bpy.types.Object.L_Arm = BoolProperty(
+    default=True, name = "L.Arm", update = AnimeDefs.update_L_Arm)
+
+bpy.types.Object.R_Leg = BoolProperty(
+    default=True, name = "R.Leg", update = AnimeDefs.update_R_Leg)
+
+bpy.types.Object.L_Leg = BoolProperty(
+    default=True, name = "L.Leg", update = AnimeDefs.update_L_Leg)
+
+bpy.types.Object.R_Hand = BoolProperty(
+    default=True, name = "R.Hand", update = AnimeDefs.update_R_Hand)
+
+bpy.types.Object.L_Hand = BoolProperty(
+    default=True, name = "L.Hand", update = AnimeDefs.update_L_Hand)
+
+bpy.types.Object.R_Foot = BoolProperty(
+    default=True, name = "R.Foot", update = AnimeDefs.update_R_Foot)
+
+bpy.types.Object.L_Foot = BoolProperty(
+    default=True, name = "L.Foot", update = AnimeDefs.update_L_Foot)
+
+bpy.types.Object.Facial_Bone = BoolProperty(
+    default=True, name = "Facial", update = AnimeDefs.update_Facial_Bone)
+
+bpy.types.Object.Full_Facial_Bone = BoolProperty(
+    default=False, name = "Full Facial", update = AnimeDefs.update_Full_Facial_Bone)
+
+bpy.types.Object.Hair_Bone = BoolProperty(
+    default=True, name = "Hair", update = AnimeDefs.update_Hair_Bone)
+
+bpy.types.Object.Full_Hair_Bone = BoolProperty(
+    default=False, name = "Full Hair", update = AnimeDefs.update_Full_Hair_Bone)
+
+bpy.types.Object.HeadFFD = BoolProperty(
+    default=False, name = "Head FFD", update = AnimeDefs.update_HeadFFD)
 
 bpy.types.Object.BonesCollection = BoolProperty(
     default=False, name = "Bones Collection")
@@ -279,39 +315,44 @@ registered_name = ["Minecraft2024", "Anime2024 Project - Valkyrie"]
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 bpy.types.Scene.myanimerig = EnumProperty(
-    default='one',
-    items=[('one', 'Design', ''),
-            ('two', 'Shader', ''),
+    default='Setup',
+    items=[('Setup', 'Setup', ''),
+            ('Design', 'Design', ''),
             ])
 
 bpy.types.Scene.myanimerigpose = EnumProperty(
-    default='one',
-    items=[('one', 'Design', ''),
-            ('two', 'Shader', ''),
-            ('three', 'Posing', ''),
+    default='Posing',
+    items=[('Setup', 'Setup', ''),
+            ('Design', 'Design', ''),
+            ('Posing', 'Posing', ''),
             ])
 
 
 bpy.types.Scene.myanimerigAddition = EnumProperty(
-    default='one',
-    items=[('one', 'Design', ''),
-            ('two', 'Shader', ''),
-            ('three', 'Addition', ''),
+    default='Setup',
+    items=[('Setup', 'Setup', ''),
+            ('Design', 'Design', ''),
+            ('Addition', 'Addition', ''),
             ])
 
 bpy.types.Scene.myanimerigposeAddition = EnumProperty(
-    default='one',
-    items=[('one', 'Design', ''),
-            ('two', 'Shader', ''),
-            ('three', 'Posing', ''),
-            ('four', 'Addition', ''),
+    default='Posing',
+    items=[('Setup', 'Setup', ''),
+            ('Design', 'Design', ''),
+            ('Posing', 'Posing', ''),
+            ('Addition', 'Addition', ''),
             ])
 
 bpy.types.Object.DesignClasses = EnumProperty(
-    default='one',
-    items=[('one', 'Mesh', ''),
-            ('two', 'LineArt', ''),
-            ('three', 'Shadow', ''),
+    default='Mesh',
+    items=[('Mesh', 'Mesh', ''),
+            ('Shader', 'Shader', ''),
+            ])
+
+bpy.types.Object.SetupClasses = EnumProperty(
+    default='LineArt',
+    items=[('LineArt', 'LineArt', ''),
+            ('Shadow', 'Shadow', ''),
             ])
 
 bpy.types.Object.NoseShadow = EnumProperty(

@@ -10,6 +10,8 @@ from .. import addonPreferences, icons
 
 def draw_ken_animerig(self, context, obj):
     addon_prefs = addonPreferences.getAddonPreferences(context)
+    pcoll = preview_collections["main"]
+    ken_icon = pcoll["Dual"]
     scene = context.scene
     rig = context.active_object
     if obj.RIG_ID == AnimeProperties.kenriglist[2]:
@@ -34,7 +36,12 @@ def draw_ken_animerig(self, context, obj):
             layout = self.layout
             box = layout.box()
             row = box.row()
-            row.label(text = "KEN Anime Rig v1.0 (Female)", icon = "OUTLINER_OB_ARMATURE")
+            row.label(text = "KEN Anime Rig v1.0 (Female)", icon_value = ken_icon.icon_id)
+            if rig.MeshSelect == True:
+                icon = "RESTRICT_SELECT_OFF"
+            else:
+                icon = "RESTRICT_SELECT_ON"
+            row.prop(rig, "MeshSelect", text = "", icon = icon, emboss = False)
             row.prop(scene, "object_properties", icon = "ARMATURE_DATA", text = "")
             for item in addon_prefs.registered_name:
                 if  item.registered_name == AnimeProperties.registered_name[1]:
@@ -42,34 +49,17 @@ def draw_ken_animerig(self, context, obj):
                         assetsDraw.drawbone_properties(box, context, obj)
                     else:
                         row = box.row()
-                        row.prop(rig, "AntiLag", text = "Subdivision", icon = 'MOD_SUBSURF')
-                        row.prop(rig, "SmoothShade", text = "Smooth Shade", icon = 'MESH_DATA')
-                        if rig.MeshSelect == True:
-                            icon = "RESTRICT_SELECT_OFF"
-                        else:
-                            icon = "RESTRICT_SELECT_ON"
-                        row.prop(rig, "MeshSelect", text = "", icon = icon, emboss = False)
-                        row = box.row()
-                        row.prop(rig, "LineArt", icon = 'MOD_LINEART')
-                        row.prop(rig, "LineArtMesh", text = "", icon = "HIDE_OFF")
-                        if rig.LineArt == True:
-                            row = box.row()
-                            row.label(text = "Bake LineArt")
-                            row = box.row()
-                            row.operator("object.lineart_bake_strokes_all", text="Bake All Lineart")
-                            row.operator("object.lineart_clear_all", text="Clear All Lineart")
-                        row = box.row()
                         row.prop(scene, rig_class, expand = True)
-                        if rig_get_class == "one":
+                        if rig_get_class == "Setup":
+                            drawrigsetup(self, context)
+                        if rig_get_class == "Design":
                             drawrigdesign(self, context)
-                        if rig_get_class == "two":
-                            drawrigmaterial(self, context)
-                        if rig_get_class == "three":
+                        if rig_get_class == "Posing":
                             if rig_class != "myanimerigAddition":
                                 drawrigposing(self, context)
                             else:
                                 AnimeExtraProperties.drawrigAddition(self, context)
-                        if rig_get_class == "four":
+                        if rig_get_class == "Addition":
                             AnimeExtraProperties.drawrigAddition(self, context)
                 else:
                     layout = self.layout
@@ -141,17 +131,16 @@ def drwatexture(list, material_obj, slot):
     drwatexture_path(list, mat, 'Shadow Color', text = "Shadow:")
     drwatexture_path(list, mat, 'Base lim', text = "lim:")
 
-def drawrigdesign(self, context):
+def drawrigsetup(self, context):
     layout = self.layout
     scene = context.scene
     rig = context.active_object
-    DesignClasses = "DesignClasses"
+    SetupClasses = "SetupClasses"
 
     box = layout.box()
     row = box.row()
-    row.label(text = "Character Height:" + str(round(rig.dimensions[2]*100/rig.RigScale, 2))+"cm x "+ str(round(rig.RigScale, 2)))
-    row = box.row()
-    row.prop(rig, "RigScale", slider = True)
+    row.prop(rig, "AntiLag", text = "Subdivision", icon = 'MOD_SUBSURF')
+    row.prop(rig, "SmoothShade", text = "Smooth Shade", icon = 'MESH_DATA')
     row = box.row()
     row.label(text = "Sub_ID(Required)")
     row = box.row()
@@ -165,10 +154,109 @@ def drawrigdesign(self, context):
     col.prop(rig, "Sub_ID", text = "")
     row.prop(rig, "Sub_ID_Lock", text = "", icon = icon, emboss = False)
     row = box.row()
+    row.label(text = "Character Height:")
+    row = box.row()
+    row.prop(rig, "RigScale", slider = True)
+    row = box.row()
+    row.prop(rig, SetupClasses, expand = True)
+    if rig.SetupClasses == "LineArt":
+        mainline = bpy.data.materials['MainLine'].grease_pencil
+        pinkline = bpy.data.materials['PinkLine'].grease_pencil
+        skinline = bpy.data.materials['SkinLine'].grease_pencil
+        row = box.row()
+        row.label(text = "LineArt:")
+        row = box.row()
+        row.prop(rig, "LineArt", icon = 'MOD_LINEART')
+        row.prop(rig, "LineArtMesh", text = "", icon = "HIDE_OFF")
+        if rig.LineArt == True:
+            row = box.row()
+            row.label(text = "Bake LineArt")
+            row = box.row()
+            row.operator("object.lineart_bake_strokes_all", text="Bake All Lineart")
+            row.operator("object.lineart_clear_all", text="Clear All Lineart")
+        row = box.row()
+        row.prop(mainline, "color", text = "Main Line")
+        row.prop(rig, "MainLineArt")
+        row = box.row()
+        row.prop(pinkline, "color", text = "Pink Line")
+        row.prop(rig, "PinkLineArt")
+        row = box.row()
+        row.prop(skinline, "color", text = "Skin Line")
+        row = box.row()
+        row.label(text = "Mesh LineArt:")
+        row = box.row()
+        row.prop(rig, "DetailLine", toggle = True)
+        if rig.DetailLine == True:
+            row = box.row()
+            row.prop(rig, "FingerLine", toggle = True)
+            row = box.row()
+            row.prop(rig, "HairLine", toggle = True)
+            if rig.Sub_ID in AnimeExtraProperties.ArmorList:
+                row = box.row()
+                row.prop(rig, "ClothLine", toggle = True)
+                row = box.row()
+                row.prop(rig, "ArmorLine", toggle = True)
+        if rig.Facial == 'two':
+            row = box.row()
+            row.label(text = "Facial LineArt:")
+            row = box.row()
+            row.prop(rig, "FaceLine", toggle = True)
+            row.prop(rig, "FaceLineType")
+            row = box.row()
+            row.prop(rig, "NoseLine", toggle = True)
+            row = box.row()
+            row.prop(rig, "EyebrowLine", toggle = True)
+            row = box.row()
+            row.prop(rig, "LipLine", toggle = True)
+            row = box.row()
+            row.prop(rig, "MadLine", toggle = True)
+            row = box.row()
+            row.prop(rig, "DirtLine", toggle = True)
+    if rig.SetupClasses == "Shadow":
+        row = box.row()
+        row.label(text = "Cast Shadow(Turn Off before bake LineArt):")
+        row = box.row()
+        row.prop(rig, "SubShadow", expand = True)
+        if rig.SubShadow == 'two':
+            row = box.row()
+            row.label(text = "Mesh:")
+            row = box.row()
+            row.prop(rig, "BodyShadow", toggle = True)
+            row = box.row()
+            row.prop(rig, "FingerShadow", toggle = True)
+            row = box.row()
+            row.label(text = "Facial:")
+            row = box.row()
+            row.label(text = "Nose:")
+            row = box.row()
+            row.prop(rig, "NoseShadow", expand = True)
+            row = box.row()
+            row.label(text = "Eye:")
+            row = box.row()
+            row.prop(rig, "EyeBottomShadow", toggle = True)
+            row = box.row()
+            row.prop(rig, "EyelidsShadow")
+            row = box.row()
+            row.prop(rig, "EyelidsHardShadow")
+            row = box.row()
+            row.prop(rig, "MadShadow")
+
+def drawrigdesign(self, context):
+    layout = self.layout
+    scene = context.scene
+    rig = context.active_object
+    DesignClasses = "DesignClasses"
+
+    box = layout.box()
+    row = box.row()
     row.label(text = "Character Design:")
+    if  rig.DesignClasses == "Shader":
+        row.prop(rig, "HueColorize", text = "", icon = "COLOR")
+        row.prop(rig, "AllRimlight", text = "", icon = "LIGHT_AREA")
+        row.prop(rig, "AllShadow", text = "", icon = "MOD_MASK")
     row = box.row()
     row.prop(rig, DesignClasses, expand = True)
-    if rig.get(DesignClasses) == 0:
+    if rig.DesignClasses == "Mesh":
         row = box.row()
         row.label(text = "Mesh Scale:")
         if rig.FacialDesign == True:
@@ -264,81 +352,11 @@ def drawrigdesign(self, context):
             row.prop(rig, "NailLength", slider = True)
             row = bodylist.row()
             row.prop(rig, "NailSharp", slider = True)
-    if rig.get(DesignClasses) == 1:
 
-        mainline = bpy.data.materials['MainLine'].grease_pencil
-        pinkline = bpy.data.materials['PinkLine'].grease_pencil
-        skinline = bpy.data.materials['SkinLine'].grease_pencil
-        row = box.row()
-        row.label(text = "LineArt:")
-        row = box.row()
-        row.prop(mainline, "color", text = "Main Line")
-        row.prop(rig, "MainLineArt")
-        row = box.row()
-        row.prop(pinkline, "color", text = "Pink Line")
-        row.prop(rig, "PinkLineArt")
-        row = box.row()
-        row.prop(skinline, "color", text = "Skin Line")
-        row = box.row()
-        row.label(text = "Mesh LineArt:")
-        row = box.row()
-        row.prop(rig, "DetailLine", toggle = True)
-        if rig.DetailLine == True:
-            row = box.row()
-            row.prop(rig, "FingerLine", toggle = True)
-            row = box.row()
-            row.prop(rig, "HairLine", toggle = True)
-            if rig.Sub_ID in AnimeExtraProperties.ArmorList:
-                row = box.row()
-                row.prop(rig, "ClothLine", toggle = True)
-                row = box.row()
-                row.prop(rig, "ArmorLine", toggle = True)
-        if rig.Facial == 'two':
-            row = box.row()
-            row.label(text = "Facial LineArt:")
-            row = box.row()
-            row.prop(rig, "FaceLine", toggle = True)
-            row.prop(rig, "FaceLineType")
-            row = box.row()
-            row.prop(rig, "NoseLine", toggle = True)
-            row = box.row()
-            row.prop(rig, "EyebrowLine", toggle = True)
-            row = box.row()
-            row.prop(rig, "LipLine", toggle = True)
-            row = box.row()
-            row.prop(rig, "MadLine", toggle = True)
-            row = box.row()
-            row.prop(rig, "DirtLine", toggle = True)
-    if rig.get(DesignClasses) == 2:
-        row = box.row()
-        row.label(text = "Cast Shadow(Turn Off before bake LineArt):")
-        row = box.row()
-        row.prop(rig, "SubShadow", expand = True)
-        if rig.SubShadow == 'two':
-            row = box.row()
-            row.label(text = "Mesh:")
-            row = box.row()
-            row.prop(rig, "BodyShadow", toggle = True)
-            row = box.row()
-            row.prop(rig, "FingerShadow", toggle = True)
-            row = box.row()
-            row.label(text = "Facial:")
-            row = box.row()
-            row.label(text = "Nose:")
-            row = box.row()
-            row.prop(rig, "NoseShadow", expand = True)
-            row = box.row()
-            row.label(text = "Eye:")
-            row = box.row()
-            row.prop(rig, "EyeBottomShadow", toggle = True)
-            row = box.row()
-            row.prop(rig, "EyelidsShadow")
-            row = box.row()
-            row.prop(rig, "EyelidsHardShadow")
-            row = box.row()
-            row.prop(rig, "MadShadow")
+    if rig.DesignClasses == "Shader":
+        drawrigmaterial(box, context)
 
-def drawrigmaterial(self, context):
+def drawrigmaterial(box, context):
     rig = context.active_object
     material_obj = rig.children[0]
     skin = material_obj.material_slots[0].material.node_tree.nodes['Skin Shader'].inputs
@@ -347,13 +365,9 @@ def drawrigmaterial(self, context):
     hair = material_obj.material_slots[3].material.node_tree.nodes['Hair Shader'].inputs
     eyes = material_obj.material_slots[4].material.node_tree.nodes['Eyes Shader'].inputs
 
-    layout = self.layout
-    box = layout.box()
+
     row = box.row()
     row.label(text = "Shader:")
-    row.prop(rig, "HueColorize", text = "", icon = "COLOR")
-    row.prop(rig, "AllRimlight", text = "", icon = "LIGHT_AREA")
-    row.prop(rig, "AllShadow", text = "", icon = "MOD_MASK")
     if rig.HueColorize == True:
         row = box.row()
         row.label(text = "Colorize:", icon = "COLOR")
@@ -589,12 +603,77 @@ def drawrigposing(self, context):
     rig = context.active_object
     box = layout.box().column()
     scene =  context.scene
-    box.prop(rig, "show_in_front", icon = "HIDE_OFF", text = "Show bones in front")
-    box.prop(rig, "flipBone", text = "Flip Bone", toggle = True)
-    row = box.row()
-    row.prop(rig, "MainBone", text = "Main Bone", toggle = True)
-    row.prop(rig, "HeadBone", text = "Head Bone", toggle = True)
+    box.label(text = "Posing:")
+    box.operator("screen.region_toggle", text = "Toggle Pose Library", icon = "ASSET_MANAGER").region_type='ASSET_SHELF'
+    box.prop(rig, "show_in_front", icon = "HIDE_OFF", text = "Show Bone In front")
+    if rig.BonesCollection == True:
+        icon = "DOWNARROW_HLT"
+    else:
+        icon = "RIGHTARROW"
+    box.prop(rig, "BonesCollection", emboss=False , icon = icon)
 
+    if rig.BonesCollection == True:
+        box.prop(rig, "flipBone", text = "Flip Bone", toggle = True)
+        row = box.row()
+        row.prop(rig, "Main_Bone", text = "Main Bone", toggle = True)
+        if rig.Main_Bone == True:
+            row = box.row()
+            row.prop(rig, "Hair_Bone", toggle = True)
+            if rig.Hair_Bone == True:
+                row.prop(rig, "Full_Hair_Bone", toggle = True)
+                if rig.Full_Hair_Bone == True:
+                    row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "Full_Hair"
+                else:
+                    row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "Hair"
+            if rig.Facial == "two":
+                row = box.row()
+                row.prop(rig, "Facial_Bone", toggle = True)
+                if rig.Facial_Bone == True:
+                    row.prop(rig, "Full_Facial_Bone", toggle = True)
+                    if rig.Full_Facial_Bone == True:
+                        row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "Full_Facial"
+                    else:
+                        row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "Facial"
+            row = box.row()
+            row.prop(rig, "HeadFFD", toggle = True)
+            if rig.HeadFFD == True:
+                row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "FFD"
+            row = box.row()
+            row.prop(rig, "Head_Bone", toggle = True)
+            if rig.Head_Bone == True:
+                row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "Head"
+            row = box.row()
+            row.prop(rig, "Body_Bone", toggle = True)
+            if rig.Body_Bone == True:
+                row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "Body"
+            row = box.row()
+            row.prop(rig, "R_Arm", toggle = True)
+            if rig.R_Arm == True:
+                row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "R.Arm"
+            row.prop(rig, "L_Arm", toggle = True)
+            if rig.L_Arm == True:
+                row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "L.Arm"
+            row = box.row()
+            row.prop(rig, "R_Hand", toggle = True)
+            if rig.R_Hand == True:
+                row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "R.Hand"
+            row.prop(rig, "L_Hand", toggle = True)
+            if rig.L_Hand == True:
+                row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "L.Hand"
+            row = box.row()
+            row.prop(rig, "R_Leg", toggle = True)
+            if rig.R_Leg == True:
+                row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "R.Leg"
+            row.prop(rig, "L_Leg", toggle = True)
+            if rig.L_Leg == True:
+                row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "L.Leg"
+            row = box.row()
+            row.prop(rig, "R_Foot", toggle = True)
+            if rig.R_Foot == True:
+                row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "R.Foot"
+            row.prop(rig, "L_Foot", toggle = True)
+            if rig.L_Foot == True:
+                row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "L.Foot"
 
     box = layout.box()
     row = box.row()
@@ -619,29 +698,24 @@ def drawrigposing(self, context):
     row.prop(rig, "HeadWorld", toggle = True)
     row = box.row()
     row.label(text="Arm World:")
+    row = box.row()
     row.prop(rig, "ArmWorld_r", text = "Right", toggle = True)
     row.prop(rig, "ArmWorld_l", text = "Left" ,toggle = True)
     row = box.row()
     row.label(text="Wrist World:")
+    row = box.row()
     row.prop(rig, "WristWorld_r", text = "Right", toggle = True)
     row.prop(rig, "WristWorld_l", text = "Left" ,toggle = True)
 
     row = box.row()
     row.label(text = "Head:")
     row = box.row()
-    row.prop(rig, "HeadFFD", toggle = True)
-    row = box.row()
-    row.label(text = "Facial:")
-    row = box.row()
-    row.prop(rig, "Full_Rigged_Face", toggle = True)
+    row.prop(rig, "PupilSize", slider = True)
     row = box.row()
     row.prop(rig, "SmartEye", toggle = True)
     row = box.row()
-    row.label(text = "Hair:")
-    row = box.row()
-    row.prop(rig, "HairControl", toggle = True)
-    row = box.row()
     row.label(text = "Quick Parent:")
+    row = box.row()
     col = row.column()
     cl = col.row()
     cl.prop(scene, "boneName", icon = "BONE_DATA", text = "")

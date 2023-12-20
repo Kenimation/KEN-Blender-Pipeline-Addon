@@ -305,6 +305,12 @@ def update_Facial(self, context):
                                 mesh_collection.hide_viewport = False
                                 mesh_collection.hide_render = False
                             break
+        if self.Facial == 'one':
+            self.Facial_Bone = False
+            self.Full_Facial_Bone = False
+        if self.Facial == 'two':
+            self.Facial_Bone = True
+            self.Full_Facial_Bone = True
     elif context.active_object.get("RIG_ID") in AnimeProperties.kenriglist[0]:
         rig = context.active_object
         facePanel = ['BracketTop', 'BracketBottom']

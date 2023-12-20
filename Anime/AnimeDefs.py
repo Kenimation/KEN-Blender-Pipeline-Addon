@@ -233,6 +233,159 @@ def update_AnimeEyeType(self, context):
         material_obj.material_slots[4].material.node_tree.nodes['Eyes Shader'].inputs['HD'].default_value = 0
         material_obj.material_slots[4].material.node_tree.nodes['Eyes Shader'].inputs['Auto HD'].default_value = 1
 
+def update_PupilSize(self, context):
+    rig = context.active_object
+    value = rig.get('PupilSize')
+    material_obj = rig.children[0]
+    material_obj.material_slots[4].material.node_tree.nodes['Eyes Shader'].inputs['Pupils Size'].default_value = value
+
+def update_Main_Bone(self,context):
+    rig = context.active_object
+    if self.Main_Bone == True:
+        rig.data.collections["Main"].is_visible = True
+        self.Facial_Bone = True
+        self.Hair_Bone = True
+        self.Head_Bone = True
+        self.Body_Bone = True
+        self.R_Arm = True
+        self.L_Arm = True
+        self.R_Leg = True
+        self.L_Leg = True
+        self.R_Hand = True
+        self.L_Hand = True
+        self.R_Foot = True
+        self.L_Foot = True
+    else:
+        rig.data.collections["Main"].is_visible = False
+        self.Full_Facial_Bone = False
+        self.Facial_Bone = False
+        self.Full_Hair_Bone = False
+        self.Hair_Bone = False
+        self.Head_Bone = False
+        self.HeadFFD = False
+        self.Body_Bone = False
+        self.R_Arm = False
+        self.L_Arm = False
+        self.R_Leg = False
+        self.L_Leg = False
+        self.R_Hand = False
+        self.L_Hand = False
+        self.R_Foot = False
+        self.L_Foot = False
+
+def update_Facial_Bone(self,context):
+    rig = context.active_object
+    if self.Facial == "two":
+        if self.Facial_Bone == True:
+            rig.data.collections["Facial"].is_visible = True
+        else:
+            self.Full_Facial_Bone = False
+            rig.data.collections["Facial"].is_visible = False
+            rig.data.collections["Full_Facial"].is_visible = False
+
+def update_Full_Facial_Bone(self,context):
+    rig = context.active_object
+    if self.Facial == "two":
+        if self.Facial_Bone == True:
+            if self.Full_Facial_Bone == True:
+                rig.data.collections["Full_Facial"].is_visible = True
+            else:
+                rig.data.collections["Full_Facial"].is_visible = False
+
+def update_Hair_Bone(self,context):
+    rig = context.active_object
+    if self.Hair_Bone == True:
+        rig.data.collections["Hair"].is_visible = True
+    else:
+        self.Full_Hair_Bone = False
+        rig.data.collections["Hair"].is_visible = False
+        rig.data.collections["Full_Hair"].is_visible = False
+
+def update_Full_Hair_Bone(self,context):
+    rig = context.active_object
+    if self.Hair_Bone == True:
+        if self.Full_Hair_Bone == True:
+            rig.data.collections["Full_Hair"].is_visible = True
+        else:
+            rig.data.collections["Full_Hair"].is_visible = False
+
+def update_HeadFFD(self,context):
+    rig = context.active_object
+    if self.HeadFFD == True:
+        rig.data.collections["FFD"].is_visible = True
+    else:
+        rig.data.collections["FFD"].is_visible = False
+
+def update_Head_Bone(self,context):
+    rig = context.active_object
+    if self.Head_Bone == True:
+        rig.data.collections["Head"].is_visible = True
+    else:
+        rig.data.collections["Head"].is_visible = False
+
+def update_Body_Bone(self,context):
+    rig = context.active_object
+    if self.Body_Bone == True:
+        rig.data.collections["Body"].is_visible = True
+    else:
+        rig.data.collections["Body"].is_visible = False
+
+def update_R_Arm(self,context):
+    rig = context.active_object
+    if self.R_Arm == True:
+        rig.data.collections["R.Arm"].is_visible = True
+    else:
+        rig.data.collections["R.Arm"].is_visible = False
+
+def update_L_Arm(self,context):
+    rig = context.active_object
+    if self.L_Arm == True:
+        rig.data.collections["L.Arm"].is_visible = True
+    else:
+        rig.data.collections["L.Arm"].is_visible = False
+
+def update_R_Leg(self,context):
+    rig = context.active_object
+    if self.R_Leg == True:
+        rig.data.collections["R.Leg"].is_visible = True
+    else:
+        rig.data.collections["R.Leg"].is_visible = False
+
+def update_L_Leg(self,context):
+    rig = context.active_object
+    if self.L_Leg == True:
+        rig.data.collections["L.Leg"].is_visible = True
+    else:
+        rig.data.collections["L.Leg"].is_visible = False
+
+def update_R_Hand(self,context):
+    rig = context.active_object
+    if self.R_Hand == True:
+        rig.data.collections["R.Hand"].is_visible = True
+    else:
+        rig.data.collections["R.Hand"].is_visible = False
+
+def update_L_Hand(self,context):
+    rig = context.active_object
+    if self.L_Hand == True:
+        rig.data.collections["L.Hand"].is_visible = True
+    else:
+        rig.data.collections["L.Hand"].is_visible = False
+
+def update_R_Foot(self,context):
+    rig = context.active_object
+    if self.R_Foot == True:
+        rig.data.collections["R.Foot"].is_visible = True
+    else:
+        rig.data.collections["R.Foot"].is_visible = False
+
+def update_L_Foot(self,context):
+    rig = context.active_object
+    if self.L_Foot == True:
+        rig.data.collections["L.Foot"].is_visible = True
+    else:
+        rig.data.collections["L.Foot"].is_visible = False
+
 def update_rig_scale(self,context):
     rig = context.active_object
     material_obj = rig.children[0]

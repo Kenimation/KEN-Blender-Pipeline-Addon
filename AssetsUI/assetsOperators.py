@@ -874,6 +874,25 @@ class ParentObjectsToRig(bpy.types.Operator):
             self.report({"ERROR"}, "an error occured; objects might not be selected")
             return {"CANCELLED"}
 
+class SelectBoneGroup(bpy.types.Operator):
+    bl_idname = "bone.selectgroup"
+    bl_label = "Select Bone Group"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    name: bpy.props.StringProperty()
+
+    def execute(self, context):
+        rig = context.active_object
+
+            # Find the active index of the collection
+        for index, collection in enumerate(rig.data.collections):
+            if collection.name == self.name:
+                rig.data.collections.active_index = index
+                bpy.ops.armature.collection_select()
+                break
+
+
+        return {'FINISHED'}
 
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #                   (un)register
@@ -902,6 +921,7 @@ classes = (
             IMAGEPACK,
             IMAGERELOAD,
             ParentObjectsToRig,
+            SelectBoneGroup,
           )        
 
 register, unregister = bpy.utils.register_classes_factory(classes)
