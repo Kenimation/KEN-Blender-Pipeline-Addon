@@ -681,46 +681,20 @@ class Assets_UI(bpy.types.Panel):
                 clean.subtype = "clean"
 
                 if obj:
-                    if obj.type == "MESH":
-                        state = "Object Material"
-                        row = box.row()
-                        row.template_list("MATERIALS", "", obj, "material_slots", obj, "active_material_index")
-                    else:
-                        state = "Scene Material: Object type does not have material."
-                        row = box.row()
-                else:
-                    state = "Scene Material"
-                    row = box.row()
-                row.template_list("SCENEMATERIALS", "", bpy.data, "materials", scene, "mat_index")
-
-                if obj:
-                    if obj.type == "MESH":
-                        try:
+                    if scene.scene_mat == False:
+                        if obj.type == "MESH":
+                            state = "Object Material"
+                            mat = obj.active_material
+                        else:
+                            state = "Scene Material: Object type does not have material."
                             for mat in bpy.data.materials:
                                 mat_list.append(mat)
                             mat = mat_list[scene.mat_index]
-                            row = box.row()
-                            add = row.operator("data.blend", text = "Append")
-                            add.blend = mat.name
-                            add.type = "mat"
-                            add.subtype = "append"
-                            append = row.operator("data.blend", text = "Replace")
-                            append.blend = mat.name
-                            append.type = "mat"
-                            append.subtype = "replace"
-                        except:
-                            pass
-
-                if scene.scene_mat == False:
-                    if obj and obj.type == "MESH":
-                        mat = obj.active_material
                     else:
-                        try:
-                            for mat in bpy.data.materials:
-                                mat_list.append(mat)
-                            mat = mat_list[scene.mat_index]
-                        except:
-                            pass
+                        state = "Scene Material"
+                        for mat in bpy.data.materials:
+                            mat_list.append(mat)
+                        mat = mat_list[scene.mat_index]
                 else:
                     state = "Scene Material"
                     for mat in bpy.data.materials:
@@ -728,10 +702,36 @@ class Assets_UI(bpy.types.Panel):
                     mat = mat_list[scene.mat_index]
 
                 row = box.row()
-                if obj and obj.type == "MESH":
+                if obj.type == "MESH":
                     row.prop(scene, "scene_mat", icon = "SCENE_DATA", text = "")
                 row.label(text = state)
-                assetsDraw.drawmaterial(scene, box, row, obj, mat, state)
+                if obj.type == "MESH":
+                    if scene.scene_mat == False:
+                        delete = row.operator("data.blend", text = "Clear Material")
+                        delete.type = "mat"
+                        delete.subtype = "del"
+                    row = box.row()
+                    row.template_list("MATERIALS", "", obj, "material_slots", obj, "active_material_index")
+                else:
+                    row = box.row()
+                row.template_list("SCENEMATERIALS", "", bpy.data, "materials", scene, "mat_index")
+
+                if obj.type == "MESH":
+                    if bpy.data.materials:
+                        for addmat in bpy.data.materials:
+                            mat_list.append(addmat)
+                        addmat = mat_list[scene.mat_index]
+                        row = box.row()
+                        add = row.operator("data.blend", text = "Append")
+                        add.blend = addmat.name
+                        add.type = "mat"
+                        add.subtype = "append"
+                        append = row.operator("data.blend", text = "Replace")
+                        append.blend = addmat.name
+                        append.type = "mat"
+                        append.subtype = "replace"
+
+                assetsDraw.drawmaterial(scene, box, obj, mat, state)
 
             if scene.mytools == 'two':
                 row = box.row()

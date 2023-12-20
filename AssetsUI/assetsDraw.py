@@ -559,12 +559,18 @@ def draw_data(self, context, obj):
         if context.scene.cam_save == True:
             draw_save_cam(context, box)
     
-    if obj.type == 'MESH':  
+    if obj.type == 'GPENCIL':
+        box.label(text = "LineArt", icon = "OUTLINER_DATA_GREASEPENCIL")
+        drawlineart(context, box, obj)
+
+    if obj.type == 'MESH':
         drawmodifiers(self, context)
         if scene.particles_properties == True:
             drawparticles(self, context)
         if scene.simulation == True:
             drawsimulation(self, context)
+    if obj.type == 'GPENCIL':
+        drawgrease_pencil_modifiers(self, context)
 
     drawconstraints(self, context)
 
@@ -638,18 +644,8 @@ def drawmaterial_properties(self, context):
             box.label(text = "No Available Object")
             box.operator("new.material", text = "New Material", icon = "MATERIAL")
 
-def drawmaterial(scene, box, row, obj, mat, state):
+def drawmaterial(scene, box, obj, mat, state):
     if mat and mat.name != 'Dots Stroke':
-        
-        select = row.operator("data.blend", icon = "RESTRICT_SELECT_OFF", emboss = False ,text = "")
-        select.type = "mat"
-        select.subtype = "select"
-        select.blend = mat.name
-        if obj:
-            if obj.type == "MESH" and scene.scene_mat == False:
-                delete = row.operator("data.blend", text = "Clean All")
-                delete.type = "mat"
-                delete.subtype = "del"
 
         box.label(text = "Fix Tools", icon = "TOOL_SETTINGS")
         if state == "Object Material":
@@ -662,12 +658,15 @@ def drawmaterial(scene, box, row, obj, mat, state):
             indexmat.mat = mat.name
             allmat = row.operator("fix.material", text = "Fix All Materials")
             allmat.type = "scene"
-            row = box.row()
-
+               
         row = box.row()
         row.label(icon_value=row.icon(mat))
         row.prop(mat, "name", text = "")
         row.scale_x = 1
+        select = row.operator("data.blend", icon = "RESTRICT_SELECT_OFF", emboss = False ,text = "")
+        select.type = "mat"
+        select.subtype = "select"
+        select.blend = mat.name
         row.prop(mat,"use_fake_user", text = "", emboss=False)
 
         if obj:
@@ -711,49 +710,126 @@ def drawmaterial(scene, box, row, obj, mat, state):
                         box.operator("new.material", text = "New Material", icon = "MATERIAL")
 
 def drawnode_tree(scene, box, mat):
-    ntree = mat.node_tree
-    id = len(ntree.nodes)
-    node = ntree.get_output_node('EEVEE')
-    input = find_node_input(node, "Surface")
-    if scene.mat_surface == True:
-        icon = "DOWNARROW_HLT"
-    else:
-        icon = "RIGHTARROW"
-    box.prop(scene, "mat_surface", text = "Materials Surface", icon = icon, emboss=False)
-    if scene.mat_surface == True:
-        node_view = box.box()
-        node_view.operator("add.image", text = "Add Image Texture", icon = "IMAGE_DATA").mat = mat.name
-        node_view.template_node_view(ntree, node, input)
-    for node in mat.node_tree.nodes:
-        if node.name == 'Animated_Texture':
-            box.label(text = node.name)
-            nodebox = box.box()
-            if not node.inputs[input].links:
-                box.prop(node.inputs[0], "default_value", text = "Frame Number")
-                row = nodebox.row()
-                nodebox.prop(node.inputs[2], "default_value", text = "Frame Muiltply")
+    try:
+        if mat.node_tree.nodes:
+            ntree = mat.node_tree
+            id = len(ntree.nodes)
+            node = ntree.get_output_node('EEVEE')
+            input = find_node_input(node, "Surface")
+            if scene.mat_surface == True:
+                icon = "DOWNARROW_HLT"
+            else:
+                icon = "RIGHTARROW"
+            box.prop(scene, "mat_surface", text = "Materials Surface", icon = icon, emboss=False)
+            if scene.mat_surface == True:
+                node_view = box.box()
+                node_view.operator("add.image", text = "Add Image Texture", icon = "IMAGE_DATA").mat = mat.name
+                node_view.template_node_view(ntree, node, input)
+            for node in mat.node_tree.nodes:
+                if node.name == 'Animated_Texture':
+                    box.label(text = node.name)
+                    nodebox = box.box()
+                    if not node.inputs[input].links:
+                        box.prop(node.inputs[0], "default_value", text = "Frame Number")
+                        row = nodebox.row()
+                        nodebox.prop(node.inputs[2], "default_value", text = "Frame Muiltply")
 
-        drawnoderamp(node, box, 'ColorRamp_Specular', "Specular Color Ramp")
-        drawnoderamp(node, box, 'ColorRamp_Roughness', "Roughness Color Ramp")
-        drawnoderamp(node, box, 'ColorRamp_Bump', "Bump Color Ramp")
-        if node.name.split(".")[0] == 'Combine Nomral Map':
-            if all(len(outputs_socket.links) > 0 for outputs_socket in node.outputs):
-                box.label(text = node.name)
-                nodebox = box.box()
-                nodebox.prop(node.inputs[3], "default_value", text = "Bump Strength")
-                row = nodebox.row()
-                row.prop(node.inputs[1], "default_value", text = "Nomral Strength")
+                drawnoderamp(node, box, 'ColorRamp_Specular', "Specular Color Ramp")
+                drawnoderamp(node, box, 'ColorRamp_Roughness', "Roughness Color Ramp")
+                drawnoderamp(node, box, 'ColorRamp_Bump', "Bump Color Ramp")
+                if node.name.split(".")[0] == 'Combine Nomral Map':
+                    if all(len(outputs_socket.links) > 0 for outputs_socket in node.outputs):
+                        box.label(text = node.name)
+                        nodebox = box.box()
+                        nodebox.prop(node.inputs[3], "default_value", text = "Bump Strength")
+                        row = nodebox.row()
+                        row.prop(node.inputs[1], "default_value", text = "Nomral Strength")
 
-        drawnodelist(box, node, id, "Glass_Dispersion")
-        drawnodelist(box, node, id, "Emission Object")
-        drawnodelist(box, node, id, "Illumination Object")
+                drawnodelist(box, node, id, "Glass_Dispersion")
+                drawnodelist(box, node, id, "Emission Object")
+                drawnodelist(box, node, id, "Illumination Object")
 
-    box.label(text = "Material Settings")
-    box.prop(mat, "blend_method")
-    box.prop(mat, "shadow_method")
-    row = box.row()
-    row.prop(mat, "show_transparent_back", toggle = True)
-    row.prop(mat, "use_screen_refraction", toggle = True)
+            box.label(text = "Material Settings")
+            box.prop(mat, "blend_method")
+            box.prop(mat, "shadow_method")
+            row = box.row()
+            row.prop(mat, "show_transparent_back", toggle = True)
+            row.prop(mat, "use_screen_refraction", toggle = True)
+            
+    except:
+
+        if mat.grease_pencil:
+            gpcolor = mat.grease_pencil
+            box.prop(gpcolor, "show_stroke", text="Stroke")
+            if gpcolor.show_stroke == True:
+                strokebox = box.box()
+                strokebox.prop(gpcolor, "mode")
+
+                strokebox.prop(gpcolor, "stroke_style", text="Style")
+
+                strokebox.prop(gpcolor, "color", text="Base Color")
+                strokebox.prop(gpcolor, "use_stroke_holdout")
+
+                if gpcolor.stroke_style == 'TEXTURE':
+                    row = strokebox.row()
+                    row.enabled = not gpcolor.lock
+                    strokebox = row.column(align=True)
+                    strokebox.template_ID(gpcolor, "stroke_image", open="image.open")
+
+                if gpcolor.stroke_style == 'TEXTURE':
+                    row = strokebox.row()
+                    row.prop(gpcolor, "mix_stroke_factor", text="Blend", slider=True)
+                    if gpcolor.mode == 'LINE':
+                        strokebox.prop(gpcolor, "pixel_size", text="UV Factor")
+
+                if gpcolor.mode in {'DOTS', 'BOX'}:
+                    strokebox.prop(gpcolor, "alignment_mode")
+                    strokebox.prop(gpcolor, "alignment_rotation")
+
+                if gpcolor.mode == 'LINE':
+                    strokebox.prop(gpcolor, "use_overlap_strokes")
+
+            box.prop(gpcolor, "show_fill", text="Fill")
+            if gpcolor.show_fill == True:
+                fillbox = box.box()
+                fillbox.prop(gpcolor, "fill_style", text="Style")
+
+                if gpcolor.fill_style == 'SOLID':
+                    fillbox.prop(gpcolor, "fill_color", text="Base Color")
+                    fillbox.prop(gpcolor, "use_fill_holdout")
+
+                elif gpcolor.fill_style == 'GRADIENT':
+                    fillbox.prop(gpcolor, "gradient_type")
+
+                    fillbox.prop(gpcolor, "fill_color", text="Base Color")
+                    fillbox.prop(gpcolor, "mix_color", text="Secondary Color")
+                    fillbox.prop(gpcolor, "use_fill_holdout")
+                    fillbox.prop(gpcolor, "mix_factor", text="Blend", slider=True)
+                    fillbox.prop(gpcolor, "flip", text="Flip Colors")
+
+                    fillbox.prop(gpcolor, "texture_offset", text="Location")
+
+                    row = fillbox.row()
+                    row.enabled = gpcolor.gradient_type == 'LINEAR'
+                    row.prop(gpcolor, "texture_angle", text="Rotation")
+
+                    fillbox.prop(gpcolor, "texture_scale", text="Scale")
+
+                elif gpcolor.fill_style == 'TEXTURE':
+                    fillbox.prop(gpcolor, "fill_color", text="Base Color")
+                    fillbox.prop(gpcolor, "use_fill_holdout")
+
+                    fillbox.template_ID(gpcolor, "fill_image", open="image.open")
+
+                    fillbox.prop(gpcolor, "mix_factor", text="Blend", slider=True)
+
+                    fillbox.prop(gpcolor, "texture_offset", text="Location")
+                    fillbox.prop(gpcolor, "texture_angle", text="Rotation")
+                    fillbox.prop(gpcolor, "texture_scale", text="Scale")
+                    fillbox.prop(gpcolor, "texture_clamp", text="Clip Image")
+
+            box.label(text = "Settings")
+            box.prop(gpcolor, "pass_index")
 
 def drawnoderamp(node, box, name, text):
     if node.name.split(".")[0] == name:
@@ -773,7 +849,6 @@ def drawnodelist(box, node, id, name):
                 if not node.inputs[input].links:
                     nodebox.prop(node.inputs[input], "default_value", text = node.inputs[input].name)
         
-
 def drawlight(box, light):
     lightbox = box.box()
     row = lightbox.row()
@@ -1037,6 +1112,67 @@ def draw_mark(scene, box, row):
         addmark.object = scene.marker_name
         addmark.id = "new marker"
         row = box.row()
+
+def drawlineart(context, box, obj):
+    gpd = obj.data
+    gpl = gpd.layers.active
+    row = box.row()
+    layer_rows = 7
+
+    col = row.column()
+    col.template_list("GPENCIL_UL_layer", "", gpd, "layers", gpd.layers, "active_index",
+                        rows=layer_rows, sort_reverse=True, sort_lock=True)
+
+    col = row.column()
+    sub = col.column(align=True)
+    sub.operator("gpencil.layer_add", icon='ADD', text="")
+    sub.operator("gpencil.layer_remove", icon='REMOVE', text="")
+
+    sub.separator()
+
+    if gpl:
+        sub.menu("GPENCIL_MT_layer_context_menu", icon='DOWNARROW_HLT', text="")
+
+        if len(gpd.layers) > 1:
+            col.separator()
+
+            sub = col.column(align=True)
+            sub.operator("gpencil.layer_move", icon='TRIA_UP', text="").type = 'UP'
+            sub.operator("gpencil.layer_move", icon='TRIA_DOWN', text="").type = 'DOWN'
+
+            col.separator()
+
+            sub = col.column(align=True)
+            sub.operator("gpencil.layer_isolate", icon='RESTRICT_VIEW_ON', text="").affect_visibility = True
+            sub.operator("gpencil.layer_isolate", icon='LOCKED', text="").affect_visibility = False
+
+        col = box.row(align=True)
+        col.prop(gpl, "blend_mode", text="Blend")
+
+        col = box.row(align=True)
+        col.prop(gpl, "opacity", text="Opacity", slider=True)
+
+        col = box.row(align=True)
+        col.prop(gpl, "use_lights")
+
+    row = box.row()
+    row.label(text = "Strokes")
+    row = box.row()
+    row.label(text = "Stroke Depth Order")
+    row = box.row()
+    row.prop(gpd, "stroke_depth_order", text="")
+
+    if obj:
+        row.enabled = not obj.show_in_front
+
+    row = box.row()
+    row.label(text = "Stroke Thickness Space")
+    row = box.row()
+    row.prop(gpd, "stroke_thickness_space", text="")
+    row = box.row()
+    row.prop(gpd, "pixel_factor", text="Thickness Scale")
+    row = box.row()
+    row.prop(gpd, "edit_curve_resolution")
 
 def drawparticles(self, context):
 
@@ -1346,6 +1482,79 @@ def drawmodifiers(self, context):
                         pass
     
     if not obj.modifiers:
+        box.label(text = "No Available Modifiers")
+
+def drawgrease_pencil_modifiers(self, context):
+    layout = self.layout
+    box = layout.box()
+    row = box.row()
+    scene = context.scene
+    if scene.showmodifier == True:
+        icon = "MODIFIER"
+        text = "Quick Modifier"
+    else:
+        icon = "MODIFIER_DATA"
+        text = "Show Modifier"
+    row.prop(scene, "showmodifier", text = text, icon = icon, emboss=False)
+    obj = context.view_layer.objects.active
+    if obj.grease_pencil_modifiers:
+        if scene.hidemodifier == True:
+            hideicon = "RESTRICT_VIEW_ON"
+        else:
+            hideicon = "RESTRICT_VIEW_OFF"
+            row.prop(scene, "editmodifier", text = "", icon = "EDITMODE_HLT")
+        row.prop(scene, "hidemodifier", text = "", icon = hideicon, emboss=False)
+        if scene.rendermodifier == True:
+            hideicon = "RESTRICT_RENDER_ON"
+        else:
+            hideicon = "RESTRICT_RENDER_OFF"
+        row.prop(scene, "rendermodifier", text = "", icon = hideicon, emboss=False)
+        row.operator("all.constraint", text = "", icon = "CHECKMARK", emboss=False).type = 2
+        row.operator("all.constraint", text = "", icon = "PANEL_CLOSE", emboss=False).type = 0
+
+    if scene.showmodifier == True:
+        row = box.row()
+        row.operator_menu_enum("object.modifier_add", "type")
+        if obj.grease_pencil_modifiers:
+            modifiers = obj.grease_pencil_modifiers
+            for id in obj.grease_pencil_modifiers[:]:
+                if id.type == "GP_SUBDIV":              
+                    row = box.row()
+                    row.operator("copy.constraint", text = "", icon = "MOD_SUBSURF", emboss=False).id = id.name
+                    row.prop(modifiers[id.name], "name", text = "")
+                    if modifiers[id.name].show_viewport == True:
+                        row.prop(modifiers[id.name], "show_in_editmode", text = "")
+                    row.prop(modifiers[id.name], "show_viewport", text = "", emboss=False)
+                    row.prop(modifiers[id.name], "show_render", text = "", emboss=False)
+                    row.operator("apply.constraint", text = "", icon = "CHECKMARK", emboss=False).id = id.name
+                    row.operator("delete.constraint", text = "", icon = "PANEL_CLOSE", emboss=False).id = id.name
+                    row = box.row()
+                    row.prop(modifiers[id.name], "subdivision_type", expand = True)
+                    box.prop(modifiers[id.name], "level", text = "Levels")
+                if id.type == "GP_LINEART":
+                    row = box.row()
+                    row.operator("copy.constraint", text = "", icon = "MOD_BEVEL", emboss=False).id = id.name
+                    row.prop(modifiers[id.name], "name", text = "")
+                    if modifiers[id.name].show_viewport == True:
+                        row.prop(modifiers[id.name], "show_in_editmode", text = "")
+                    row.prop(modifiers[id.name], "show_viewport", text = "", emboss=False)
+                    row.prop(modifiers[id.name], "show_render", text = "", emboss=False)
+                    row.operator("apply.constraint", text = "", icon = "CHECKMARK", emboss=False).id = id.name
+                    row.operator("delete.constraint", text = "", icon = "PANEL_CLOSE", emboss=False).id = id.name
+                    row = box.row()
+                    box.prop(modifiers[id.name], "source_type")
+                    if modifiers[id.name].source_type == "OBJECT":
+                        box.prop(modifiers[id.name], "source_object", text = "Object")
+                    if modifiers[id.name].source_type == 'COLLECTION':
+                        row = box.row()
+                        row.prop(modifiers[id.name], "source_collection", text = "Collection")
+                        row.prop(modifiers[id.name], "use_invert_collectio", text = "")
+                    box.prop(modifiers[id.name], "target_layer", text = "Layer")
+                    box.prop(modifiers[id.name], "target_material", text = "Material")
+                    box.prop(modifiers[id.name], "thickness", text = "Thickness")
+                    box.prop(modifiers[id.name], "opacity", text = "Opacity")
+    
+    if not obj.grease_pencil_modifiers:
         box.label(text = "No Available Modifiers")
 
 def drawmodifiers1(self, context):
