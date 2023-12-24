@@ -33,12 +33,11 @@ def update_MeshSelect(self, context):
 
     if parent_collection is not None:
         for child_collection in parent_collection.children:
-            if child_collection.name.split(".", 1)[0] == "Mesh":
+            if child_collection.name.split(".", 1)[0] == "Mesh" or child_collection.name.split(".", 1)[0] == "Shadow Map":
                 if self.MeshSelect == True:
                     child_collection.hide_select = False
                 if self.MeshSelect == False:
                     child_collection.hide_select = True
-                break
 
 def update_LineArt(self, context):
     rig = context.active_object
