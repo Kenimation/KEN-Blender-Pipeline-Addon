@@ -568,7 +568,11 @@ class PARTICLES(bpy.types.UIList):
                 layout.prop(particles.settings, "name", text="", emboss=False, icon_value=icon)
                 layout.prop(particles, "seed", text="Seed", emboss=False)
                 layout.prop(particles.settings, "count", text="N", emboss=False)
+                addstart = layout.operator("bpy.ops", text = "", icon = "KEYFRAME_HLT", emboss=False)
+                addstart.id = "add_paticles_start_frame"
                 layout.prop(particles.settings, "frame_start", text="S", emboss=False)
+                addend = layout.operator("bpy.ops", text = "", icon = "KEYFRAME_HLT", emboss=False)
+                addend.id = "add_paticles_end_frame"
                 layout.prop(particles.settings, "frame_end", text="E", emboss=False)
                 jump = layout.operator("bpy.ops", text = "", icon = "KEYFRAME_HLT", emboss=False)
                 jump.object = str(particles.settings.frame_start)

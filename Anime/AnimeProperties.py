@@ -327,7 +327,6 @@ bpy.types.Scene.myanimerigpose = EnumProperty(
             ('Posing', 'Posing', ''),
             ])
 
-
 bpy.types.Scene.myanimerigAddition = EnumProperty(
     default='Setup',
     items=[('Setup', 'Setup', ''),

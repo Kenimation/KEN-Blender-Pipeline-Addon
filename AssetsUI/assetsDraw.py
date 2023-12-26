@@ -73,9 +73,8 @@ def draw_tools(scene, obj, self):
             row = EditingTools.row()
             row.label(text = "Editing Tools")
             row = EditingTools.row()
-            col = EditingTools.column_flow(columns = 2)
-            col.operator("select.alphauv", text = "Select Alpha")
-            col.operator("scale.uv", text = "Scale Faces")
+            row.operator("select.alphauv", text = "Select Alpha")
+            row.operator("scale.uv", text = "Scale Faces")
             row = EditingTools.row()
             row.operator("alpha.delete", text = "Delete Alpha")
 

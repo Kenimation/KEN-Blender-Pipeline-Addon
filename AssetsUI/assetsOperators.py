@@ -9,203 +9,6 @@ from bpy.props import StringProperty, BoolProperty, FloatProperty, IntProperty, 
 #                      operators
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-class Copyloc(bpy.types.Operator):
-    bl_idname = "copy.loc"
-    bl_label = "Copy Location"
-    bl_options = {'REGISTER', 'UNDO'}
-    
-    x: BoolProperty(
-        name="X",
-        description="Copy X.",
-        default=True,
-    )
-    y: BoolProperty(
-        name="Y",
-        description="Copy Y",
-        default=True,
-    )
-    z: BoolProperty(
-        name="Z",
-        description="Copy Z.",
-        default=True,
-    )
-
-    def execute(self, context):
-        try:
-            if self.x == True:
-                assetsDefs.copytransform("loc", "x")
-            if self.y == True:
-                assetsDefs.copytransform("loc", "y")
-            if self.z == True:
-                assetsDefs.copytransform("loc", "z")
-        except:
-            self.report({"ERROR"}, "Cannot copy location!!!")
-        return {'FINISHED'}
-    def draw(self, context):
-        layout = self.layout
-        row = layout.row()
-        row.column_flow(columns = 3)
-        row.prop(self, "x", toggle = True)
-        row.prop(self, "y", toggle = True)
-        row.prop(self, "z", toggle = True)
-     
-class Copyrota(bpy.types.Operator):
-    bl_idname = "copy.rota"
-    bl_label = "Copy Rotation"
-    bl_options = {'REGISTER', 'UNDO'}
-    
-    x: BoolProperty(
-        name="X",
-        description="Copy X.",
-        default=True,
-    )
-    y: BoolProperty(
-        name="Y",
-        description="Copy Y",
-        default=True,
-    )
-    z: BoolProperty(
-        name="Z",
-        description="Copy Z.",
-        default=True,
-    )
-
-    def execute(self, context):
-        try:
-            if self.x == True:
-                assetsDefs.copytransform("rota", "x")
-            if self.y == True:
-                assetsDefs.copytransform("rota", "y")
-            if self.z == True:
-                assetsDefs.copytransform("rota", "z")
-        except:
-            self.report({"ERROR"}, "Cannot copy rotation!!!")
-        return {'FINISHED'}
-    def draw(self, context):
-        layout = self.layout
-        row = layout.row()
-        row.column_flow(columns = 3)
-        row.prop(self, "x", toggle = True)
-        row.prop(self, "y", toggle = True)
-        row.prop(self, "z", toggle = True)
-    
-class Copysize(bpy.types.Operator):
-    bl_idname = "copy.size"
-    bl_label = "Copy Size"
-    bl_options = {'REGISTER', 'UNDO'}
-    
-    x: BoolProperty(
-        name="X",
-        description="Copy X.",
-        default=True,
-    )
-    y: BoolProperty(
-        name="Y",
-        description="Copy Y",
-        default=True,
-    )
-    z: BoolProperty(
-        name="Z",
-        description="Copy Z.",
-        default=True,
-    )
-
-    def execute(self, context):
-        try:
-            if self.x == True:
-                assetsDefs.copytransform("size", "x")
-            if self.y == True:
-                assetsDefs.copytransform("size", "y")
-            if self.z == True:
-                assetsDefs.copytransform("size", "z")
-        except:
-            self.report({"ERROR"}, "Cannot copy size!!!")
-        return {'FINISHED'}
-    def draw(self, context):
-        layout = self.layout
-        row = layout.row()
-        row.column_flow(columns = 3)
-        row.prop(self, "x", toggle = True)
-        row.prop(self, "y", toggle = True)
-        row.prop(self, "z", toggle = True)
-
-class Copytransform(bpy.types.Operator):
-    bl_idname = "copy.trans"
-    bl_label = "Copy Transform"
-    bl_options = {'REGISTER', 'UNDO'}
-    
-    copyloc: BoolProperty(
-        name="Location",
-        description="Copy Location.",
-        default=True,
-    )
-    copyrota: BoolProperty(
-        name="Rotation",
-        description="Copy Rotation",
-        default=True,
-    )
-    copysize: BoolProperty(
-        name="Size",
-        description="Copy Size.",
-        default=True,
-    )
-    x: BoolProperty(
-        name="X",
-        description="Copy X.",
-        default=True,
-    )
-    y: BoolProperty(
-        name="Y",
-        description="Copy Y",
-        default=True,
-    )
-    z: BoolProperty(
-        name="Z",
-        description="Copy Z.",
-        default=True,
-    )
-
-    def execute(self, context):
-        try:
-            if self.copyloc == True:
-                if self.x == True:
-                    assetsDefs.copytransform("loc", "x")
-                if self.y == True:
-                    assetsDefs.copytransform("loc", "y")
-                if self.z == True:
-                    assetsDefs.copytransform("loc", "z")
-            if self.copyrota == True:
-                if self.x == True:
-                    assetsDefs.copytransform("rota", "x")
-                if self.y == True:
-                    assetsDefs.copytransform("rota", "y")
-                if self.z == True:
-                    assetsDefs.copytransform("rota", "z")
-            if self.copysize == True:  
-                if self.x == True:
-                    assetsDefs.copytransform("size", "x")
-                if self.y == True:
-                    assetsDefs.copytransform("size", "y")
-                if self.z == True:
-                    assetsDefs.copytransform("size", "z")
-        except:
-            self.report({"ERROR"}, "Cannot copy transform!!!")
-        return {'FINISHED'}
-    
-    def draw(self, context):
-        layout = self.layout
-        box = layout.box()
-        row = box.row()
-        row.column_flow(columns = 3)
-        row = box.row()
-        row.prop(self, "copyloc", toggle = True)
-        row.prop(self, "copyrota", toggle = True)
-        row.prop(self, "copysize", toggle = True)
-        row = box.row()
-        row.prop(self, "x", toggle = True)
-        row.prop(self, "y", toggle = True)
-        row.prop(self, "z", toggle = True)
-
 class RestCursor(bpy.types.Operator):
     bl_idname = "rest.cursor"
     bl_label = "Rest Cursor"
@@ -431,7 +234,31 @@ class Operators(bpy.types.Operator):
             for obj in bpy.context.scene.objects:
                 if obj.type == scene.Object_Type:
                     obj.select_set(True)    
-             
+
+        if self.id == "add_paticles_start_frame":
+            if context.active_object.particle_systems:
+                try:
+                    particles_list = []
+                    for particles in context.active_object.particle_systems:
+                        particles_list.append(particles)
+                    particles_system = particles_list[scene.particles_index]
+                    particles_data = particles_system.settings
+                except:
+                    pass
+                particles_data.frame_start = context.scene.frame_current
+
+        if self.id == "add_paticles_end_frame":
+            if context.active_object.particle_systems:
+                try:
+                    particles_list = []
+                    for particles in context.active_object.particle_systems:
+                        particles_list.append(particles)
+                    particles_system = particles_list[scene.particles_index]
+                    particles_data = particles_system.settings
+                except:
+                    pass
+                particles_data.frame_end = context.scene.frame_current 
+
         if self.id == "jump_frame":
             frame_number = self.object
             bpy.context.scene.frame_set(round(float(frame_number)))
@@ -899,10 +726,6 @@ class SelectBoneGroup(bpy.types.Operator):
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 classes = (
-            Copyloc,
-            Copyrota,
-            Copysize,
-            Copytransform,
             Open_Image,
             RestCursor,
             Addconstraints,

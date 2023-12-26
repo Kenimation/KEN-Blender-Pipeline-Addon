@@ -25,61 +25,7 @@ def move_to_collection(obj, collection):
 	for col in obj.users_collection:
 		col.objects.unlink(obj)
 	collection.objects.link(obj)
-
-def copytransform(self, xyz):
-    if bpy.context.object.mode == 'OBJECT':
-        actobj = bpy.context.view_layer.objects.active
-        if self == "loc":
-            for obj in bpy.context.selected_objects:
-                if xyz == "x":
-                    obj.matrix_world.translation[0] = actobj.matrix_world.translation[0]
-                if xyz == "y":
-                    obj.matrix_world.translation[1] = actobj.matrix_world.translation[1]
-                if xyz == "z":
-                    obj.matrix_world.translation[2] = actobj.matrix_world.translation[2]
-        if self == "rota":
-            for obj in bpy.context.selected_objects:
-                if xyz == "x":
-                    obj.rotation_euler[0] = actobj.rotation_euler[0]
-                if xyz == "y":
-                    obj.rotation_euler[1] = actobj.rotation_euler[1]
-                if xyz == "z":
-                    obj.rotation_euler[2] = actobj.rotation_euler[2]
-        if self == "size":
-            for obj in bpy.context.selected_objects:
-                if xyz == "x":
-                    obj.scale[0] = actobj.scale[0]
-                if xyz == "y":
-                    obj.scale[1] = actobj.scale[1]
-                if xyz == "z":
-                    obj.scale[2] = actobj.scale[2]
-    elif bpy.context.object.mode == 'POSE':
-        actbones = bpy.context.active_pose_bone
-        if self == "loc":
-            for bones in bpy.context.selected_pose_bones:
-                if xyz == "x":
-                    bones.location[0] = actbones.location[0]
-                if xyz == "y":
-                    bones.location[1] = actbones.location[1]
-                if xyz == "z":
-                    bones.location[2] = actbones.location[2]
-        if self == "rota":
-            for bones in bpy.context.selected_pose_bones:
-                if xyz == "x":
-                    bones.rotation_euler[0] = actbones.rotation_euler[0]
-                if xyz == "y":
-                    bones.rotation_euler[1] = actbones.rotation_euler[1]
-                if xyz == "z":
-                    bones.rotation_euler[2] = actbones.rotation_euler[2]
-        if self == "size":
-            for bones in bpy.context.selected_pose_bones:
-                if xyz == "x":
-                    bones.scale[0] = actbones.scale[0]
-                if xyz == "y":
-                    bones.scale[1] = actbones.scale[1]
-                if xyz == "z":
-                    bones.scale[2] = actbones.scale[2]
-
+    
 def update_mat_fake_use(self, context):
     if self.mat_fake_use == True:
         for mat in bpy.data.materials:

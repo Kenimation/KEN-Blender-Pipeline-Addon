@@ -19,7 +19,6 @@
 
 import bpy
 from bpy.props import *
-import rna_keymap_ui
 
 
 ################################################

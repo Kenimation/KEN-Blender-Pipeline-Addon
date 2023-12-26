@@ -1,5 +1,6 @@
 import bpy
 import os
+import rna_keymap_ui
 
 from bpy.props import (StringProperty,
                         EnumProperty,
@@ -68,19 +69,21 @@ def add_hotkey():
 	kc = wm.keyconfigs.addon
 
 	if kc:
-		if bpy.app.version >= (3,2,0):
-			mouse_key = "LEFTMOUSE"
-		else:
-			mouse_key = "EVT_TWEAK_L"
-
 		################################################
 		km = kc.keymaps.new(name='UV Editor', space_type='EMPTY')
-		kmi = km.keymap_items.new('uvdrag.toolkit_quick_drag_island', mouse_key, 'ANY', alt=True)
+		kmi = km.keymap_items.new('uvdrag.toolkit_quick_drag_island', 'LEFTMOUSE', 'ANY', alt=True)
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 		################################################
-		km = kc.keymaps.new(name='UV Editor', space_type='EMPTY')
-		kmi = km.keymap_items.new('uvdrag.toolkit_quick_drag_rotate_island', mouse_key, 'ANY', ctrl=True, alt=True)
+		kmi = km.keymap_items.new('uvdrag.toolkit_quick_drag_rotate_island', 'LEFTMOUSE', 'ANY', ctrl=True, alt=True)
+		kmi.active = True
+		addon_keymaps.append((km, kmi))
+
+		km = kc.keymaps.new(name='Dopesheet', space_type='DOPESHEET_EDITOR')
+		kmi = km.keymap_items.new('offset.selected_keyframes', 'R', 'PRESS', alt=True)
+		kmi.active = True
+		addon_keymaps.append((km, kmi))
+		kmi = km.keymap_items.new('object.offset_keyframes_similar_bones', 'R', 'PRESS', shift=True)
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
@@ -92,15 +95,20 @@ def get_hotkey_entry_item(km, kmi_name, kmi_value):
 	return None
 
 def remove_hotkey():
-	wm = bpy.context.window_manager
-	kc = wm.keyconfigs.addon
-	# 複数のキーマップを登録する場合、各キーマップの登録場所の記入が必要
-	km = kc.keymaps['UV Editor']
+    wm = bpy.context.window_manager
+    kc = wm.keyconfigs.addon
 
-	for km, kmi in addon_keymaps:
-		km.keymap_items.remove(kmi)
-		wm.keyconfigs.addon.keymaps.remove(km)
-	addon_keymaps.clear()
+    keymaps_to_remove = ['Dopesheet', 'UV Editor']
+
+    for keymap_name in keymaps_to_remove:
+        keymap = kc.keymaps.get(keymap_name)
+        if keymap:
+            keymap_items = [kmi for kmi in keymap.keymap_items if kmi in addon_keymaps]
+            for kmi in keymap_items:
+                keymap.keymap_items.remove(kmi)
+            kc.keymaps.remove(keymap)
+
+    addon_keymaps.clear()
 
 class UVDRAG_OT_AddHotkey(bpy.types.Operator):
 	''' Add hotkey entry '''
@@ -227,7 +235,7 @@ class AddonPref(bpy.types.AddonPreferences):
     flip_bone : bpy.props.BoolProperty(default=True, update = assetsDefs.write_flip_bone)
     view : bpy.props.BoolProperty(default=True, update = write_view)
     advanced_option : bpy.props.BoolProperty(default=True, update = write_advanced_option)
-    tools : bpy.props.BoolProperty(default=False, update = write_tools)
+    tools : bpy.props.BoolProperty(default=True, update = write_tools)
 
     rig_scale : bpy.props.FloatProperty(
 		name='Rig Scale',
@@ -375,26 +383,44 @@ class AddonPref(bpy.types.AddonPreferences):
             col.separator()
             wm = context.window_manager
             kc = wm.keyconfigs.user
+            
+            dopesheet_reg_location = "Dopesheet"
+            km = kc.keymaps[dopesheet_reg_location]
+            kmi = get_hotkey_entry_item(km, 'offset.selected_keyframes', '')  # ← オペレーターと、プロパティを設定するs
+            col.label(text=dopesheet_reg_location)
+            if kmi:
+                col.context_pointer_set("keymap", km)
+                rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
+                col.separator()
+            else:
+                col.label(text="No hotkey entry found")
+                col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
+            kmi = get_hotkey_entry_item(km, 'object.offset_keyframes_similar_bones', '')  # ← オペレーターと、プロパティを設定するs
+            if kmi:
+                col.context_pointer_set("keymap", km)
+                rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
+                col.separator()
+            else:
+                col.label(text="No hotkey entry found")
+                col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
 
             #########################################
-            reg_location = "UV Editor" # ← 登録場所を設定する
-            km = kc.keymaps[reg_location]
-            kmi = get_hotkey_entry_item(km, 'uvdrag.toolkit_quick_drag_island', '')  # ← オペレーターと、プロパティを設定する
+            uv_reg_location = "UV Editor" # ← 登録場所を設定する
+            km = kc.keymaps[uv_reg_location]
+            kmi = get_hotkey_entry_item(km, 'uvdrag.toolkit_quick_drag_island', '')  # ← オペレーターと、プロパティを設定するs
+            col.label(text=uv_reg_location)
             if kmi:
-                col.label(text="\"" +  reg_location + "\"")
                 col.context_pointer_set("keymap", km)
-                uv_drag.rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
+                rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
                 col.separator()
             else:
                 col.label(text="No hotkey entry found")
                 col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
             #########################################
-            km = kc.keymaps[reg_location]
             kmi = get_hotkey_entry_item(km, 'uvdrag.toolkit_quick_drag_rotate_island', '')  # ← オペレーターと、プロパティを設定する
             if kmi:
-                col.label(text="\"" +  reg_location + "\"")
                 col.context_pointer_set("keymap", km)
-                uv_drag.rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
+                rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
                 col.separator()
             else:
                 col.label(text="No hotkey entry found")
@@ -419,13 +445,14 @@ class AddonPref(bpy.types.AddonPreferences):
             row = box.row()
             row.operator("wm.url_open", text="Kenimation Discord Server", icon_value = discord_icon.icon_id).url = "https://discord.gg/zgksz7E"
 
-            box = layout.box()
-            box.label(text = "Original Addons / Rig")
-            box.label(text = "BlueEvilGFXs")
-            row = box.row()
-            row.scale_y = 1.25
-            row.operator("wm.url_open", text="BlueEvilGFXs", icon_value = youtube_icon.icon_id).url = "https://www.youtube.com/channel/UCKPgR4jjSDRTqWGAd2IOL5w"
-            row.operator("wm.url_open", text="Thomas Animations", icon_value = youtube_icon.icon_id).url = "https://www.youtube.com/@ThomasAnimations"
+            if all(item.registered_name in AnimeProperties.registered_name for item in self.registered_name):
+                box = layout.box()
+                box.label(text = "Original Addons / Rig")
+                box.label(text = "BlueEvilGFXs")
+                row = box.row()
+                row.scale_y = 1.25
+                row.operator("wm.url_open", text="BlueEvilGFXs", icon_value = youtube_icon.icon_id).url = "https://www.youtube.com/channel/UCKPgR4jjSDRTqWGAd2IOL5w"
+                row.operator("wm.url_open", text="Thomas Animations", icon_value = youtube_icon.icon_id).url = "https://www.youtube.com/@ThomasAnimations"
 
             box = layout.box()
             box.label(text = "Functions")
@@ -461,6 +488,7 @@ def register():
         register_class(cls)
         
     add_hotkey()
+
     icon = icons.icons("icons")
     pcoll = icon.getColl()
     icon.load(pcoll)
@@ -468,11 +496,11 @@ def register():
 
   
 def unregister():
-    
     remove_hotkey()
     from bpy.utils import unregister_class
     for cls in reversed(classes):
         unregister_class(cls)
+    
     for km, kmi in addon_keymaps:
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
