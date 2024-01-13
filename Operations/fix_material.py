@@ -352,20 +352,21 @@ class New_Material(bpy.types.Operator):
 
     def execute(self, context):
         ob = context.active_object
-        # Get material
-        mat = bpy.data.materials.new(name="Material")
-        mat.use_nodes = True
+        if ob.type == "MESH":
+            # Get material
+            mat = bpy.data.materials.new(name="Material")
+            mat.use_nodes = True
 
-        # Assign it to object
-        if ob.data.materials:
-            # assign to 1st material slot
-            slot = context.object.active_material_index
-            ob.data.materials[slot] = mat
-        else:
-            # no slots
-            ob.data.materials.append(mat)
-        fixmaterial(mat)
-        return {"FINISHED"}
+            # Assign it to object
+            if ob.data.materials:
+                # assign to 1st material slot
+                slot = context.object.active_material_index
+                ob.data.materials[slot] = mat
+            else:
+                # no slots
+                ob.data.materials.append(mat)
+            fixmaterial(mat)
+            return {"FINISHED"}
 
 class Fix_Material(bpy.types.Operator):
     bl_idname = "fix.material"
@@ -414,27 +415,28 @@ class Fix_Material(bpy.types.Operator):
         if self.type == "obj":
             for obj in context.selected_objects:
                 context.view_layer.objects.active = obj
-                actmat = context.object.active_material_index
-                matnum = len(context.active_object.data.materials)
-                for count in range(matnum):
-                    context.object.active_material_index = count
-                    mat = obj.active_material
-                    try:
-                        fixmaterial(mat)
-                        if self.ramp == True:
-                            fixRamp(mat)
-                        if self.bump == True:
-                            fixBump(mat)
-                        if self.nomral == True:
-                            fixnormal(mat)
-                        if self.SSS == True:
-                            fixSSS(mat, 1)
-                        else:
-                            fixSSS(mat, 0)
-                    except:
-                        continue
-                        
-                context.object.active_material_index = actmat
+                if obj.type == "MESH":
+                    actmat = context.object.active_material_index
+                    matnum = len(context.active_object.data.materials)
+                    for count in range(matnum):
+                        context.object.active_material_index = count
+                        mat = obj.active_material
+                        try:
+                            fixmaterial(mat)
+                            if self.ramp == True:
+                                fixRamp(mat)
+                            if self.bump == True:
+                                fixBump(mat)
+                            if self.nomral == True:
+                                fixnormal(mat)
+                            if self.SSS == True:
+                                fixSSS(mat, 1)
+                            else:
+                                fixSSS(mat, 0)
+                        except:
+                            continue
+                                
+                        context.object.active_material_index = actmat
 
         if self.type == "index":
             mat = mat_data
@@ -469,7 +471,8 @@ class Fix_Material(bpy.types.Operator):
         return {'FINISHED'}
     
 def menu_fixmaterial(self, context):
-    self.layout.operator("fix.material", text = "Fix Material")
+    if context.object.type == "MESH":
+        self.layout.operator("fix.material", text = "Fix Material")
 
 classes = (
             Add_Image,
