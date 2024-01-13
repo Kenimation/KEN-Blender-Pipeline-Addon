@@ -279,24 +279,6 @@ bpy.types.Scene.VertexGroupMiiror = bpy.props.BoolProperty(
     default= False
 )
 
-bpy.types.Scene.BoneTool = bpy.props.BoolProperty(
-    name="Bone Tool",
-    description="Enable Bone Tool",
-    default= False
-)
-
-bpy.types.Scene.Track_Prefix = bpy.props.StringProperty(
-    name="Track Prefix",
-    description="Track Prefix",
-    default= "Track_",
-)
-
-bpy.types.Scene.Rig_Prop = bpy.props.StringProperty(
-    name="Rig Properties",
-    description="Rig Properties",
-    default= "Prop",
-)
-
 bpy.types.Scene.VertexGroupMenu = EnumProperty(
     default='one',
     items=[('one', 'Custom', ''),
@@ -342,13 +324,6 @@ bpy.types.Scene.Object_Type = EnumProperty(
            ('EMPTY', 'Empty', ''),
             ('LIGHT', 'Light', ''),
             ('CAMERA', 'Camera', ''),
-            ])
-
-bpy.types.Scene.Constraints_Type = EnumProperty(
-    default='Damped Track',
-    items=[('Damped Track', 'Damped Track', ''),
-           ('Child Of', 'Child Of', ''),
-           ('Copy Rotation', 'Copy Rotation', ''),
             ])
 
 bpy.types.Scene.boneName = StringProperty()

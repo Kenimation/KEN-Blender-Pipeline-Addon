@@ -24,7 +24,7 @@ bpy.types.Object.EyelidsHardShadow = IntProperty(
     min=0, max=3, default=0, name = "Eyelids Hard Shadow")
 
 bpy.types.Object.EyelidsShadow = IntProperty(
-    min=0, max=3, default=1, name = "Eyelids Shadow")
+    min=0, max=4, default=1, name = "Eyelids Shadow")
 
 bpy.types.Object.EyeBottomShadow = BoolProperty(
     default=True, name = "Eye Bottom")
@@ -32,8 +32,8 @@ bpy.types.Object.EyeBottomShadow = BoolProperty(
 bpy.types.Object.FingerShadow = BoolProperty(
     default=False, name = "Finger")
 
-bpy.types.Object.BodyShadow = BoolProperty(
-    default=False, name = "Body")
+bpy.types.Object.NeckShadow = BoolProperty(
+    default=False, name = "Neck")
 
 bpy.types.Object.Sub_ID_Lock = BoolProperty(
     default=False)
@@ -105,12 +105,6 @@ bpy.types.Object.Blush = BoolProperty(
 bpy.types.Object.MeshSelect = BoolProperty(
     default=True, name = "Mesh Select", update=AnimeDefs.update_MeshSelect)
 
-bpy.types.Object.LineArtMesh = BoolProperty(
-    default=True, name = "LineArt", update=AnimeDefs.update_LineArtMesh)
-
-bpy.types.Object.LineArt = BoolProperty(
-    default=True, name = "LineArt", update=AnimeDefs.update_LineArt)
-
 bpy.types.Object.HairMaterial = BoolProperty(
     default=True, name = "Hair Shader")
 
@@ -144,6 +138,9 @@ bpy.types.Object.DirtLine = BoolProperty(
 bpy.types.Object.FingerLine = BoolProperty(
     default=False, name = "Finger Line")
 
+bpy.types.Object.BandedLine = BoolProperty(
+    default=True, name = "Banded Cloth")
+
 bpy.types.Object.ClothLine = BoolProperty(
     default=True, name = "Cloth Line")
 
@@ -154,7 +151,7 @@ bpy.types.Object.HairLine = BoolProperty(
     default=True, name = "Hair Line")
 
 bpy.types.Object.DetailLine = BoolProperty(
-    default=True, name = "Detail Line", update=AnimeDefs.update_DetailLine)
+    default=True, name = "Detail Line")
 
 bpy.types.Object.MadLine = BoolProperty(
     default=True, name = "Mad Line")
@@ -171,6 +168,12 @@ bpy.types.Object.NoseLine = BoolProperty(
 bpy.types.Object.FaceLine = BoolProperty(
     default=True, name = "Face Line")
 
+bpy.types.Object.LineArtMesh = BoolProperty(
+    default=True, name = "LineArt", update=AnimeDefs.update_LineArtMesh)
+
+bpy.types.Object.LineArt = BoolProperty(
+    default=True, name = "LineArt", update=AnimeDefs.update_LineArt)
+
 bpy.types.Object.NoseType = IntProperty(
     min=1, max=3, default=1, name = "Nose Type")
 
@@ -184,7 +187,7 @@ bpy.types.Object.PinkLineArt = IntProperty(
     min=1, max=10, default=1, name = "Thickness")
 
 bpy.types.Object.EyelashType = IntProperty(
-    min=1, max=4, default=2, name = "Eyelash Type")
+    min=1, max=4, default=1, name = "Eyelash Type")
 
 bpy.types.Object.EyebrowsPos = FloatProperty(
     min=0.1, max=2, default=1, name = "Eyebrows Position")
@@ -248,9 +251,6 @@ bpy.types.Object.LegMuscle = FloatProperty(
 
 bpy.types.Object.FootSize = FloatProperty(
     min=0.5, max=2, default=1, name = "Foot Length")
-
-bpy.types.Object.PupilSize = FloatProperty(
-    min=0.2, max=1.5, default=1, name = "Pupil Size", update = AnimeDefs.update_PupilSize)
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #                  Bool Property
@@ -354,20 +354,18 @@ bpy.types.Object.SetupClasses = EnumProperty(
             ('Shadow', 'Shadow', ''),
             ])
 
+bpy.types.Object.NoseLineType = EnumProperty(
+    default='Straight',
+    items=[('Straight', 'Straight', ''),
+            ('Slash', 'Slash', ''),
+            ])
+
 bpy.types.Object.NoseShadow = EnumProperty(
     default='one',
     items=[('one', 'None', ''),
             ('two', 'Right', ''),
             ('three', 'Left', ''),
             ])
-
-bpy.types.Object.AnimeEyeType = EnumProperty(
-    default='three',
-    items=[('one', 'LD', ''),
-            ('two', 'HD', ''),
-            ('three', 'Auto', ''),
-            ],
-        update=AnimeDefs.update_AnimeEyeType)
 
 bpy.types.Object.SubShadow = EnumProperty(
     default='one',

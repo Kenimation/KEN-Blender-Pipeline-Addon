@@ -66,11 +66,153 @@ class Append_TheAnimeRigKENFemale(bpy.types.Operator):
         self.report({'INFO'}, "KEN Anime Rig has been appended! | Scene Color Space set to Standard")
         return {'FINISHED'}
 
+class Anime_BakeLineArt(bpy.types.Operator):
+    bl_idname = "anime.bake_lineart_all"
+    bl_label = "Bake All LineArt"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        start = context.scene.frame_start
+        end = context.scene.frame_end
+
+        scene = context.scene
+
+        bpy.ops.wm.console_toggle()
+
+        # Get all the markers in the scene
+        markers = scene.timeline_markers
+
+        # Iterate over the markers
+        camera_mark_list = []
+
+        # Iterate over the markers
+        for marker in markers:
+            if marker.camera:
+                camera_mark_list.append(marker.frame)
+
+        camera_mark_list.append(end)
+
+        bake_list = [(camera_mark_list[i], camera_mark_list[i+1]) for i in range(len(camera_mark_list)-1)]
+
+        print("Baking List:" + str(bake_list))
+
+        for index, list in enumerate(bake_list):
+            start_bake, end_bake = bake_list[index]
+            print("Start Baking LineArt: " + "Start " + str(start_bake) + "frames" + " End " + str(end_bake - 1) + "frames")
+            print("LineArt Baking...")
+            context.scene.frame_start = start_bake
+            context.scene.frame_end = end_bake - 1
+            bpy.ops.object.lineart_bake_strokes_all()
+            print("Finish Baking LineArt: " + "Start " + str(start_bake) + "frames" + " End " + str(end_bake - 1) + "frames")
+
+        bpy.ops.wm.console_toggle()
+
+        context.scene.frame_start = start
+        context.scene.frame_end = end
+
+        self.report({'INFO'}, "Render LineArt Baking!")
+        
+        return {'FINISHED'}
+
+class Anime_SnapRender(bpy.types.Operator):
+    bl_idname = "render.anime_snap"
+    bl_label = "Render Anime Snap"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        original_frame = context.scene.frame_current
+        output_path = context.scene.render.filepath
+        start = context.scene.frame_start
+        end = context.scene.frame_end
+        frameRate = context.scene.render.fps
+        colorspace = context.scene.sequencer_colorspace_settings.name
+        frames = []
+
+        bpy.ops.wm.console_toggle()
+
+        bpy.ops.render.view_show('INVOKE_DEFAULT')
+
+        markers = context.scene.timeline_markers
+        for marker in markers:
+            frames.append(marker.frame)
+
+        for obj in context.scene.objects:
+            if obj.type != 'GPENCIL':
+                try:
+                    for fcurve in obj.animation_data.action.fcurves:
+                        for keyframe_point in fcurve.keyframe_points:
+                            x, y = keyframe_point.co
+                            if x >= start and x <= end and x not in frames:
+                                frames.append(int(x))
+                except:
+                    continue
+
+        frames.append(start)
+        frames.append(end)
+        frames = list(set(frames))
+        frames = sorted(frames)
+
+        directory, filename = os.path.split(output_path)
+        output_directory = directory.replace("\\\\", "\\")
+        output_file = os.path.join(output_directory, filename + "_FrameSheet" + '.txt')
+        
+        current_frame_list = []
+
+        for index, frame in enumerate(frames):
+            bpy.context.scene.frame_current = frame
+            order_number = index + 1
+            self.report({'INFO'}, "Render Frame " +"%04d" % order_number + " | " + "F" + "%04d" % frame)
+            rendername = filename + "_" + "%04d" % order_number
+            bpy.context.scene.render.filepath = os.path.join(directory, rendername)
+            bpy.ops.render.render(write_still=True)
+            print("Render Finish: " + str(frame) + "frames")
+            current_frame_list.append(frame)
+            with open(output_file, 'w') as file:
+                file.write("- " + filename + " Render Frame Sheet -" + '\n')
+                file.write("Color Space: " + str(colorspace) + '\n')
+                file.write("Frame Rate: " + str(frameRate) + '\n')
+                file.write("Total Frames: " + str(len(current_frame_list)) + "/" + str(len(frames)) + '\n')
+                file.write(str(current_frame_list) + '\n')
+
+        with open(output_file, 'w') as file:
+            file.write("- " + filename + " Render Frame Sheet -" + '\n')
+            file.write("Color Space: " + str(colorspace) + '\n')
+            file.write("Frame Rate: " + str(frameRate) + '\n')
+            file.write("Total Frames: " + str(len(current_frame_list)) + '\n')
+            file.write(str(current_frame_list) + '\n')
+
+        bpy.context.scene.frame_current = original_frame
+        bpy.context.scene.render.filepath = output_path
+
+        bpy.ops.wm.console_toggle()
+        
+        self.report({'INFO'}, "Render Finished! | File:" + str(output_path))
+        
+        return {'FINISHED'}
+
+class Anime_SnapRender_Batch(bpy.types.Operator):
+    bl_idname = "render.anime_snap_batch"
+    bl_label = "Batch Render Anime Snap"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        project_files = [
+            "/path/to/project1.blend",
+            "/path/to/project2.blend",
+            "/path/to/project3.blend",
+            # Add more project file paths as needed
+        ]
+        for project_file in project_files:
+            bpy.ops.wm.open_mainfile(filepath=project_file)
+            bpy.ops.render.anime_snap()
+        return {'FINISHED'}
 
 classes = (
             Append_TheAnimeRigKENFemale,
+            Anime_BakeLineArt,
+            Anime_SnapRender,
+            Anime_SnapRender_Batch,
           )
-          
 
 register, unregister = bpy.utils.register_classes_factory(classes)
 

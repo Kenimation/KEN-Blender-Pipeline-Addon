@@ -9,8 +9,8 @@ from bpy.props import (BoolProperty,
 import os
 from . import AnimeDefs
 
-AdditionList = ['Rossweisse', 'Warrior']
-ArmorList = ['Rossweisse', 'Warrior']
+AdditionList = ['Rossweisse', 'Warrior', "Valkyrie"]
+ArmorList = ['Rossweisse', 'Warrior', "Valkyrie"]
 
 def update_Simulation(self, context):
     rig = bpy.context.active_object
@@ -63,6 +63,12 @@ bpy.types.Object.RossweisseType = EnumProperty(
     default='two',
     items=[('one', 'Short', ''),
             ('two', 'Long', ''),
+            ('three', 'Armor', ''),
+            ])
+
+bpy.types.Object.ArmorType = EnumProperty(
+    default='two',
+    items=[('one', 'Short', ''),
             ('two', 'Armor', ''),
             ])
 
@@ -190,3 +196,33 @@ def drawrigAddition(self, context):
             row.operator("ptcache.bake_all", text = "Bake All Dynamics").bake=True
             row.operator("ptcache.free_bake_all", text = "Delete All Bakes")
 
+    if rig.Sub_ID == 'Valkyrie':
+        row = box.row()
+        row.label(text = "Character Type:")
+        row = box.row()
+        row.prop(rig, "ArmorType", expand = True)
+        row = box.row()
+        row.label(text = "Simulation:")
+        row = box.row()
+        row.prop(rig, "ShowSimulation", icon = "MOD_CLOTH", toggle = True)
+        if rig.ShowSimulation == True:
+            row = box.row()
+            row.prop(rig, "SimulationQuality")
+            row.prop(rig, "SimulationSpeed")
+            row = box.row()
+            row.prop(rig, "SimulationStart")
+            row.prop(rig, "SimulationEnd")
+            row = box.row()
+            row.label(text = "Collision:")
+            row = box.row()
+            row.prop(rig, "SimulationCollision", toggle = True)
+            row.prop(rig, "SimulationSelfCollision", toggle = True)
+            if rig.SimulationCollision == True:
+                row = box.row()
+                row.prop(rig, "SimulationCollisionQuality")
+                row.prop(rig, "SimulationCollisionDistance")
+            row = box.row()
+            row.label(text = "Bake:")
+            row = box.row()
+            row.operator("ptcache.bake_all", text = "Bake All Dynamics").bake=True
+            row.operator("ptcache.free_bake_all", text = "Delete All Bakes")

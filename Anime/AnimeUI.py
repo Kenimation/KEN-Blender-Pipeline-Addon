@@ -30,7 +30,7 @@ def draw_ken_animerig(self, context, obj):
                 rig_get_class = scene.myanimerigposeAddition
             else:
                 rig_class = "myanimerigpose"
-                rig_get_class = scene.myanimerigpose
+                rig_get_class = scene.myanimerigpose           
 
         if scene.ken_rig == True:
             layout = self.layout
@@ -43,6 +43,7 @@ def draw_ken_animerig(self, context, obj):
                 icon = "RESTRICT_SELECT_ON"
             row.prop(rig, "MeshSelect", text = "", icon = icon, emboss = False)
             row.prop(scene, "object_properties", icon = "ARMATURE_DATA", text = "")
+            row.operator("render.anime_snap", text = "", icon = "RESTRICT_RENDER_OFF")
             for item in addon_prefs.registered_name:
                 if  item.registered_name == AnimeProperties.registered_name[1]:
                     if rig.mode == 'EDIT':
@@ -172,7 +173,7 @@ def drawrigsetup(self, context):
             row = box.row()
             row.label(text = "Bake LineArt")
             row = box.row()
-            row.operator("object.lineart_bake_strokes_all", text="Bake All Lineart")
+            row.operator("anime.bake_lineart_all", text="Bake All Lineart")
             row.operator("object.lineart_clear_all", text="Clear All Lineart")
         row = box.row()
         row.prop(mainline, "color", text = "Main Line")
@@ -182,6 +183,24 @@ def drawrigsetup(self, context):
         row.prop(rig, "PinkLineArt")
         row = box.row()
         row.prop(skinline, "color", text = "Skin Line")
+        if rig.Facial == 'two':
+            row = box.row()
+            row.label(text = "Facial LineArt:")
+            row = box.row()
+            row.prop(rig, "FaceLine", toggle = True)
+            row.prop(rig, "FaceLineType")
+            row = box.row()
+            row.prop(rig, "NoseLine", toggle = True)
+            if rig.NoseLine == True:
+                row.prop(rig, "NoseLineType", expand = True)
+            row = box.row()
+            row.prop(rig, "EyebrowLine", toggle = True)
+            row = box.row()
+            row.prop(rig, "LipLine", toggle = True)
+            row = box.row()
+            row.prop(rig, "MadLine", toggle = True)
+            row = box.row()
+            row.prop(rig, "DirtLine", toggle = True)
         row = box.row()
         row.label(text = "Mesh LineArt:")
         row = box.row()
@@ -194,24 +213,9 @@ def drawrigsetup(self, context):
             if rig.Sub_ID in AnimeExtraProperties.ArmorList:
                 row = box.row()
                 row.prop(rig, "ClothLine", toggle = True)
+                row.prop(rig, "BandedLine", toggle = True)
                 row = box.row()
                 row.prop(rig, "ArmorLine", toggle = True)
-        if rig.Facial == 'two':
-            row = box.row()
-            row.label(text = "Facial LineArt:")
-            row = box.row()
-            row.prop(rig, "FaceLine", toggle = True)
-            row.prop(rig, "FaceLineType")
-            row = box.row()
-            row.prop(rig, "NoseLine", toggle = True)
-            row = box.row()
-            row.prop(rig, "EyebrowLine", toggle = True)
-            row = box.row()
-            row.prop(rig, "LipLine", toggle = True)
-            row = box.row()
-            row.prop(rig, "MadLine", toggle = True)
-            row = box.row()
-            row.prop(rig, "DirtLine", toggle = True)
     if rig.SetupClasses == "Shadow":
         row = box.row()
         row.label(text = "Cast Shadow(Turn Off before bake LineArt):")
@@ -221,7 +225,7 @@ def drawrigsetup(self, context):
             row = box.row()
             row.label(text = "Mesh:")
             row = box.row()
-            row.prop(rig, "BodyShadow", toggle = True)
+            row.prop(rig, "NeckShadow", toggle = True)
             row = box.row()
             row.prop(rig, "FingerShadow", toggle = True)
             row = box.row()
@@ -583,8 +587,8 @@ def drawrigmaterial(box, context):
         row = eyelist.row()
         row.label(text = "Texture Type:")
         row = eyelist.row()
-        row.prop(rig, "AnimeEyeType", expand = True)
-        if rig.AnimeEyeType != "one":
+        row.prop(eyes['EyesType'], "default_value", text = "Eyes Type", slider = True)
+        if eyes['EyesType'].default_value > 0:
             row = eyelist.row()
             row.label(text = "Texture:")
             row = eyelist.row()
@@ -603,7 +607,14 @@ def drawrigposing(self, context):
     rig = context.active_object
     box = layout.box().column()
     scene =  context.scene
-    box.label(text = "Posing:")
+    row = box.row()
+    row.label(text = "Posing:")
+    if context.space_data.overlay.show_bones == True:
+        icon = "HIDE_OFF"
+    else:
+        icon = "HIDE_ON"
+    row.prop(context.space_data.overlay, "show_bones", icon = icon, emboss=False , text = "")
+
     box.operator("screen.region_toggle", text = "Toggle Pose Library", icon = "ASSET_MANAGER").region_type='ASSET_SHELF'
     box.prop(rig, "show_in_front", icon = "HIDE_OFF", text = "Show Bone In front")
     if rig.BonesCollection == True:
@@ -710,8 +721,6 @@ def drawrigposing(self, context):
     row = box.row()
     row.label(text = "Head:")
     row = box.row()
-    row.prop(rig, "PupilSize", slider = True)
-    row = box.row()
     row.prop(rig, "SmartEye", toggle = True)
     row = box.row()
     row.label(text = "Quick Parent:")
@@ -734,6 +743,15 @@ def menu_func_anime(self, context):
     if addon_prefs.registered_name:
         if all(item.registered_name in AnimeProperties.registered_name for item in addon_prefs.registered_name):
             self.layout.menu("Anime_RIG_Menu", text = "KEN Anime RIG Presnt", icon_value = ken_icon.icon_id)
+
+def draw_anime_snap(self, context):
+    pcoll = preview_collections["main"]
+    ken_icon = pcoll["Dual"]
+    addon_prefs = addonPreferences.getAddonPreferences(context)
+    if addon_prefs.registered_name:
+        for item in addon_prefs.registered_name:
+            if item.registered_name == AnimeProperties.registered_name[1]:
+                self.layout.operator("render.anime_snap", text = "Render Anime Snap Frame", icon_value = ken_icon.icon_id)
 
 class Anime_RIG_Menu(bpy.types.Menu):
     bl_idname = "Anime_RIG_Menu"
@@ -763,7 +781,7 @@ classes = (
             Anime_RIG_Menu,
           )
 
-def register(): 
+def register():
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
@@ -774,6 +792,7 @@ def register():
     preview_collections["main"] = pcoll
 
     bpy.types.VIEW3D_MT_add.append(menu_func_anime)
+    bpy.types.TOPBAR_MT_render.append(draw_anime_snap)
   
 def unregister():
     from bpy.utils import unregister_class
@@ -781,3 +800,4 @@ def unregister():
         unregister_class(cls)
     del bpy.types.PoseBone.extra_prop
     bpy.types.VIEW3D_MT_add.remove(menu_func_anime)
+    bpy.types.TOPBAR_MT_render.remove(draw_anime_snap)

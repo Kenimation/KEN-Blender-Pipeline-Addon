@@ -76,26 +76,6 @@ def update_LineArtMesh(self, context):
                     child_collection.hide_render = False
                 break
 
-def update_DetailLine(self, context):
-    rig = context.active_object
-    for collection in bpy.data.collections:
-            if rig.name in collection.objects:
-                parent_collection = collection
-                break
-
-    if parent_collection is not None:
-        for child_collection in parent_collection.children:
-            if child_collection.name.split(".", 1)[0] == "LineArt_Mesh":
-                for mesh_collection in child_collection.children:
-                    if mesh_collection.name.split(".", 1)[0] == "Detail_Line":
-                        if self.DetailLine == False:
-                            mesh_collection.hide_viewport = True
-                            mesh_collection.hide_render = True
-                        if self.DetailLine == True:
-                            mesh_collection.hide_viewport = False
-                            mesh_collection.hide_render = False
-                        break
-
 def update_MixHue(self, context):
     rig = context.active_object
     material_obj = rig.children[0]
@@ -218,25 +198,6 @@ def update_SmoothShadow(self, context):
     material_obj.material_slots[1].material.node_tree.nodes['Base Shader'].inputs[inputs].default_value = value
     material_obj.material_slots[2].material.node_tree.nodes['Metal Shader'].inputs[inputs].default_value = value
     material_obj.material_slots[3].material.node_tree.nodes['Hair Shader'].inputs[inputs].default_value = value
-
-def update_AnimeEyeType(self, context):
-    rig = context.active_object
-    material_obj = rig.children[0]
-    if self.AnimeEyeType == "one":
-        material_obj.material_slots[4].material.node_tree.nodes['Eyes Shader'].inputs['HD'].default_value = 0
-        material_obj.material_slots[4].material.node_tree.nodes['Eyes Shader'].inputs['Auto HD'].default_value = 0
-    elif self.AnimeEyeType == "two":
-        material_obj.material_slots[4].material.node_tree.nodes['Eyes Shader'].inputs['HD'].default_value = 1
-        material_obj.material_slots[4].material.node_tree.nodes['Eyes Shader'].inputs['Auto HD'].default_value = 0
-    elif self.AnimeEyeType == "three":
-        material_obj.material_slots[4].material.node_tree.nodes['Eyes Shader'].inputs['HD'].default_value = 0
-        material_obj.material_slots[4].material.node_tree.nodes['Eyes Shader'].inputs['Auto HD'].default_value = 1
-
-def update_PupilSize(self, context):
-    rig = context.active_object
-    value = rig.get('PupilSize')
-    material_obj = rig.children[0]
-    material_obj.material_slots[4].material.node_tree.nodes['Eyes Shader'].inputs['Pupils Size'].default_value = value
 
 def update_Main_Bone(self,context):
     rig = context.active_object

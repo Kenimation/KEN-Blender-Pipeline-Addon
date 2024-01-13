@@ -468,10 +468,24 @@ class Fix_Material(bpy.types.Operator):
                     continue
         return {'FINISHED'}
     
+def menu_fixmaterial(self, context):
+    self.layout.operator("fix.material", text = "Fix Material")
+
 classes = (
             Add_Image,
             New_Material,
             Fix_Material,
-          )        
+          )
 
-register, unregister = bpy.utils.register_classes_factory(classes)
+def register(): 
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(cls)
+    bpy.types.VIEW3D_MT_object_context_menu.append(menu_fixmaterial)
+  
+def unregister():
+    from bpy.utils import unregister_class
+    for cls in reversed(classes):
+        unregister_class(cls)
+    del bpy.types.PoseBone.extra_prop
+    bpy.types.VIEW3D_MT_object_context_menu.remove(menu_fixmaterial)

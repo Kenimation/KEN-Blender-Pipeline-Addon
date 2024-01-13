@@ -603,7 +603,6 @@ class Assets_UI(bpy.types.Panel):
         row.label(text = "Create by KEN", icon = 'RIGHTARROW')
         assetsDraw.drawheader(context, addon_prefs, row, obj)
         row.operator("open.addonprefsofaddon", icon = "SETTINGS", text = "")
-        row = box.row()
         addon_updater_ops.check_for_update_background(context)
         addon_updater_ops.update_notice_box_ui(self, context, row)
         box = layout.box()
@@ -647,7 +646,7 @@ class Assets_UI(bpy.types.Panel):
                     if all(item.registered_name in AnimeProperties.registered_name for item in addon_prefs.registered_name):
                         minecraftUI.draw_ken_mcrig(self, context, obj)
                 for item in addon_prefs.registered_name:
-                    if  item.registered_name == AnimeProperties.registered_name[1]:
+                    if item.registered_name == AnimeProperties.registered_name[1]:
                         AnimeUI.draw_ken_animerig(self, context, obj)
                 if obj.RIG_ID in AnimeProperties.kenriglist:
                     if scene.object_properties == True:
@@ -927,6 +926,10 @@ class Assets_UI(bpy.types.Panel):
             else:
                 row.operator("render.opengl", text = "Viewport Render", icon = "RENDER_STILL")
                 row.operator("render.opengl", text = "Viewport Animation", icon = "RENDER_ANIMATION").animation = True
+            for item in addon_prefs.registered_name:
+                if item.registered_name == AnimeProperties.registered_name[1]:
+                    ken_icon = pcoll["Dual"]
+                    row.operator("render.anime_snap", text = "", icon_value = ken_icon.icon_id)
             if scene.cycles.denoiser == 'OPTIX':
                 row = box.row()
                 row.operator("cycles.denoise_animation", text = "Optix Denoising Animation")

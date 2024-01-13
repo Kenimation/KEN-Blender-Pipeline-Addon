@@ -124,11 +124,6 @@ def draw_tools(scene, obj, self):
             if scene.BoneTool == True:
                 BoneTool = box.box()
                 row = BoneTool.row()
-                row.label(text = "Damped Track Loop")
-                row = BoneTool.row()
-                row.prop(scene, "Track_Prefix", text = "")
-                row.operator("add.dampedtrackloop", text = "Add")
-                row = BoneTool.row()
                 row.label(text = "Constraints Driver")
                 row = BoneTool.row()
                 row.prop(scene, "Constraints_Type", text = "")
@@ -136,6 +131,19 @@ def draw_tools(scene, obj, self):
                 row = BoneTool.row()
                 row.operator("add.constraintsdriver", text = "Add")
                 row.operator("remove.constraintsdriver", text = "Remove")
+                row = BoneTool.row()
+                row.label(text = "Damped Track Child")
+                row = BoneTool.row()
+                row.operator("add.dampedtrackchild", text = "Track Child")
+                row.prop(scene, "Damped_Track_Influence", slider = True)
+                row = BoneTool.row()
+                row.operator("add.copyrotationparent", text = "Copy Parent Rotation")
+                row.prop(scene, "Copy_Rotation_Influence", slider = True)
+                row = BoneTool.row()
+                row.label(text = "Damped Track Loop")
+                row = BoneTool.row()
+                row.prop(scene, "Track_Prefix", text = "")
+                row.operator("add.dampedtrackloop", text = "Add")
 
 def draw_edit(scene, box):
     if scene.object_properties == False:

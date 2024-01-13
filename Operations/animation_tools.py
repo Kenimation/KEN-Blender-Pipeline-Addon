@@ -658,6 +658,355 @@ class OBJECT_OT_clean_keyframes(bpy.types.Operator):
 
         return {'FINISHED'}
 
+class OBJECT_OT_step_selected_keyframes(bpy.types.Operator):
+    '''Offset Animated - Location, Rotation, Scale'''
+    bl_idname = "step.keyframes"
+    bl_label = "Set step Keyframes"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return (context.object is not None and
+                context.object.mode != 'EDIT' and
+                len(context.selected_objects) != 0)
+
+    def execute(self, context):
+        scene = context.scene
+        current_frame = context.scene.frame_current
+        selected_objects = context.selected_objects
+        start = context.scene.frame_start
+        end = context.scene.frame_end
+
+        if scene.SetKeyFramesList == "one":
+            step = 1
+        elif scene.SetKeyFramesList == "two":
+            step = 2
+        elif scene.SetKeyFramesList == "three":
+            step = 3
+        elif scene.SetKeyFramesList == "four":
+            step = 4
+
+        bpy.ops.wm.console_toggle()
+
+        def setkey(action, obj, frame):
+            bpy.context.scene.frame_set(frame)
+
+            data_paths_with_keyframes = []
+
+            if bpy.context.object.mode == 'POSE':
+                if bpy.context.object.type == "ARMATURE":
+                    for fcurve in action.fcurves:
+                        # Check if keyframes exist for the FCurve
+                        if fcurve.data_path.startswith(f'pose.bones["{obj.name}"]'):
+                            if fcurve.keyframe_points:
+                                for keyframe in fcurve.keyframe_points:
+                                    if keyframe.select_control_point:
+                                        data_paths_with_keyframes.append(fcurve.data_path)
+
+                    data_paths_with_keyframes = list(set(data_paths_with_keyframes))
+
+                    if data_paths_with_keyframes:
+                        for data_path in data_paths_with_keyframes:
+                            data_path = data_path.replace(f'pose.bones["{bone.name}"].', '')
+                            obj.keyframe_insert(data_path=data_path, frame=frame)
+
+                    else:      
+                        for fcurve in action.fcurves:                  
+                            if fcurve.data_path.startswith(f'pose.bones["{obj.name}"]'):
+                                if fcurve.keyframe_points:
+                                    data_paths_with_keyframes.append(fcurve.data_path)
+
+                        data_paths_with_keyframes = list(set(data_paths_with_keyframes))
+
+                        if data_paths_with_keyframes:
+                            for data_path in data_paths_with_keyframes:
+                                data_path = data_path.replace(f'pose.bones["{bone.name}"].', '')
+                                obj.keyframe_insert(data_path=data_path, frame=frame)
+
+            elif bpy.context.object.mode == "OBJECT":
+                # Iterate over the FCurves
+                for fcurve in action.fcurves:
+                    # Check if keyframes exist for the FCurve
+                    if fcurve.keyframe_points:
+                        for keyframe in fcurve.keyframe_points:
+                            if keyframe.select_control_point:
+                                data_paths_with_keyframes.append(fcurve.data_path)
+
+                data_paths_with_keyframes = list(set(data_paths_with_keyframes))
+
+                if data_paths_with_keyframes:
+                    for data_path in data_paths_with_keyframes:
+                        obj.keyframe_insert(data_path=data_path, frame=frame)
+
+                else:
+                    for fcurve in action.fcurves:
+                        if fcurve.keyframe_points:
+                            data_paths_with_keyframes.append(fcurve.data_path)
+
+                    data_paths_with_keyframes = list(set(data_paths_with_keyframes))
+
+                    if data_paths_with_keyframes:
+                        for data_path in data_paths_with_keyframes:
+                            obj.keyframe_insert(data_path=data_path, frame=frame)
+
+        if scene.SetKeyType == "one":
+            # Iterate through the selected objects
+            for obj in selected_objects:
+                if obj.mode == 'POSE':
+                    if obj.type == "ARMATURE":
+                        animation_data = obj.animation_data
+                        # Check if animation data exists
+                        if animation_data and animation_data.action:
+                            action = animation_data.action
+                            selected_bones = [bone for bone in obj.pose.bones if bone.bone.select]
+
+                            for bone in selected_bones:
+                                print("Set keyframes Bone: " + bone.name)
+
+                                selected_keyframes = set()
+                            
+                                for fcurve in action.fcurves:
+                                    if fcurve.data_path.startswith(f'pose.bones["{bone.name}"]'):
+                                        for keyframe in fcurve.keyframe_points:
+                                            if keyframe.select_control_point:
+                                                selected_keyframes.add(int(keyframe.co[0]))
+                                
+                                if selected_keyframes:
+                                    # Assuming you have two keyframes selected
+                                    start_frame = min(selected_keyframes)
+                                    end_frame = max(selected_keyframes)
+
+                                    # Set keyframes every two frames between the start and end frames
+                                    for frame in range(start_frame + step, end_frame, step):
+
+                                        setkey(action, bone, frame)
+
+                                else:
+                                    # Get the fcurves for the selected bone
+                                    for fcurve in action.fcurves:
+                                        if fcurve.data_path.startswith(f'pose.bones["{bone.name}"]'):
+                                            for keyframe in fcurve.keyframe_points:
+                                                selected_keyframes.add(int(keyframe.co[0]))
+                                                keyframe.select_control_point = True
+                                                keyframe.select_left_handle = True
+                                                keyframe.select_right_handle = True
+                                        
+                                    start_frame = min(selected_keyframes)
+                                    end_frame = max(selected_keyframes)
+
+                                    # Set keyframes every two frames between the start and end frames
+                                    for frame in range(start_frame + step, end_frame, step):
+
+                                        setkey(action, bone, frame)
+                                    
+                            for fcurve in obj.animation_data.action.fcurves:
+                                for keyframe in fcurve.keyframe_points:
+                                    if keyframe.select_control_point:
+                                        selected_keyframes.add(int(keyframe.co[0]))  
+
+                            max_value = max(selected_keyframes)  # Find the maximum value
+                            selected_keyframes.remove(max_value) 
+                                
+                            for fcurve in obj.animation_data.action.fcurves:
+                                for bone in selected_bones:
+                                    if fcurve.data_path.startswith(bone.path_from_id()):
+                                        for kf in fcurve.keyframe_points:
+                                            if int(kf.co[0]) in selected_keyframes:
+                                                kf.interpolation = 'CONSTANT'
+
+                elif obj.mode == "OBJECT":
+                    print("Set keyframes Object: " + obj.name)
+
+                    selected_keyframes = set()
+
+                    animation_data = obj.animation_data
+                    
+                    # Check if animation data exists
+                    if animation_data and animation_data.action:
+                        action = animation_data.action
+
+                        for fcurve in obj.animation_data.action.fcurves:
+                            for keyframe in fcurve.keyframe_points:
+                                if keyframe.select_control_point:
+                                    selected_keyframes.add(int(keyframe.co[0]))
+
+                        if selected_keyframes:
+                            # Assuming you have two keyframes selected
+                            start_frame = min(selected_keyframes)
+                            end_frame = max(selected_keyframes)
+
+                            # Set keyframes every two frames between the start and end frames
+                            for frame in range(start_frame + step, end_frame, step):
+
+                                setkey(action, obj, frame)
+
+                        else:
+                            # Get the fcurves for the selected bone
+                            for fcurve in obj.animation_data.action.fcurves:
+                                for keyframe in fcurve.keyframe_points:
+                                    selected_keyframes.add(int(keyframe.co[0]))
+                                    keyframe.select_control_point = True
+                                    keyframe.select_left_handle = True
+                                    keyframe.select_right_handle = True
+                                
+                            start_frame = min(selected_keyframes)
+                            end_frame = max(selected_keyframes)
+
+                            # Set keyframes every two frames between the start and end frames
+                            for frame in range(start_frame + step, end_frame, step):
+
+                                setkey(action, obj ,frame)
+                        
+                        for fcurve in obj.animation_data.action.fcurves:
+                            for keyframe in fcurve.keyframe_points:
+                                if keyframe.select_control_point:
+                                    selected_keyframes.add(int(keyframe.co[0]))
+                            
+                        max_value = max(selected_keyframes)  # Find the maximum value
+                        selected_keyframes.remove(max_value) 
+
+                        for fcurve in obj.animation_data.action.fcurves:
+                            for kf in fcurve.keyframe_points:
+                                if int(kf.co[0]) in selected_keyframes:
+                                    kf.interpolation = 'CONSTANT'
+
+        elif scene.SetKeyType == "two":
+
+            frames_range = []
+            current = start
+            while current <= end:
+                frames_range.append(current)
+                current += step
+
+            for obj in selected_objects:
+
+                if obj.mode == 'POSE':
+                    if obj.type == "ARMATURE":
+                        animation_data = obj.animation_data
+                        
+                        # Check if animation data exists
+                        if animation_data and animation_data.action:
+                            action = animation_data.action
+
+                            selected_bones = [bone for bone in obj.pose.bones if bone.bone.select]
+                            for bone in selected_bones:
+                                print("Set keyframes Bones: " + bone.name)
+
+                                selected_keyframes = set()
+                            
+                                for fcurve in action.fcurves:
+                                    if fcurve.data_path.startswith(f'pose.bones["{bone.name}"]'):
+                                        for keyframe in fcurve.keyframe_points:
+                                            if keyframe.select_control_point:
+                                                selected_keyframes.add(int(keyframe.co[0]))
+                                
+                                if selected_keyframes:
+                                    # Assuming you have two keyframes selected
+                                    start_frame = min(selected_keyframes)
+                                    end_frame = max(selected_keyframes)
+
+                                    for frame in frames_range:
+                                        if start_frame <= frame <= end_frame:
+
+                                            setkey(action, bone, frame)
+
+                                else:
+                                    # Get the fcurves for the selected bone
+                                    for fcurve in action.fcurves:
+                                        if fcurve.data_path.startswith(f'pose.bones["{bone.name}"]'):
+                                            for keyframe in fcurve.keyframe_points:
+                                                selected_keyframes.add(int(keyframe.co[0]))
+                                                keyframe.select_control_point = True
+                                                keyframe.select_left_handle = True
+                                                keyframe.select_right_handle = True
+                                                                        
+                                    start_frame = min(selected_keyframes)
+                                    end_frame = max(selected_keyframes)
+
+                                    for frame in frames_range:
+                                        if start_frame <= frame <= end_frame:
+
+                                            setkey(action, bone, frame) 
+                    
+                            for fcurve in obj.animation_data.action.fcurves:
+                                for keyframe in fcurve.keyframe_points:
+                                    if keyframe.select_control_point:
+                                        selected_keyframes.add(int(keyframe.co[0]))  
+
+                            max_value = max(selected_keyframes)  # Find the maximum value
+                            selected_keyframes.remove(max_value) 
+                                
+                            for fcurve in obj.animation_data.action.fcurves:
+                                for bone in selected_bones:
+                                    if fcurve.data_path.startswith(bone.path_from_id()):
+                                        for kf in fcurve.keyframe_points:
+                                            if int(kf.co[0]) in selected_keyframes:
+                                                kf.interpolation = 'CONSTANT'
+
+                elif obj.mode == "OBJECT":
+
+                    print("Set keyframes Object: " + obj.name)
+
+                    selected_keyframes = set()
+
+                    animation_data = obj.animation_data
+                    
+                    # Check if animation data exists
+                    if animation_data and animation_data.action:
+                        action = animation_data.action
+
+                        for fcurve in obj.animation_data.action.fcurves:
+                            for keyframe in fcurve.keyframe_points:
+                                if keyframe.select_control_point:
+                                    selected_keyframes.add(int(keyframe.co[0]))
+
+                        if selected_keyframes:
+                            # Assuming you have two keyframes selected
+                            start_frame = min(selected_keyframes)
+                            end_frame = max(selected_keyframes)
+
+                            for frame in frames_range:
+                                if start_frame <= frame <= end_frame:
+
+                                    setkey(action, obj, frame)
+
+                        else:
+                            # Get the fcurves for the selected bone
+                            for fcurve in obj.animation_data.action.fcurves:
+                                for keyframe in fcurve.keyframe_points:
+                                    selected_keyframes.add(int(keyframe.co[0]))
+                                    keyframe.select_control_point = True
+                                    keyframe.select_left_handle = True
+                                    keyframe.select_right_handle = True
+                                
+                            start_frame = min(selected_keyframes)
+                            end_frame = max(selected_keyframes)
+
+                            for frame in frames_range:
+                                if start_frame <= frame <= end_frame:
+
+                                    setkey(action, obj, frame)
+                                    
+                    
+                        for fcurve in obj.animation_data.action.fcurves:
+                            for keyframe in fcurve.keyframe_points:
+                                if keyframe.select_control_point:
+                                    selected_keyframes.add(int(keyframe.co[0]))
+                            
+                        max_value = max(selected_keyframes)  # Find the maximum value
+                        selected_keyframes.remove(max_value) 
+
+                        for fcurve in obj.animation_data.action.fcurves:
+                            for kf in fcurve.keyframe_points:
+                                if int(kf.co[0]) in selected_keyframes:
+                                    kf.interpolation = 'CONSTANT'
+
+        bpy.ops.wm.console_toggle()
+
+        context.scene.frame_current = current_frame
+
+        return {'FINISHED'}
+
 class PANEL_PT_Animation_Tool(bpy.types.Panel):
     bl_label = "KEN Action"
     bl_space_type = 'DOPESHEET_EDITOR'
@@ -667,10 +1016,17 @@ class PANEL_PT_Animation_Tool(bpy.types.Panel):
 
 
     def draw(self, context):
+        scene = context.scene
+        if scene.SetKeyFramesList == "one":
+            step = context.scene.render.fps/1
+        elif scene.SetKeyFramesList == "two":
+            step = context.scene.render.fps/2
+        elif scene.SetKeyFramesList == "three":
+            step = context.scene.render.fps/3
+        elif scene.SetKeyFramesList == "four":
+            step = context.scene.render.fps/4
+
         layout = self.layout
-
-        # Offset Bone Keyframes -----------------------------------------------------
-
         box = layout.box() 
         row = box.row()
         row.label(text='Keyframes', icon='DECORATE_KEYFRAME')
@@ -700,6 +1056,14 @@ class PANEL_PT_Animation_Tool(bpy.types.Panel):
             row.scale_y = 1.2
             row.operator("object.offset_keyframes_similar_bones", text='Similar', icon='BONE_DATA')
             row.operator("offset.selected_keyframes", text='Selected', icon='RESTRICT_SELECT_OFF')
+        row = box.row()
+        row.label(text='Step Keyframes', icon='IPO_CONSTANT')
+        row = box.row()
+        row.prop(context.scene, "SetKeyType", expand = True)
+        row = box.row()
+        row.prop(context.scene, "SetKeyFramesList", text=str(round(step)) +"fps Step")
+        row = box.row()
+        row.operator("step.keyframes", text='Step Keyframes')
 
         #---------------------------- Add Cycle Modifier ---------------------------------
 
@@ -710,6 +1074,7 @@ classes = (
             OBJECT_OT_offset_rotation,
             OBJECT_OT_offset_scale,
             OBJECT_OT_offset_keyframes_similar_bones,
+            OBJECT_OT_step_selected_keyframes,
             OBJECT_OT_clean_keyframes,
             PANEL_PT_Animation_Tool,
           )
@@ -739,6 +1104,19 @@ def register():
 
     #-------------------------------------------------------------
 
+    bpy.types.Scene.SetKeyType = bpy.props.EnumProperty(
+        default='one',
+        items=[('one', 'Local', ''),
+                ('two', 'Gobal', ''),
+                ])
+
+    bpy.types.Scene.SetKeyFramesList = bpy.props.EnumProperty(
+        default='two',
+        items=[('one', '1/1', ''),
+                ('two', '1/2', ''),
+                ('three', '1/3', ''),
+                ('four', '1/4', ''),
+                ])
 
 def unregister():
     for cls in classes:
