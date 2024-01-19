@@ -87,6 +87,11 @@ def add_hotkey():
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
+		km = kc.keymaps.new(name='3D View', space_type='VIEW_3D')
+		kmi = km.keymap_items.new('view3d.open_object_pie_menu', 'BUTTON4MOUSE', 'PRESS')
+		kmi.active = True
+		addon_keymaps.append((km, kmi))
+
 def get_hotkey_entry_item(km, kmi_name, kmi_value):
 	for i, km_item in enumerate(km.keymap_items):
 		if km.keymap_items.keys()[i] == kmi_name:
@@ -124,7 +129,7 @@ class UVDRAG_OT_AddHotkey(bpy.types.Operator):
 
 class SyncAddonPrefs(bpy.types.Operator):
     bl_idname = "addonprefs.sync"
-    bl_label = "sync. addon prefs"
+    bl_label = "sync.addon prefs"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -231,7 +236,8 @@ class AddonPref(bpy.types.AddonPreferences):
 
     bktemplate_setting_bool : bpy.props.BoolProperty(default=True, name = "Bool", description = "Bool")
     compact_panel : bpy.props.BoolProperty(default = True, description = "Compact Ppanel")
-    scene_material_panel : bpy.props.BoolProperty(default = True, description = "Turn on scene material panel in material priperties.")
+    pie_menu : bpy.props.BoolProperty(default = True, description = "Use KEN Pie Menu")
+    scene_material_panel : bpy.props.BoolProperty(default = False, description = "Turn on scene material panel in material priperties.")
     flip_bone : bpy.props.BoolProperty(default=True, update = assetsDefs.write_flip_bone)
     view : bpy.props.BoolProperty(default=True, update = write_view)
     advanced_option : bpy.props.BoolProperty(default=True, update = write_advanced_option)
@@ -345,6 +351,8 @@ class AddonPref(bpy.types.AddonPreferences):
             row = box.row()
             row.prop(self, "compact_panel", text = "Compact Panel")
             row = box.row()
+            row.prop(self, "pie_menu", text = "Pie Menu")
+            row = box.row()
             row.prop(self, "scene_material_panel", text = "Scene Material Panel")
             row = box.row()
             if self.registered_name:
@@ -353,7 +361,7 @@ class AddonPref(bpy.types.AddonPreferences):
                     row = box.row()
                     row.label(text = "Rig Settings:")
                     for item in self.registered_name:
-                        if  item.registered_name == AnimeProperties.registered_name[1]:
+                        if  item.registered_name == AnimeProperties.registered_name[2]:
                             row = box.row()
                             row.label(text = "Rig Scale:")
                             row.prop(self, "rig_scale", text = "Rig Scale")
@@ -384,6 +392,19 @@ class AddonPref(bpy.types.AddonPreferences):
             wm = context.window_manager
             kc = wm.keyconfigs.user
             
+            if self.pie_menu == True:
+                view3d_reg_location = "3D View"
+                km = kc.keymaps[view3d_reg_location]
+                kmi = get_hotkey_entry_item(km, 'view3d.open_object_pie_menu', '')  # ← オペレーターと、プロパティを設定するs
+                col.label(text=view3d_reg_location)
+                if kmi:
+                    col.context_pointer_set("keymap", km)
+                    rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
+                    col.separator()
+                else:
+                    col.label(text="No hotkey entry found")
+                    col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
+                
             dopesheet_reg_location = "Dopesheet"
             km = kc.keymaps[dopesheet_reg_location]
             kmi = get_hotkey_entry_item(km, 'offset.selected_keyframes', '')  # ← オペレーターと、プロパティを設定するs

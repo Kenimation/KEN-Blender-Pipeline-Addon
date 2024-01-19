@@ -469,6 +469,7 @@ def menu_func_mc(self, context):
     addon_prefs = addonPreferences.getAddonPreferences(context)
     if addon_prefs.registered_name:
         if all(item.registered_name in AnimeProperties.registered_name for item in addon_prefs.registered_name):
+            self.layout.separator()
             self.layout.menu("MC_RIG_Menu", text = "KEN MC RIG Presnt", icon_value = ken_icon.icon_id)
 
 class MC_RIG_Menu(bpy.types.Menu):

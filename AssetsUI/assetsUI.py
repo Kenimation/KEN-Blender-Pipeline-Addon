@@ -5,7 +5,7 @@ import os
 import bmesh
 from . import assetsDraw, assetsDefs
 from ..Minecraft import minecraftUI
-from ..Anime import AnimeProperties, AnimeUI
+from ..Anime import AnimeProperties, AnimeUI,  AnimeRig
 from .. import addonPreferences, addon_updater_ops, icons
 
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -646,8 +646,9 @@ class Assets_UI(bpy.types.Panel):
                     if all(item.registered_name in AnimeProperties.registered_name for item in addon_prefs.registered_name):
                         minecraftUI.draw_ken_mcrig(self, context, obj)
                 for item in addon_prefs.registered_name:
-                    if item.registered_name == AnimeProperties.registered_name[1]:
+                    if item.registered_name == AnimeProperties.registered_name[2]:
                         AnimeUI.draw_ken_animerig(self, context, obj)
+                        AnimeRig.draw_horse_animerig(self, context, obj)
                 if obj.RIG_ID in AnimeProperties.kenriglist:
                     if scene.object_properties == True:
                         assetsDraw.drawobj_properties(self,context, obj)
@@ -657,9 +658,9 @@ class Assets_UI(bpy.types.Panel):
 
         if scene.myProps == 'two':
             row = box.row()
-            row.prop(scene, "mytools", expand = True)
+            row.prop(scene, "libraries", expand = True)
 
-            if scene.mytools == 'one':
+            if scene.libraries == 'one':
                 obj = context.view_layer.objects.active
                 scene = context.scene
                 row = box.row()
@@ -679,9 +680,8 @@ class Assets_UI(bpy.types.Panel):
                     icon = "FAKE_USER_OFF"
                 row.prop(scene, "mat_fake_use", text = "", icon = icon, emboss = False)
                 row.scale_x = 0.75
-                clean = row.operator("data.blend", icon = "BRUSH_DATA", text = "Clean")
+                clean = row.operator("clean.resources", icon = "BRUSH_DATA", text = "Clean")
                 clean.type = "mat"
-                clean.subtype = "clean"
 
                 if obj:
                     if scene.scene_mat == False:
@@ -736,7 +736,7 @@ class Assets_UI(bpy.types.Panel):
 
                 assetsDraw.drawmaterial(scene, box, obj, mat, state)
 
-            if scene.mytools == 'two':
+            if scene.libraries == 'two':
                 row = box.row()
                 row.label(text = "Lights Mixer", icon = "LIGHT_DATA")
                 if scene.expandlight == False:
@@ -806,7 +806,7 @@ class Assets_UI(bpy.types.Panel):
 
                 assetsDraw.draw_world(context, box)
 
-            if scene.mytools == 'three':
+            if scene.libraries == 'three':
                 row = box.row()
                 row.label(text = "Cameras Manager", icon = "CAMERA_DATA")
                 if scene.marker == True:
@@ -870,7 +870,7 @@ class Assets_UI(bpy.types.Panel):
                 else:
                     box.label(text = "No Selected Camera")
             
-            if scene.mytools == 'four':
+            if scene.libraries == 'four':
                 row = box.row()
                 imgnum = len(bpy.data.images)-1
                 row.scale_x = 1.75
@@ -927,9 +927,9 @@ class Assets_UI(bpy.types.Panel):
                 row.operator("render.opengl", text = "Viewport Render", icon = "RENDER_STILL")
                 row.operator("render.opengl", text = "Viewport Animation", icon = "RENDER_ANIMATION").animation = True
             for item in addon_prefs.registered_name:
-                if item.registered_name == AnimeProperties.registered_name[1]:
+                if item.registered_name == AnimeProperties.registered_name[2]:
                     ken_icon = pcoll["Dual"]
-                    row.operator("render.anime_snap", text = "", icon_value = ken_icon.icon_id)
+                    row.operator("render.anime_snap", text = "", icon_value = ken_icon.icon_id).mode = "Final"
             if scene.cycles.denoiser == 'OPTIX':
                 row = box.row()
                 row.operator("cycles.denoise_animation", text = "Optix Denoising Animation")
@@ -941,7 +941,6 @@ class Assets_UI(bpy.types.Panel):
                 assetsDraw.draw_cycles(scene, box)
             if context.scene.render.engine in ["BLENDER_EEVEE"]:
                 assetsDraw.draw_eevee(scene, box)
-
 
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #                   (un)register

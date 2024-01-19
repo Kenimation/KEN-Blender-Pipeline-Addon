@@ -44,14 +44,6 @@ def update_img_fake_use(self, context):
             if img.has_data:
                 img.use_fake_user = False
 
-def update_hideoverlay(self, context):
-    if self.hideoverlay == True:
-        context.space_data.overlay.show_extras = True
-        context.space_data.overlay.show_bones = True
-    else:
-        context.space_data.overlay.show_extras = False
-        context.space_data.overlay.show_bones = False
-
 def update_rendermodifier(self, context):
     obj = context.view_layer.objects.active
     modifiers = obj.modifiers

@@ -119,6 +119,8 @@ class Anime_SnapRender(bpy.types.Operator):
     bl_label = "Render Anime Snap"
     bl_options = {'REGISTER', 'UNDO'}
 
+    mode: bpy.props.StringProperty(options={'HIDDEN'})
+
     def execute(self, context):
         original_frame = context.scene.frame_current
         output_path = context.scene.render.filepath
@@ -161,21 +163,30 @@ class Anime_SnapRender(bpy.types.Operator):
         for index, frame in enumerate(frames):
             bpy.context.scene.frame_current = frame
             order_number = index + 1
-            self.report({'INFO'}, "Render Frame " +"%04d" % order_number + " | " + "F" + "%04d" % frame)
+            print("Render Frame " +"%04d" % order_number + " | " + "F" + "%04d" % frame)
             rendername = filename + "_" + "%04d" % order_number
             bpy.context.scene.render.filepath = os.path.join(directory, rendername)
-            bpy.ops.render.render(write_still=True)
+            if self.mode == "Final":
+                bpy.ops.render.render(write_still=True)
+            elif self.mode == "Viewport":
+                bpy.ops.render.opengl(write_still=True)
             print("Render Finish: " + str(frame) + "frames")
             current_frame_list.append(frame)
             with open(output_file, 'w') as file:
-                file.write("- " + filename + " Render Frame Sheet -" + '\n')
+                if self.mode == "Final":
+                    file.write("- " + filename + " Render Frame Sheet -" + '\n')
+                elif self.mode == "Viewport":
+                    file.write("- " + filename +"_Preview" + " Render Frame Sheet -" + '\n')
                 file.write("Color Space: " + str(colorspace) + '\n')
                 file.write("Frame Rate: " + str(frameRate) + '\n')
                 file.write("Total Frames: " + str(len(current_frame_list)) + "/" + str(len(frames)) + '\n')
                 file.write(str(current_frame_list) + '\n')
 
         with open(output_file, 'w') as file:
-            file.write("- " + filename + " Render Frame Sheet -" + '\n')
+            if self.mode == "Final":
+                file.write("- " + filename + " Render Frame Sheet -" + '\n')
+            elif self.mode == "Viewport":
+                file.write("- " + filename +"_Preview" + " Render Frame Sheet -" + '\n')
             file.write("Color Space: " + str(colorspace) + '\n')
             file.write("Frame Rate: " + str(frameRate) + '\n')
             file.write("Total Frames: " + str(len(current_frame_list)) + '\n')
@@ -185,8 +196,11 @@ class Anime_SnapRender(bpy.types.Operator):
         bpy.context.scene.render.filepath = output_path
 
         bpy.ops.wm.console_toggle()
-        
-        self.report({'INFO'}, "Render Finished! | File:" + str(output_path))
+
+        if self.mode == "Final":
+            self.report({'INFO'}, "Render Finished! | File:" + str(output_path))
+        elif self.mode == "Viewport":
+            self.report({'INFO'}, "Preview Render Finished! | File:" + str(output_path))
         
         return {'FINISHED'}
 

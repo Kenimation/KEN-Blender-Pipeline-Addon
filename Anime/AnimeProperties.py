@@ -198,6 +198,12 @@ bpy.types.Object.EyebrowsThickness = FloatProperty(
 bpy.types.Object.EyebrowsWidth = FloatProperty(
     min=0.1, max=2, default=1, name = "Eyebrows Width")
 
+bpy.types.Object.EyebrowsLineType= IntProperty(
+    min=1, max=2, default=1, name = "Eyebrows Line Type")
+
+bpy.types.Object.EyebrowsType= IntProperty(
+    min=1, max=2, default=1, name = "Eyebrows Type")
+
 bpy.types.Object.RigScale = FloatProperty(
     min=1, max=15, default=1, name = "Rig Scale", update = AnimeDefs.update_rig_scale)
 
@@ -259,36 +265,6 @@ bpy.types.Object.FootSize = FloatProperty(
 bpy.types.Object.Main_Bone = BoolProperty(
     default=True, name = "Main Bone", update = AnimeDefs.update_Main_Bone)
 
-bpy.types.Object.Head_Bone = BoolProperty(
-    default=True, name = "Head", update = AnimeDefs.update_Head_Bone)
-
-bpy.types.Object.Body_Bone = BoolProperty(
-    default=True, name = "Body", update = AnimeDefs.update_Body_Bone)
-
-bpy.types.Object.R_Arm = BoolProperty(
-    default=True, name = "R.Arm", update = AnimeDefs.update_R_Arm)
-
-bpy.types.Object.L_Arm = BoolProperty(
-    default=True, name = "L.Arm", update = AnimeDefs.update_L_Arm)
-
-bpy.types.Object.R_Leg = BoolProperty(
-    default=True, name = "R.Leg", update = AnimeDefs.update_R_Leg)
-
-bpy.types.Object.L_Leg = BoolProperty(
-    default=True, name = "L.Leg", update = AnimeDefs.update_L_Leg)
-
-bpy.types.Object.R_Hand = BoolProperty(
-    default=True, name = "R.Hand", update = AnimeDefs.update_R_Hand)
-
-bpy.types.Object.L_Hand = BoolProperty(
-    default=True, name = "L.Hand", update = AnimeDefs.update_L_Hand)
-
-bpy.types.Object.R_Foot = BoolProperty(
-    default=True, name = "R.Foot", update = AnimeDefs.update_R_Foot)
-
-bpy.types.Object.L_Foot = BoolProperty(
-    default=True, name = "L.Foot", update = AnimeDefs.update_L_Foot)
-
 bpy.types.Object.Facial_Bone = BoolProperty(
     default=True, name = "Facial", update = AnimeDefs.update_Facial_Bone)
 
@@ -301,14 +277,12 @@ bpy.types.Object.Hair_Bone = BoolProperty(
 bpy.types.Object.Full_Hair_Bone = BoolProperty(
     default=False, name = "Full Hair", update = AnimeDefs.update_Full_Hair_Bone)
 
-bpy.types.Object.HeadFFD = BoolProperty(
-    default=False, name = "Head FFD", update = AnimeDefs.update_HeadFFD)
-
 bpy.types.Object.BonesCollection = BoolProperty(
     default=False, name = "Bones Collection")
 
 kenriglist = ["KENRemastered", "KENLayout", "KenAnime"]
-registered_name = ["Minecraft2024", "Anime2024 Project - Valkyrie"]
+registered_name = ["KENCER USER", "Minecraft2024", "Anime2024 Project - Valkyrie"]
+bone_collections = ["FFD", "Head", "Body", "R.Arm", "L.Arm", "R.Hand", "L.Hand","R.Leg","L.Leg","R.Foot","L.Foot"]
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #                  Enum Property

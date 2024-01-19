@@ -22,9 +22,9 @@ def drawheader(context, addon_prefs, row, obj):
             row.prop(scene, "tools", icon = "TOOL_SETTINGS", text = "")
 
     if scene.myProps == 'two':
-        if scene.mytools == 'three':
+        if scene.libraries == 'three':
             row.prop(scene, "camera", text = "Local Camera")
-        if scene.mytools == 'one' or scene.mytools == 'four':
+        if scene.libraries == 'one' or scene.libraries == 'four':
             row.scale_x = 0.25
             row.operator("outliner.orphans_purge", text = "Purge").do_recursive=True
             row.scale_x = 1
@@ -52,14 +52,13 @@ def draw_tools(scene, obj, self):
         row = QuickImport.row()
         col = row.column_flow(columns = 2)
         col.operator("import.minecraftmodel", text = "Minecraft Obj")
-        col.operator("minecraft.import_json", text = "Minecraft Json")
+        col.operator("import.minecraftjson", text = "Minecraft Json")
         row = QuickImport.row()
         row.label(text = "Image Import")
         row = QuickImport.row()
         row.operator("alpha.import", text = "Alpha Plane")
         row = QuickImport.row()
         row.operator("3d.item", text = "3D Item from file")
-
 
     if obj.type == 'MESH':
         row = box.row()
@@ -584,7 +583,8 @@ def draw_data(self, context, obj):
 def draw_view(addon_prefs, context, box, row, obj):
     scene = context.scene
     row.label(text = "View", icon = "VIEW3D")
-    row.prop(scene, "hideoverlay", icon = "OVERLAY", text = "")
+    row.prop(context.space_data.overlay, "show_bones", icon = "BONE_DATA", text = "")
+    row.prop(context.space_data.overlay, "show_overlays", icon = "OVERLAY", text = "")
     row = box.row()
     row.prop(context.scene.render, "use_simplify", text = "Use Simplify", toggle = True)
     row.prop(context.scene.render, "simplify_subdivision", text = "Subdivision")
@@ -887,16 +887,11 @@ def drawlight(box, light):
         lightbox.prop(light, "angle", text = "Angle")
     if light.type == "AREA":
         lightbox.prop(light, "shape")
-    try:
-        if light.type != "POINT":
-            if light.shape == "SQUARE" or light.shape == "DISK":
-                lightbox.prop(light, "size", text = "Size")
-            if light.shape == "RECTANGLE" or light.shape == "ELLIPSE": 
-                lightbox.prop(light, "size", text = "Size X")
-                lightbox.prop(light, "size_y", text = "Size Y")
-    except:
-        pass
-    if light.type == "AREA":
+        if light.shape == "SQUARE" or light.shape == "DISK":
+            lightbox.prop(light, "size", text = "Size")
+        if light.shape == "RECTANGLE" or light.shape == "ELLIPSE": 
+            lightbox.prop(light, "size", text = "Size X")
+            lightbox.prop(light, "size_y", text = "Size Y")
         lightbox.prop(light, "spread", text = "Spread")
 
 def drawlight_linking(scene, box, obj):
@@ -1320,9 +1315,8 @@ def drawimage(scene, box, row):
         icon = "FAKE_USER_OFF"
     row.prop(scene, "img_fake_use", text = "", icon = icon, emboss = False)
     row.scale_x = 0.75
-    clean = row.operator("data.blend", icon = "BRUSH_DATA", text = "Clean")
+    clean = row.operator("clean.resources", icon = "BRUSH_DATA", text = "Clean")
     clean.type = "img"
-    clean.subtype = "clean"
     if scene.imagepreview == True:
         try:
             img_list = []

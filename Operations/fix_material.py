@@ -472,10 +472,18 @@ class Fix_Material(bpy.types.Operator):
     
 def menu_fixmaterial(self, context):
     if context.object.type == "MESH":
-        self.layout.operator("fix.material", text = "Fix Material")
-        delete = self.layout.operator("data.blend", text = "Clear Material")
-        delete.type = "mat"
-        delete.subtype = "del"
+        if context.object.material_slots:
+            for slot in context.object.material_slots:
+                # Check if a material is assigned to the slot
+                if slot.material is not None:
+                    self.layout.separator()
+                    self.layout.operator("fix.material", text = "Fix Material")
+                    delete = self.layout.operator("data.blend", text = "Clear Material")
+                    delete.type = "mat"
+                    delete.subtype = "del"
+        else:
+            self.layout.separator()
+            self.layout.operator("new.material", text = "New Material")
 
 classes = (
             Add_Image,

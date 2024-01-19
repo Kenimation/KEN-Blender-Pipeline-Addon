@@ -169,6 +169,7 @@ def draw_func(self, context):
     layout.operator(
     OBJECT_OT_vertex_group_mirror_prefix.bl_idname, text = "Mirror Prefix Vertex Groups",
     icon='MOD_MIRROR')
+    layout.separator()
 
 
 classes = (

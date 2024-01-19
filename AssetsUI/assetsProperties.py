@@ -7,7 +7,7 @@ bpy.types.Scene.myProps = bpy.props.EnumProperty(default = "one",
                                 ('two', 'Libraries', ''),
                                 ('three', 'Render', ''),
                                 ])
-bpy.types.Scene.mytools = bpy.props.EnumProperty(default = "one",
+bpy.types.Scene.libraries = bpy.props.EnumProperty(default = "one",
                         items = [('one', 'Materials', ''),
                                 ('two', 'Lights', ''),
                                 ('three', 'Cameras', ''),
@@ -149,11 +149,6 @@ bpy.types.Scene.hideconstraints = bpy.props.BoolProperty(
     name="Hide All Constraints",
     default=False,
     update = assetsDefs.update_hideconstraints
-)
-bpy.types.Scene.hideoverlay = bpy.props.BoolProperty(
-    name="Hide Overlay",
-    default=True,
-    update = assetsDefs.update_hideoverlay
 )
 bpy.types.Scene.imagepreview = bpy.props.BoolProperty(
     name="Show Image Preview",

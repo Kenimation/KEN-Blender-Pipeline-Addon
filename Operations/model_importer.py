@@ -520,7 +520,7 @@ class Import_MinecraftModel(bpy.types.Operator, ImportHelper):
 
 class ImportMinecraftJSON(Operator, ImportHelper):
     """Import Minecraft .json file"""
-    bl_idname = "minecraft.import_json"
+    bl_idname = "import.minecraftjson"
     bl_label = "Import JSON"
     bl_options = {"REGISTER", "UNDO"}
 

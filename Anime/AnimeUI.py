@@ -43,9 +43,9 @@ def draw_ken_animerig(self, context, obj):
                 icon = "RESTRICT_SELECT_ON"
             row.prop(rig, "MeshSelect", text = "", icon = icon, emboss = False)
             row.prop(scene, "object_properties", icon = "ARMATURE_DATA", text = "")
-            row.operator("render.anime_snap", text = "", icon = "RESTRICT_RENDER_OFF")
+            row.operator("render.anime_snap", text = "", icon = "RESTRICT_RENDER_OFF").mode = "Final"
             for item in addon_prefs.registered_name:
-                if  item.registered_name == AnimeProperties.registered_name[1]:
+                if  item.registered_name == AnimeProperties.registered_name[2]:
                     if rig.mode == 'EDIT':
                         assetsDraw.drawbone_properties(box, context, obj)
                     else:
@@ -188,13 +188,16 @@ def drawrigsetup(self, context):
             row.label(text = "Facial LineArt:")
             row = box.row()
             row.prop(rig, "FaceLine", toggle = True)
-            row.prop(rig, "FaceLineType")
+            if rig.FaceLine == True:
+                row.prop(rig, "FaceLineType")
             row = box.row()
             row.prop(rig, "NoseLine", toggle = True)
             if rig.NoseLine == True:
                 row.prop(rig, "NoseLineType", expand = True)
             row = box.row()
             row.prop(rig, "EyebrowLine", toggle = True)
+            if rig.EyebrowLine == True:
+                row.prop(rig, "EyebrowsLineType")
             row = box.row()
             row.prop(rig, "LipLine", toggle = True)
             row = box.row()
@@ -284,6 +287,8 @@ def drawrigdesign(self, context):
                 row.prop(Blush['Color'], "default_value", text = "")
                 row = faciallist.row()
                 row.label(text = "Eyebrows:")
+                row = faciallist.row()
+                row.prop(rig, "EyebrowsType")
                 row = faciallist.row()
                 row.prop(rig, "EyebrowsThickness", slider = True)
                 row = faciallist.row()
@@ -624,6 +629,7 @@ def drawrigposing(self, context):
     box.prop(rig, "BonesCollection", emboss=False , icon = icon)
 
     if rig.BonesCollection == True:
+        collections = rig.data.collections
         box.prop(rig, "flipBone", text = "Flip Bone", toggle = True)
         row = box.row()
         row.prop(rig, "Main_Bone", text = "Main Bone", toggle = True)
@@ -646,44 +652,44 @@ def drawrigposing(self, context):
                     else:
                         row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "Facial"
             row = box.row()
-            row.prop(rig, "HeadFFD", toggle = True)
-            if rig.HeadFFD == True:
+            row.prop(collections["FFD"], "is_visible", text = "FFD", toggle = True)
+            if collections["FFD"].is_visible == True:
                 row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "FFD"
             row = box.row()
-            row.prop(rig, "Head_Bone", toggle = True)
-            if rig.Head_Bone == True:
+            row.prop(collections["Head"], "is_visible", text = "Head", toggle = True)
+            if collections["Head"].is_visible == True:
                 row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "Head"
             row = box.row()
-            row.prop(rig, "Body_Bone", toggle = True)
-            if rig.Body_Bone == True:
+            row.prop(collections["Body"], "is_visible", text = "Body", toggle = True)
+            if collections["Body"].is_visible == True:
                 row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "Body"
             row = box.row()
-            row.prop(rig, "R_Arm", toggle = True)
-            if rig.R_Arm == True:
+            row.prop(collections["R.Arm"], "is_visible", text = "R_Arm", toggle = True)
+            if collections["R.Arm"].is_visible == True:
                 row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "R.Arm"
-            row.prop(rig, "L_Arm", toggle = True)
-            if rig.L_Arm == True:
+            row.prop(collections["L.Arm"], "is_visible", text = "R_Arm", toggle = True)
+            if collections["L.Arm"].is_visible == True:
                 row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "L.Arm"
             row = box.row()
-            row.prop(rig, "R_Hand", toggle = True)
-            if rig.R_Hand == True:
+            row.prop(collections["R.Hand"], "is_visible", text = "R_Hand", toggle = True)
+            if collections["R.Hand"].is_visible == True:
                 row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "R.Hand"
-            row.prop(rig, "L_Hand", toggle = True)
-            if rig.L_Hand == True:
+            row.prop(collections["L.Hand"], "is_visible", text = "L_Hand", toggle = True)
+            if collections["L.Hand"].is_visible == True:
                 row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "L.Hand"
             row = box.row()
-            row.prop(rig, "R_Leg", toggle = True)
-            if rig.R_Leg == True:
+            row.prop(collections["R.Leg"], "is_visible", text = "R_Leg", toggle = True)
+            if collections["R.Leg"].is_visible == True:
                 row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "R.Leg"
-            row.prop(rig, "L_Leg", toggle = True)
-            if rig.L_Leg == True:
+            row.prop(collections["L.Leg"], "is_visible", text = "L_Leg", toggle = True)
+            if collections["L.Leg"].is_visible == True:
                 row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "L.Leg"
             row = box.row()
-            row.prop(rig, "R_Foot", toggle = True)
-            if rig.R_Foot == True:
+            row.prop(collections["R.Foot"], "is_visible", text = "R_Foot", toggle = True)
+            if collections["R.Foot"].is_visible == True:
                 row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "R.Foot"
-            row.prop(rig, "L_Foot", toggle = True)
-            if rig.L_Foot == True:
+            row.prop(collections["L.Foot"], "is_visible", text = "L_Foot", toggle = True)
+            if collections["L.Foot"].is_visible == True:
                 row.operator("bone.selectgroup", text = "", emboss = False ,icon = "RESTRICT_SELECT_OFF").name = "L.Foot"
 
     box = layout.box()
@@ -750,8 +756,19 @@ def draw_anime_snap(self, context):
     addon_prefs = addonPreferences.getAddonPreferences(context)
     if addon_prefs.registered_name:
         for item in addon_prefs.registered_name:
-            if item.registered_name == AnimeProperties.registered_name[1]:
-                self.layout.operator("render.anime_snap", text = "Render Anime Snap Frame", icon_value = ken_icon.icon_id)
+            if item.registered_name == AnimeProperties.registered_name[2]:
+                self.layout.separator()
+                self.layout.operator("render.anime_snap", text = "Render Anime Snap Frame", icon_value = ken_icon.icon_id).mode = "Final"
+
+def draw_anime_snap_viewport(self, context):
+    pcoll = preview_collections["main"]
+    ken_icon = pcoll["Dual"]
+    addon_prefs = addonPreferences.getAddonPreferences(context)
+    if addon_prefs.registered_name:
+        for item in addon_prefs.registered_name:
+            if item.registered_name == AnimeProperties.registered_name[2]:
+                self.layout.separator()
+                self.layout.operator("render.anime_snap", text = "Viewport Render Anime Snap Frame", icon_value = ken_icon.icon_id).mode = "Viewport"
 
 class Anime_RIG_Menu(bpy.types.Menu):
     bl_idname = "Anime_RIG_Menu"
@@ -763,7 +780,7 @@ class Anime_RIG_Menu(bpy.types.Menu):
 
         addon_prefs = addonPreferences.getAddonPreferences(context)
         for item in addon_prefs.registered_name:
-            if  item.registered_name == AnimeProperties.registered_name[1]:
+            if  item.registered_name == AnimeProperties.registered_name[2]:
 
                 layout = self.layout
 
@@ -793,6 +810,7 @@ def register():
 
     bpy.types.VIEW3D_MT_add.append(menu_func_anime)
     bpy.types.TOPBAR_MT_render.append(draw_anime_snap)
+    bpy.types.VIEW3D_MT_view.append(draw_anime_snap_viewport)
   
 def unregister():
     from bpy.utils import unregister_class
@@ -801,3 +819,4 @@ def unregister():
     del bpy.types.PoseBone.extra_prop
     bpy.types.VIEW3D_MT_add.remove(menu_func_anime)
     bpy.types.TOPBAR_MT_render.remove(draw_anime_snap)
+    bpy.types.VIEW3D_MT_view.remove(draw_anime_snap_viewport)
