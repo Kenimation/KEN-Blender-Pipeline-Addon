@@ -18,8 +18,6 @@ class OBJECT_OT_select_by_name_type(bpy.types.Operator):
 
     def invoke(self, context, event):
 
-
-
         cur_frame = bpy.context.scene.frame_current
 
         def insert_keys(frame):

@@ -9,7 +9,7 @@ from bpy_extras.io_utils import ImportHelper
 from bpy.types import Operator, OperatorFileListElement
 from bpy.props import StringProperty, BoolProperty, FloatProperty, IntProperty, CollectionProperty, EnumProperty
 from ..AssetsUI import assetsDefs
-from . import fix_material, editing
+from . import material_tool, editing
 
 DIRECTIONS = np.array([
     "north",
@@ -506,8 +506,8 @@ class Import_MinecraftModel(bpy.types.Operator, ImportHelper):
                 for count in range(matnum):
                     context.object.active_material_index = count
                     mat = obj.active_material
-                    fix_material.fixmaterial(mat)
-                    fix_material.fixnormal(mat)
+                    material_tool.fixmaterial(mat)
+                    material_tool.fixnormal(mat)
             objg = assetsDefs.collections().new(name=colname)
             context.scene.collection.children.link(objg)  # Add to outliner.
             for obj in context.selected_objects:

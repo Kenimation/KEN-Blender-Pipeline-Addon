@@ -5,7 +5,7 @@
 bl_info = {
     "name": "KEN Blender Pipeline",
     "author": "KEN",
-    "version": (2, 1, 9),
+    "version": (2, 2, 0),
     "blender": (4, 0, 0),
     "location": "3DView",
     "description": "KEN Blender Pipeline Addons",

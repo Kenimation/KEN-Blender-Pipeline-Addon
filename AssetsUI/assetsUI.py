@@ -680,8 +680,7 @@ class Assets_UI(bpy.types.Panel):
                     icon = "FAKE_USER_OFF"
                 row.prop(scene, "mat_fake_use", text = "", icon = icon, emboss = False)
                 row.scale_x = 0.75
-                clean = row.operator("clean.resources", icon = "BRUSH_DATA", text = "Clean")
-                clean.type = "mat"
+                row.operator("clean.resources", icon = "BRUSH_DATA", text = "Clean").type = "mat"
 
                 if obj:
                     if scene.scene_mat == False:
@@ -949,6 +948,7 @@ class Assets_UI(bpy.types.Panel):
 preview_collections = {}
 
 classes = (
+            CAB_PG_Prop,
             COLLECTION,
             SCENEMATERIALS,
             MATERIALS,
@@ -957,15 +957,13 @@ classes = (
             PARTICLES,
             IMAGES,
             LIGHT,
-            CAB_PG_Prop,
             Assets_UI,
           )
-
 def register():
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
-        
+    
     bpy.types.Scene.CAB_PG_Prop = bpy.props.PointerProperty(type = CAB_PG_Prop)
 
     icon = icons.icons("icons")

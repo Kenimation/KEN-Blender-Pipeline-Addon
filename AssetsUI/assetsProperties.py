@@ -130,21 +130,7 @@ bpy.types.Scene.ray_visility = bpy.props.BoolProperty(
     description="Ray Visility",
     default=False,
 )
-bpy.types.Scene.editmodifier = bpy.props.BoolProperty(
-    name="Show All Edit Modifier",
-    default=False,
-    update = assetsDefs.update_editmodifier
-)
-bpy.types.Scene.cagemodifier = bpy.props.BoolProperty(
-    name="Show All Cage Modifier",
-    default=False,
-    update = assetsDefs.update_cagemodifier
-)
-bpy.types.Scene.rendermodifier = bpy.props.BoolProperty(
-    name="Render All Modifier",
-    default=False,
-    update = assetsDefs.update_rendermodifier
-)
+
 bpy.types.Scene.hideconstraints = bpy.props.BoolProperty(
     name="Hide All Constraints",
     default=False,
@@ -167,11 +153,7 @@ bpy.types.Scene.showmodifier = bpy.props.BoolProperty(
     name="Show Modifier",
     default=True,
 )
-bpy.types.Scene.hidemodifier = bpy.props.BoolProperty(
-    name="Hide All Modifier",
-    default=False,
-    update = assetsDefs.update_hidemodifier
-)
+
 bpy.types.Scene.hide = bpy.props.BoolProperty(
     name="Hide",
     default=False,

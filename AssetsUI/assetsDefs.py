@@ -4,7 +4,6 @@ import os
 from ..Anime import AnimeProperties
 from .. import addonPreferences
 
-
 def users_collection(obj):
 	"""Returns the collections/group of an object"""
 	if hasattr(obj, "users_collection"):
@@ -44,36 +43,6 @@ def update_img_fake_use(self, context):
             if img.has_data:
                 img.use_fake_user = False
 
-def update_rendermodifier(self, context):
-    obj = context.view_layer.objects.active
-    modifiers = obj.modifiers
-    if self.rendermodifier == True:
-        for id in obj.modifiers[:]:
-            modifiers[id.name].show_render = False
-    else:
-        for id in obj.modifiers[:]:
-            modifiers[id.name].show_render = True
-
-def update_editmodifier(self, context):
-    obj = context.view_layer.objects.active
-    modifiers = obj.modifiers
-    if self.editmodifier == True:
-        for id in obj.modifiers[:]:
-            modifiers[id.name].show_in_editmode = True
-    else:
-        for id in obj.modifiers[:]:
-            modifiers[id.name].show_in_editmode = False
-
-def update_cagemodifier(self, context):
-    obj = context.view_layer.objects.active
-    modifiers = obj.modifiers
-    if self.cagemodifier == True:
-        for id in obj.modifiers[:]:
-            modifiers[id.name].show_on_cage = True
-    else:
-        for id in obj.modifiers[:]:
-            modifiers[id.name].show_on_cage = False
-
 def update_hideconstraints(self, context):
     obj = context.object
     bones = context.active_pose_bone
@@ -87,16 +56,6 @@ def update_hideconstraints(self, context):
     else:
         for id in con[:]:
             con[id.name].enabled = True
-
-def update_hidemodifier(self, context):
-    obj = context.view_layer.objects.active
-    modifiers = obj.modifiers
-    if self.hidemodifier == True:
-        for id in obj.modifiers[:]:
-            modifiers[id.name].show_viewport = False
-    else:
-        for id in obj.modifiers[:]:
-            modifiers[id.name].show_viewport = True
 
 def update_hide(self, context):
     for ob in context.scene.objects:

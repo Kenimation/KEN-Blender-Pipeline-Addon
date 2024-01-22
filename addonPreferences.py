@@ -9,8 +9,9 @@ from bpy.props import (StringProperty,
                         CollectionProperty,
 )
 from enum import Enum
-from .Operations import uv_drag
-from .AssetsUI import assetsDefs
+from .Operations import uv_drag, material_tool
+from .UI import modifiers_ui, constraints_ui
+from .AssetsUI import assetsUI, assetsDefs
 from .Minecraft import minecraftDefs
 from .Anime import AnimeProperties, AnimeDefs
 from . import addon_updater_ops, icons
@@ -114,6 +115,15 @@ def remove_hotkey():
             kc.keymaps.remove(keymap)
 
     addon_keymaps.clear()
+
+def use_modifier_panel(self, context):
+    modifiers_ui.ken_modifier_panel(self, context)
+
+def use_constraint_panel(self, context):
+    constraints_ui.ken_constraint_panel(self, context)
+
+def use_material_panel(self, context):
+    material_tool.ken_material_panel(self, context)
 
 class UVDRAG_OT_AddHotkey(bpy.types.Operator):
 	''' Add hotkey entry '''
@@ -237,11 +247,28 @@ class AddonPref(bpy.types.AddonPreferences):
     bktemplate_setting_bool : bpy.props.BoolProperty(default=True, name = "Bool", description = "Bool")
     compact_panel : bpy.props.BoolProperty(default = True, description = "Compact Ppanel")
     pie_menu : bpy.props.BoolProperty(default = True, description = "Use KEN Pie Menu")
-    scene_material_panel : bpy.props.BoolProperty(default = False, description = "Turn on scene material panel in material priperties.")
     flip_bone : bpy.props.BoolProperty(default=True, update = assetsDefs.write_flip_bone)
     view : bpy.props.BoolProperty(default=True, update = write_view)
     advanced_option : bpy.props.BoolProperty(default=True, update = write_advanced_option)
     tools : bpy.props.BoolProperty(default=True, update = write_tools)
+
+    use_material_panel: BoolProperty(
+        name="Material Panel",
+        description="Enable/disable Material Panel",
+        default=False,
+        update=use_material_panel)
+
+    use_modifier_panel: BoolProperty(
+        name="Modifier Panel",
+        description="Enable/disable Modifier Panel",
+        default=True,
+        update=use_modifier_panel)
+
+    use_constraint_panel: BoolProperty(
+        name="Constraint Panel",
+        description="Enable/disable Constraint Panel",
+        default=True,
+        update=use_constraint_panel)
 
     rig_scale : bpy.props.FloatProperty(
 		name='Rig Scale',
@@ -342,19 +369,43 @@ class AddonPref(bpy.types.AddonPreferences):
             col.separator()
             col.operator("add.registered_name", text = "", icon = "ADD")
             col.operator("remove.registered_name", text = "", icon = "REMOVE")
-            row = box.row()
-            row.label(text = "UI Settings:")
-            row = box.row()
+
+            split = box.split()
+
+            col = split.column()
+            col.label(text = "UI Settings:")
+            col = col.column()
+            row = col.row()
+            row.label(text = "", icon = "MENU_PANEL")
+            row.prop(self, "pie_menu", text = "Pie Menu")
+            col = col.column()
+            row = col.row()
+            row.label(text = "Panel Setting:")
+            col = col.column()
+            row = col.row()
+            row.label(text = "", icon = "MODIFIER")
+            row.prop(self, "use_modifier_panel", text = "Modifier Panel")
+            col = col.column()
+            row = col.row()
+            row.label(text = "", icon = "CONSTRAINT")
+            row.prop(self, "use_constraint_panel", text = "Constraint Panel")
+            col = col.column()
+            row = col.row()
+            row.label(text = "", icon = "MATERIAL")
+            row.prop(self, "use_material_panel", text = "Material Panel")
+
+            col = split.column()
+            col.label(text = "Category Settings:")
+            col = col.column()
+            col.prop(self, "compact_panel", text = "Compact Panel")
+            col = col.column()
+            col.label(text = "Panel Header:")
+            col = col.column()
+            row = col.row()
             row.prop(self, "view", icon = "VIEW3D", text = "")
             row.prop(self, "advanced_option", icon = "OUTLINER", text = "")
             row.prop(self, "tools", icon = "TOOL_SETTINGS", text = "")
-            row = box.row()
-            row.prop(self, "compact_panel", text = "Compact Panel")
-            row = box.row()
-            row.prop(self, "pie_menu", text = "Pie Menu")
-            row = box.row()
-            row.prop(self, "scene_material_panel", text = "Scene Material Panel")
-            row = box.row()
+
             if self.registered_name:
                 if all(item.registered_name in AnimeProperties.registered_name for item in self.registered_name):
                     box = layout.box()

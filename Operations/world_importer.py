@@ -6,7 +6,7 @@ from bpy_extras.io_utils import ImportHelper
 from bpy.types import Operator, OperatorFileListElement
 from bpy.props import StringProperty, BoolProperty, FloatProperty, IntProperty, CollectionProperty, EnumProperty
 from ..AssetsUI import assetsDefs
-from . import fix_material, editing
+from . import material_tool, editing
 
 def duplicatedDatablock(name):
 	"""Check if datablock is a duplicate or not, e.g. ending in .00# """
@@ -300,7 +300,7 @@ class World_Import(bpy.types.Operator, ImportHelper):
 				mat.node_tree.nodes["Principled BSDF"].subsurface_method = 'BURLEY'
 				mat.node_tree.nodes["Image Texture"].interpolation = 'Closest'
 				mat.node_tree.links.new(mat.node_tree.nodes["Principled BSDF"].inputs['Alpha'], mat.node_tree.nodes["Image Texture"].outputs['Alpha'])
-				fix_material.fixmaterial(mat)
+				material_tool.fixmaterial(mat)
 				matname = mat.node_tree.nodes["Image Texture"].image.filepath
 				str_1 = str(matname)
 				str_list = list(str_1)
@@ -325,7 +325,7 @@ class World_Import(bpy.types.Operator, ImportHelper):
 				mat.node_tree.links.new(bsdf.inputs['Normal'], n_map.outputs['Normal'])
 				mat.blend_method = 'HASHED'
 				if self.set_ramp == True:
-					fix_material.fixRamp(mat)
+					material_tool.fixRamp(mat)
 			except:
 				pass
 		if not mat:
