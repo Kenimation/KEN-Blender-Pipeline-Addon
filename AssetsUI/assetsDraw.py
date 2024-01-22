@@ -607,7 +607,7 @@ def draw_data(self, context, obj):
 			icon = "CONSTRAINT"
 		if obj.mode == 'POSE':
 			icon = "CONSTRAINT_BONE"
-		text = "Quick Constraints"
+		text = "Constraints List"
 	else:
 		icon = "HIDE_OFF"
 		text = "Expand Constraints List"
