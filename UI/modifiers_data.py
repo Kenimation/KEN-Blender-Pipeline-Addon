@@ -1126,15 +1126,16 @@ class DATA_modifiers:
 		if show_adaptive_options:
 			col.label(text="Render:")
 			col.prop(ob.cycles, "use_adaptive_subdivision", text="Adaptive")
+			
+			col.label(text="Viewport:")
+			col.prop(md, "levels", text="Levels")
+
+			col.separator()
 			if ob.cycles.use_adaptive_subdivision:
 				col.prop(ob.cycles, "dicing_rate")
 			else:
 				col.prop(md, "render_levels", text="Levels")
 
-			col.separator()
-
-			col.label(text="Viewport:")
-			col.prop(md, "levels", text="Levels")
 
 			col.separator()
 		else:

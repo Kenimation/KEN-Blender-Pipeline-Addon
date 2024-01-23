@@ -9,16 +9,25 @@ class DATA_constraints:
         pass
 
     @staticmethod
-    def draw_influence(layout, con):
+    def draw_influence(layout, con, owner):
         layout.separator()
         if con.type in {'IK', 'SPLINE_IK'}:
             # constraint.disable_keep_transform doesn't work well
             # for these constraints.
             layout.prop(con, "influence")
         else:
+            if owner == "OBJECT":
+                owner = "OBJECT"
+            elif owner == "BONE":
+                owner = "BONE"
             row = layout.row(align=True)
             row.prop(con, "influence")
-            row.operator("disable.constraint", text="", icon='CANCEL').con = con.name
+            if con.influence == 0:
+                row = row.row()
+                row.enabled = False
+            disable = row.operator("disable.constraint", text="", icon='CANCEL')
+            disable.con = con.name
+            disable.owner  = owner 
 
     @staticmethod
     def space_template(layout, con, target=True, owner=True, separator=True):
@@ -105,7 +114,7 @@ class DATA_constraints:
         clear.constraint = con.name
         clear.owner = owner
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def TRACK_TO(self, layout, ob, con, owner):
         
@@ -122,7 +131,7 @@ class DATA_constraints:
 
         self.space_template(layout, con)
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def FOLLOW_PATH(self, layout, ob, con, owner):
         
@@ -149,7 +158,7 @@ class DATA_constraints:
 
         layout.operator("constraint.followpath_path_animate", text="Animate Path", icon='ANIM_DATA')
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def LIMIT_ROTATION(self, layout, ob, con, owner):
         
@@ -189,7 +198,7 @@ class DATA_constraints:
         layout.prop(con, "use_transform_limit")
         self.space_template(layout, con, target=False, owner=True)
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def LIMIT_LOCATION(self, layout, ob, con, owner):
         
@@ -258,7 +267,7 @@ class DATA_constraints:
         layout.prop(con, "use_transform_limit")
         self.space_template(layout, con, target=False, owner=True)
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def LIMIT_SCALE(self, layout, ob, con, owner):
         
@@ -327,7 +336,7 @@ class DATA_constraints:
         layout.prop(con, "use_transform_limit")
         self.space_template(layout, con, target=False, owner=True)
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def COPY_ROTATION(self, layout, ob, con, owner):
         
@@ -358,7 +367,7 @@ class DATA_constraints:
 
         self.space_template(layout, con)
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def COPY_LOCATION(self, layout, ob, con, owner):
         
@@ -388,7 +397,7 @@ class DATA_constraints:
 
         self.space_template(layout, con)
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def COPY_SCALE(self, layout, ob, con, owner):
         
@@ -417,7 +426,7 @@ class DATA_constraints:
 
         self.space_template(layout, con)
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def MAINTAIN_VOLUME(self, layout, ob, con, owner):
         
@@ -433,7 +442,7 @@ class DATA_constraints:
 
         self.space_template(layout, con, target=False, owner=True)
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def COPY_TRANSFORMS(self, layout, ob, con, owner):
         
@@ -447,7 +456,7 @@ class DATA_constraints:
 
         self.space_template(layout, con)
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def ACTION(self, layout, ob, con, owner):
         
@@ -469,7 +478,7 @@ class DATA_constraints:
 
         layout.prop(con, "mix_mode", text="Mix", text_ctxt=i18n_contexts.constraint)
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def LOCKED_TRACK(self, layout, ob, con, owner):
         
@@ -484,7 +493,7 @@ class DATA_constraints:
         row = layout.row()
         row.prop(con, "lock_axis", expand=True)
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def LIMIT_DISTANCE(self, layout, ob, con, owner):
         
@@ -504,7 +513,7 @@ class DATA_constraints:
 
         self.space_template(layout, con)
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def STRETCH_TO(self, layout, ob, con, owner):
         
@@ -550,7 +559,7 @@ class DATA_constraints:
         row = layout.row()
         row.prop(con, "keep_axis", text="Rotation", expand=True)
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def FLOOR(self, layout, ob, con, owner):
         
@@ -567,7 +576,7 @@ class DATA_constraints:
 
         self.space_template(layout, con)
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def CLAMP_TO(self, layout, ob, con, owner):
         
@@ -581,7 +590,7 @@ class DATA_constraints:
 
         layout.prop(con, "use_cyclic")
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def TRANSFORM(self, layout, ob, con, owner):
         
@@ -595,7 +604,7 @@ class DATA_constraints:
 
         self.space_template(layout, con)
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def SHRINKWRAP(self, layout, ob, con, owner):
         
@@ -638,7 +647,7 @@ class DATA_constraints:
             subsub.prop(con, "track_axis", text="")
             row.prop_decorator(con, "track_axis")
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def DAMPED_TRACK(self, layout, ob, con, owner):
         
@@ -650,7 +659,7 @@ class DATA_constraints:
         row = layout.row()
         row.prop(con, "track_axis", expand=True)
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def SPLINE_IK(self, layout, ob, con, owner):
         
@@ -660,7 +669,7 @@ class DATA_constraints:
 
         self.target_template(layout, con)
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def PIVOT(self, layout, ob, con, owner):
         
@@ -682,7 +691,7 @@ class DATA_constraints:
         col = layout.column()
         col.prop(con, "rotation_range", text="Rotation Range")
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def FOLLOW_TRACK(self, layout, ob, con, owner):
         
@@ -725,7 +734,7 @@ class DATA_constraints:
 
         layout.operator("clip.constraint_to_fcurve")
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def CAMERA_SOLVER(self, layout, ob, con, owner):
         
@@ -740,7 +749,7 @@ class DATA_constraints:
 
         layout.operator("clip.constraint_to_fcurve")
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def OBJECT_SOLVER(self, layout, ob, con, owner):
         
@@ -770,7 +779,7 @@ class DATA_constraints:
 
         layout.operator("clip.constraint_to_fcurve")
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def draw_transform_cache(self, layout, ob, con, owner):
         
@@ -785,7 +794,7 @@ class DATA_constraints:
         if cache_file is not None:
             layout.prop_search(con, "object_path", cache_file, "object_paths")
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
     def TRANSFORM_CACHE(self, layout, ob, con, owner):
         
@@ -808,7 +817,7 @@ class DATA_constraints:
 
         layout.operator("constraint.normalize_target_weights")
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)
 
         if not con.targets:
             layout.label(text="No target bones added", icon='ERROR')
@@ -909,4 +918,4 @@ class DATA_constraints:
             sub.active = con.use_rotation
             sub.prop(con, "orient_weight", text="", slider=True)
 
-        self.draw_influence(layout, con)
+        self.draw_influence(layout, con, owner)

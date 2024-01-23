@@ -20,31 +20,157 @@ def is_constraint_disabled(con):
 	return False
 
 class Disable_constraint(bpy.types.Operator):
-    bl_idname = "disable.constraint"
-    bl_label = "Disable Constraint"
-    bl_options = {'REGISTER', 'UNDO'}
+	bl_idname = "disable.constraint"
+	bl_label = "Disable Constraint"
+	bl_options = {'REGISTER', 'UNDO'}
 
-    con: bpy.props.StringProperty(options={'HIDDEN'})
+	con: bpy.props.StringProperty(options={'HIDDEN'})
+	owner: bpy.props.StringProperty(options={'HIDDEN'})
 
-    def execute(self, context):
-        ob = bpy.context.object
-        if context.object.mode == 'OBJECT':
-            constraint = ob.constraints.get(self.con)
-            if constraint:
-                mw = ob.matrix_world.copy()
-                constraint.influence = 0
-                ob.matrix_world = mw
-        elif context.object.mode == 'POSE':
-            bone = context.active_pose_bone
-            constraint = bone.constraints.get(self.con)
-            if constraint:
-                mw = bone.matrix.copy()
-                constraint.influence = 0
-                bone.matrix = mw
-        return {"FINISHED"}
+	def execute(self, context):
+		ob = context.object
+		if self.owner == 'BONE':
+			bone = context.pose_bone
+			con = bone.constraints.get(self.con)
+			mat = ob.matrix_world @ bone.matrix
+		else:
+			con = ob.constraints.get(self.con)
+			mat = ob.matrix_world
+
+		con.influence = 0.0
+
+		# Set the matrix.
+		if self.owner == 'BONE':
+			bone.matrix = ob.matrix_world.inverted() @ mat
+		else:
+			ob.matrix_world = mat
+		return {"FINISHED"}
 
 class Constraints_OT_List_Up(Operator):
-	bl_idname = "constraints.list_up"
+	bl_idname = "ken.constraints_list_up"
+	bl_label = "Constraints List Move Up"
+	bl_description = "Constraints List Move Up"
+	bl_options = {'REGISTER', 'UNDO'}
+
+	@classmethod
+	def poll(cls, context):
+		if context.space_data.context == 'CONSTRAINT':
+			return len(context.object.constraints) > 0 and context.object.con_index > 0
+		elif context.space_data.context == 'BONE_CONSTRAINT':
+			return (len(context.active_pose_bone.constraints) > 0 and context.object.bcon_index > 0)
+
+	def execute(self, context):
+		if context.space_data.context == 'CONSTRAINT':
+			name = context.object.constraints[context.object.con_index].name
+
+			if context.object.con_index == 0:
+				context.object.con_index = len(context.object.constraints) - 1
+			else:
+				context.object.con_index -= 1
+			bpy.ops.constraint.move_to_index(constraint=name, owner="OBJECT", index=context.object.con_index)
+		elif context.space_data.context == 'BONE_CONSTRAINT':
+			name = context.active_pose_bone.constraints[context.object.bcon_index].name
+
+			if context.object.bcon_index == 0:
+				context.object.bcon_index = len(context.active_pose_bone.constraints) - 1
+			else:
+				context.object.bcon_index -= 1
+			bpy.ops.constraint.move_to_index(constraint=name, owner="BONE", index=context.object.bcon_index)
+		return{'FINISHED'}
+
+class Constraints_OT_List_Down(Operator):
+	bl_idname = "ken.constraints_list_down"
+	bl_label = "Constraints List Move Down"
+	bl_description = "Constraints List Move Down"
+	bl_options = {'REGISTER', 'UNDO'}
+
+	@classmethod
+	def poll(cls, context):
+		if context.space_data.context == 'CONSTRAINT':
+			return len(context.object.constraints) > 0 and (context.object.con_index < len(context.object.constraints) - 1)
+		elif context.space_data.context == 'BONE_CONSTRAINT':
+			return len(context.active_pose_bone.constraints) > 0 and (context.object.bcon_index < len(context.active_pose_bone.constraints) - 1)
+
+	def execute(self, context):
+		if context.space_data.context == 'CONSTRAINT':
+			name = context.object.constraints[context.object.con_index].name
+
+			if context.object.con_index == len(context.object.constraints) - 1:
+				context.object.con_index = 0
+			else:
+				context.object.con_index += 1
+
+			bpy.ops.constraint.move_to_index(constraint=name, owner="OBJECT", index=context.object.con_index)
+		elif context.space_data.context == 'BONE_CONSTRAINT':
+			name = context.active_pose_bone.constraints[context.object.bcon_index].name
+
+			if context.object.bcon_index == len(context.active_pose_bone.constraints) - 1:
+				context.object.bcon_index = 0
+			else:
+				context.object.bcon_index += 1
+
+			bpy.ops.constraint.move_to_index(constraint=name, owner="BONE", index=context.object.bcon_index)
+
+		return{'FINISHED'}
+
+class Constraints_OT_List_First(Operator):
+	bl_idname = "ken.constraints_list_first"
+	bl_label = "Constraints List Move to First"
+	bl_description = "Constraints List Move to First"
+	bl_options = {'REGISTER', 'UNDO'}
+
+	@classmethod
+	def poll(cls, context):
+		if context.space_data.context == 'CONSTRAINT':
+			return len(context.object.constraints) > 0 and context.object.con_index > 0
+		elif context.space_data.context == 'BONE_CONSTRAINT':
+			return (len(context.active_pose_bone.constraints) > 0 and context.object.bcon_index > 0)
+
+	def execute(self, context):
+		if context.space_data.context == 'CONSTRAINT':
+			name = context.object.constraints[context.object.con_index].name
+			bpy.ops.constraint.move_to_index(constraint=name, owner='OBJECT', index=0)
+			if not context.object.con_index == 0:
+				context.object.con_index = 0
+		elif context.space_data.context == 'BONE_CONSTRAINT':
+			name = context.active_pose_bone.constraints[context.object.bcon_index].name
+			bpy.ops.constraint.move_to_index(constraint=name, owner='BONE', index=0)
+			if not context.object.bcon_index == 0:
+				context.object.bcon_index = 0
+		return{'FINISHED'}
+
+class Constraints_OT_List_Last(Operator):
+	bl_idname = "ken.constraints_list_last"
+	bl_label = "Constraints List Move to Last"
+	bl_description = "Constraints List Move to Last"
+	bl_options = {'REGISTER', 'UNDO'}
+
+	@classmethod
+	def poll(cls, context):
+		if context.space_data.context == 'CONSTRAINT':
+			return len(context.object.constraints) > 0 and (context.object.con_index < len(context.object.constraints) - 1)
+
+		elif context.space_data.context == 'BONE_CONSTRAINT':
+			return len(context.active_pose_bone.constraints) > 0 and (context.object.bcon_index < len(context.active_pose_bone.constraints) - 1)
+	
+	def execute(self, context):
+		if context.space_data.context == 'CONSTRAINT':
+			name = context.object.constraints[context.object.con_index].name
+			bpy.ops.constraint.move_to_index(constraint=name, owner="OBJECT", index=len(context.object.constraints) - 1)
+			if not context.object.con_index == len(context.object.constraints) - 1:
+
+				context.object.con_index = len(context.object.constraints) - 1
+		elif context.space_data.context == 'BONE_CONSTRAINT':
+			name = context.active_pose_bone.constraints[context.object.bcon_index].name
+			bpy.ops.constraint.move_to_index(constraint=name, owner="BONE", index=len(context.active_pose_bone.constraints) - 1)
+			if not context.object.bcon_index == len(context.active_pose_bone.constraints) - 1:
+
+				context.object.bcon_index = len(context.active_pose_bone.constraints) - 1
+
+		return{'FINISHED'}
+
+class Constraints_OT_List_Up_Button(Operator):
+	bl_idname = "ken.constraints_list_up_button"
 	bl_label = "Constraints List Move Up"
 	bl_description = "Constraints List Move Up"
 	bl_options = {'REGISTER', 'UNDO'}
@@ -56,12 +182,12 @@ class Constraints_OT_List_Up(Operator):
 
 		try:
 			if context.space_data.context != 'CONSTRAINT':
-				return (len(context.active_pose_bone.constraints) > 0 and context.object.con_index > 0)
+				return (len(context.active_pose_bone.constraints) > 0 and context.object.bcon_index > 0)
 			else:
 				return len(context.object.constraints) > 0 and context.object.con_index > 0
 		except:
 			if context.object.mode == 'POSE':
-				return (len(context.active_pose_bone.constraints) > 0 and context.object.con_index > 0)
+				return (len(context.active_pose_bone.constraints) > 0 and context.object.bcon_index > 0)
 			else:
 				return len(context.object.constraints) > 0 and context.object.con_index > 0
 
@@ -76,17 +202,17 @@ class Constraints_OT_List_Up(Operator):
 				context.object.con_index -= 1
 			bpy.ops.constraint.move_to_index(constraint=name, owner=owner, index=context.object.con_index)
 		elif owner == 'BONE':
-			name = context.active_pose_bone.constraints[context.object.con_index].name
+			name = context.active_pose_bone.constraints[context.object.bcon_index].name
 
-			if context.object.con_index == 0:
-				context.object.con_index = len(context.active_pose_bone.constraints) - 1
+			if context.object.bcon_index == 0:
+				context.object.bcon_index = len(context.active_pose_bone.constraints) - 1
 			else:
-				context.object.con_index -= 1
-			bpy.ops.constraint.move_to_index(constraint=name, owner=owner, index=context.object.con_index)
+				context.object.bcon_index -= 1
+			bpy.ops.constraint.move_to_index(constraint=name, owner=owner, index=context.object.bcon_index)
 		return{'FINISHED'}
 
-class Constraints_OT_List_Down(Operator):
-	bl_idname = "constraints.list_down"
+class Constraints_OT_List_Down_Button(Operator):
+	bl_idname = "ken.constraints_list_down_button"
 	bl_label = "Constraints List Move Down"
 	bl_description = "Constraints List Move Down"
 	bl_options = {'REGISTER', 'UNDO'}
@@ -98,12 +224,12 @@ class Constraints_OT_List_Down(Operator):
 		
 		try:
 			if context.space_data.context != 'CONSTRAINT':
-				return len(context.active_pose_bone.constraints) > 0 and (context.object.con_index < len(context.active_pose_bone.constraints) - 1)
+				return len(context.active_pose_bone.constraints) > 0 and (context.object.bcon_index < len(context.active_pose_bone.constraints) - 1)
 			else:
 				return len(context.object.constraints) > 0 and (context.object.con_index < len(context.object.constraints) - 1)
 		except:
 			if context.object.mode == 'POSE':
-				return len(context.active_pose_bone.constraints) > 0 and (context.object.con_index < len(context.active_pose_bone.constraints) - 1)
+				return len(context.active_pose_bone.constraints) > 0 and (context.object.bcon_index < len(context.active_pose_bone.constraints) - 1)
 			else:
 				return len(context.object.constraints) > 0 and (context.object.con_index < len(context.object.constraints) - 1)
 
@@ -119,19 +245,19 @@ class Constraints_OT_List_Down(Operator):
 
 			bpy.ops.constraint.move_to_index(constraint=name, owner=owner, index=context.object.con_index)
 		elif owner == 'BONE':
-			name = context.active_pose_bone.constraints[context.object.con_index].name
+			name = context.active_pose_bone.constraints[context.object.bcon_index].name
 
-			if context.object.con_index == len(context.active_pose_bone.constraints) - 1:
-				context.object.con_index = 0
+			if context.object.bcon_index == len(context.active_pose_bone.constraints) - 1:
+				context.object.bcon_index = 0
 			else:
-				context.object.con_index += 1
+				context.object.bcon_index += 1
 
-			bpy.ops.constraint.move_to_index(constraint=name, owner=owner, index=context.object.con_index)
+			bpy.ops.constraint.move_to_index(constraint=name, owner=owner, index=context.object.bcon_index)
 
 		return{'FINISHED'}
 
-class Constraints_OT_List_First(Operator):
-	bl_idname = "constraints.list_first"
+class Constraints_OT_List_First_Button(Operator):
+	bl_idname = "ken.constraints_list_first_button"
 	bl_label = "Constraints List Move to First"
 	bl_description = "Constraints List Move to First"
 	bl_options = {'REGISTER', 'UNDO'}
@@ -140,33 +266,33 @@ class Constraints_OT_List_First(Operator):
 
 	@classmethod
 	def poll(cls, context):
-
 		try:
 			if context.space_data.context != 'CONSTRAINT':
-				return (len(context.active_pose_bone.constraints) > 0 and context.object.con_index > 0)
+				return (len(context.active_pose_bone.constraints) > 0 and context.object.bcon_index > 0)
 			else:
 				return len(context.object.constraints) > 0 and context.object.con_index > 0
 		except:
 			if context.object.mode == 'POSE':
-				return (len(context.active_pose_bone.constraints) > 0 and context.object.con_index > 0)
+				return (len(context.active_pose_bone.constraints) > 0 and context.object.bcon_index > 0)
 			else:
 				return len(context.object.constraints) > 0 and context.object.con_index > 0
 
 	def execute(self, context):
 		owner = self.owner
-		if not context.object.con_index == 0:
-			context.object.con_index = 0
-
 		if owner == 'OBJECT':
 			name = context.object.constraints[context.object.con_index].name
 			bpy.ops.constraint.move_to_index(constraint=name, owner=owner, index=0)
+			if not context.object.con_index == 0:
+				context.object.con_index = 0
 		elif owner == 'BONE':
-			name = context.active_pose_bone.constraints[context.object.con_index].name
+			name = context.active_pose_bone.constraints[context.object.bcon_index].name
 			bpy.ops.constraint.move_to_index(constraint=name, owner=owner, index=0)
+			if not context.object.bcon_index == 0:
+				context.object.bcon_index = 0
 		return{'FINISHED'}
 
-class Constraints_OT_List_Last(Operator):
-	bl_idname = "constraints.list_last"
+class Constraints_OT_List_Last_Button(Operator):
+	bl_idname = "ken.constraints_list_last_button"
 	bl_label = "Constraints List Move to Last"
 	bl_description = "Constraints List Move to Last"
 	bl_options = {'REGISTER', 'UNDO'}
@@ -178,31 +304,29 @@ class Constraints_OT_List_Last(Operator):
 
 		try:
 			if context.space_data.context != 'CONSTRAINT':
-				return len(context.active_pose_bone.constraints) > 0 and (context.object.con_index < len(context.active_pose_bone.constraints) - 1)
+				return len(context.active_pose_bone.constraints) > 0 and (context.object.bcon_index < len(context.active_pose_bone.constraints) - 1)
 			else:
 				return len(context.object.constraints) > 0 and (context.object.con_index < len(context.object.constraints) - 1)
 		except:
 			if context.object.mode == 'POSE':
-				return len(context.active_pose_bone.constraints) > 0 and (context.object.con_index < len(context.active_pose_bone.constraints) - 1)
+				return len(context.active_pose_bone.constraints) > 0 and (context.object.bcon_index < len(context.active_pose_bone.constraints) - 1)
 			else:
 				return len(context.object.constraints) > 0 and (context.object.con_index < len(context.object.constraints) - 1)
 	
 	def execute(self, context):
 		owner = self.owner
 		if owner == 'OBJECT':
+			name = context.object.constraints[context.object.con_index].name
+			bpy.ops.constraint.move_to_index(constraint=name, owner=owner, index=len(context.object.constraints) - 1)
 			if not context.object.con_index == len(context.object.constraints) - 1:
 
 				context.object.con_index = len(context.object.constraints) - 1
-
-			name = context.object.constraints[context.object.con_index].name
-			bpy.ops.constraint.move_to_index(constraint=name, owner=owner, index=len(context.object.constraints) - 1)
 		elif owner == 'BONE':
-			if not context.object.con_index == len(context.active_pose_bone.constraints) - 1:
-
-				context.object.con_index = len(context.active_pose_bone.constraints) - 1
-
-			name = context.active_pose_bone.constraints[context.object.con_index].name
+			name = context.active_pose_bone.constraints[context.object.bcon_index].name
 			bpy.ops.constraint.move_to_index(constraint=name, owner=owner, index=len(context.active_pose_bone.constraints) - 1)
+			if not context.object.bcon_index == len(context.active_pose_bone.constraints) - 1:
+
+				context.object.bcon_index = len(context.active_pose_bone.constraints) - 1
 
 		return{'FINISHED'}
 
@@ -405,7 +529,7 @@ class KEN_OT_CopyToSelected_ListConstraints(Operator):
 		bpy.ops.constraint.copy_to_selected(constraint=self.name, owner = self.owner)
 		return {'FINISHED'}
 
-class KEN_OT_DeleteListConstraints(Operator):
+class KEN_OT_Delete_Constraints_List(Operator):
 	bl_idname = "ken.delete_constraints_list"
 	bl_label = "Delete Constraints List"
 	bl_description = "Delete Constraints"
@@ -415,11 +539,18 @@ class KEN_OT_DeleteListConstraints(Operator):
 	owner: bpy.props.StringProperty(options={'HIDDEN'})
 
 	def execute(self, context):
+		obj = context.object
 		bpy.ops.constraint.delete(constraint=self.name, owner = self.owner)
+		if self.owner == "OBJECT":
+			if obj.con_index != 0:
+				obj.con_index = obj.con_index - 1
+		elif self.owner == "BONE":
+			if obj.bcon_index != 0:
+				obj.bcon_index = obj.bcon_index - 1
 		return {'FINISHED'}
 
-class Apply_Constraints(bpy.types.Operator):
-	bl_idname = "apply.constraints"
+class KEN_OT_Apply_Constraints_List(bpy.types.Operator):
+	bl_idname = "ken.apply_constraints_list"
 	bl_label = "Apply Constraints"
 	bl_options = {'REGISTER', 'UNDO'}
 
@@ -427,11 +558,19 @@ class Apply_Constraints(bpy.types.Operator):
 	owner: bpy.props.StringProperty(options={'HIDDEN'})
 
 	def execute(self, context):
+		obj = context.object
 		bpy.ops.constraint.apply(constraint=self.name, owner = self.owner)
+		if self.owner == "OBJECT":
+			if obj.con_index != 0:
+				obj.con_index = obj.con_index - 1
+		elif self.owner == "BONE":
+			if obj.bcon_index != 0:
+				obj.bcon_index = obj.bcon_index - 1
+		
 		return {"FINISHED"}
 
-class Duplicate_Constraints(bpy.types.Operator):
-	bl_idname = "duplicate.constraints"
+class KEN_OT_Duplicate_Constraints_List(bpy.types.Operator):
+	bl_idname = "ken.duplicate_constraints_list"
 	bl_label = "Duplicate Constraints"
 	bl_options = {'REGISTER', 'UNDO'}
 
@@ -439,7 +578,209 @@ class Duplicate_Constraints(bpy.types.Operator):
 	owner: bpy.props.StringProperty(options={'HIDDEN'})
 
 	def execute(self, context):
+		obj = context.object
 		bpy.ops.constraint.copy(constraint=self.name, owner = self.owner)
+
+		if self.owner == "OBJECT":
+			obj.con_index = obj.con_index + 1
+		elif self.owner == "BONE":
+			obj.bcon_index = obj.bcon_index + 1
+		return {"FINISHED"}
+
+class KEN_OT_Delete_Constraints(Operator):
+	bl_idname = "ken.delete_constraints"
+	bl_label = "Delete Constraints List"
+	bl_description = "Delete Constraints"
+	bl_options = {'REGISTER', 'UNDO'}
+	
+	def execute(self, context):
+		obj = context.object
+		bone = context.active_pose_bone
+		if context.space_data.context == 'CONSTRAINT':
+			con_list = []
+			for con in obj.constraints:
+				con_list.append(con)
+			constraints = con_list[obj.con_index]
+			owner = "OBJECT"
+
+		elif context.space_data.context == 'BONE_CONSTRAINT':
+			con_list = []
+			for con in bone.constraints:
+				con_list.append(con)
+			constraints = con_list[obj.bcon_index]
+			owner = "BONE"
+
+		bpy.ops.constraint.delete(constraint=constraints.name, owner = owner)
+
+		if owner == "OBJECT":
+			if obj.con_index != 0:
+				obj.con_index = obj.con_index - 1
+		elif owner == "BONE":
+			if obj.bcon_index != 0:
+				obj.bcon_index = obj.bcon_index - 1
+
+		return {'FINISHED'}
+
+class KEN_OT_Apply_Constraints(bpy.types.Operator):
+	bl_idname = "ken.apply_constraints"
+	bl_label = "Apply Constraints"
+	bl_options = {'REGISTER', 'UNDO'}
+
+	def execute(self, context):
+		obj = context.object
+		bone = context.active_pose_bone
+		if context.space_data.context == 'CONSTRAINT':
+			con_list = []
+			for con in obj.constraints:
+				con_list.append(con)
+			constraints = con_list[obj.con_index]
+			owner = "OBJECT"
+
+		elif context.space_data.context == 'BONE_CONSTRAINT':
+			con_list = []
+			for con in bone.constraints:
+				con_list.append(con)
+			constraints = con_list[obj.bcon_index]
+			owner = "BONE"
+
+		bpy.ops.constraint.apply(constraint=constraints.name, owner = owner)
+
+		if owner == "OBJECT":
+			if obj.con_index != 0:
+				obj.con_index = obj.con_index - 1
+		elif owner == "BONE":
+			if obj.bcon_index != 0:
+				obj.bcon_index = obj.bcon_index - 1
+
+		return {"FINISHED"}
+
+class KEN_OT_Duplicate_Constraints(bpy.types.Operator):
+	bl_idname = "ken.duplicate_constraints"
+	bl_label = "Duplicate Constraints"
+	bl_options = {'REGISTER', 'UNDO'}
+
+	def execute(self, context):
+		obj = context.object
+		bone = context.active_pose_bone
+		if context.space_data.context == 'CONSTRAINT':
+			con_list = []
+			for con in obj.constraints:
+				con_list.append(con)
+			constraints = con_list[obj.con_index]
+			owner = "OBJECT"
+
+		elif context.space_data.context == 'BONE_CONSTRAINT':
+			con_list = []
+			for con in bone.constraints:
+				con_list.append(con)
+			constraints = con_list[obj.bcon_index]
+			owner = "BONE"
+
+		bpy.ops.constraint.copy(constraint=constraints.name, owner = owner)
+
+		if owner == "OBJECT":
+			obj.con_index = obj.con_index + 1
+		elif owner == "BONE":
+			obj.bcon_index = obj.bcon_index + 1
+
+		return {"FINISHED"}
+
+class KEN_OT_Toggle_Constraints_View(bpy.types.Operator):
+	bl_idname = "ken.toggle_constraints_view"
+	bl_label = "Toggle Constraints View"
+	bl_options = {'REGISTER', 'UNDO'}
+
+	@classmethod
+	def poll(cls, context):
+		if context.space_data.context != 'MODIFIER':
+			return True
+		return False
+
+	def execute(self, context):
+		obj = context.object
+		bone = context.active_pose_bone
+		if context.space_data.context == 'CONSTRAINT':
+			con_list = []
+			for con in obj.constraints:
+				con_list.append(con)
+			constraints = con_list[obj.con_index]
+			con = obj.constraints[constraints.name]
+			if con.enabled == True:
+				con.enabled = False
+			else:
+				con.enabled = True
+
+		elif context.space_data.context == 'BONE_CONSTRAINT':
+			con_list = []
+			for con in bone.constraints:
+				con_list.append(con)
+			constraints = con_list[obj.bcon_index]
+			con = bone.constraints[constraints.name]
+			if con.enabled == True:
+				con.enabled = False
+			else:
+				con.enabled = True
+
+		return {"FINISHED"}
+
+class KEN_OT_Solo_Constraints_View(bpy.types.Operator):
+	bl_idname = "ken.solo_constraints_view"
+	bl_label = "Solo Constraints List"
+	bl_options = {'REGISTER', 'UNDO'}
+
+	@classmethod
+	def poll(cls, context):
+		if context.space_data.context != 'MODIFIER':
+			return True
+		return False
+
+	def execute(self, context):
+		obj = context.object
+		bone = context.active_pose_bone
+		if context.space_data.context == 'CONSTRAINT':
+			con_list = []
+			for con in obj.constraints:
+				con_list.append(con)
+			for con in obj.constraints:
+				if con != con_list[obj.con_index]:
+					con.enabled = False
+				else:
+					con.enabled = True
+
+		elif context.space_data.context == 'BONE_CONSTRAINT':
+			con_list = []
+			for con in bone.constraints:
+				con_list.append(con)
+			for con in bone.constraints:
+				if con != con_list[obj.bcon_index]:
+					con.enabled = False
+				else:
+					con.enabled = True
+				
+		return {"FINISHED"}
+
+class KEN_OT_Show_Constraints_View(bpy.types.Operator):
+	bl_idname = "ken.show_constraints_view"
+	bl_label = "Show All Constraints List"
+	bl_options = {'REGISTER', 'UNDO'}
+
+	@classmethod
+	def poll(cls, context):
+		if context.space_data.context != 'MODIFIER':
+			return True
+		return False
+
+	def execute(self, context):
+		obj = context.object
+		bone = context.active_pose_bone
+		if context.space_data.context == 'CONSTRAINT':
+			for con in obj.constraints:
+				con.enabled = True
+
+		elif context.space_data.context == 'BONE_CONSTRAINT':
+			for con in bone.constraints:
+				con.enabled = True
+				
 		return {"FINISHED"}
 
 class Constraints(bpy.types.UIList):
@@ -467,19 +808,27 @@ class Constraints(bpy.types.UIList):
 
 			if constraints:
 				owner = "OBJECT"
-				duplicate = layout.operator("duplicate.constraints", text="", emboss=False, icon = "LAYER_ACTIVE" if index == context.object.con_index else "LAYER_USED")
+				duplicate = layout.operator("ken.duplicate_constraints_list", text="", emboss=False, icon = "LAYER_ACTIVE" if index == context.object.con_index else "LAYER_USED")
 				duplicate.name = constraints.name
 				duplicate.owner = owner
 				row = layout.row()
 				row.alert = is_constraint_disabled(constraints)
 				row.label(text="", icon_value=layout.icon(constraints))
 				layout.prop(constraints, "name", text="", emboss=False)
+				row = layout.row()
+				row.prop(constraints, "influence", text="", emboss=False)
+				if constraints.influence == 0:
+					row = row.row()
+					row.enabled = False
+				disable = row.operator("disable.constraint", text="", icon='CANCEL', emboss=False)
+				disable.con = constraints.name
+				disable.owner  = owner 
 				layout.prop(constraints, "enabled", text="", icon = "HIDE_ON", emboss=False)
 				if len(context.selected_objects) > 1:
 					copy = layout.operator("ken.copy_to_selected_constraints_list", emboss = False, icon='COPYDOWN', text="")
 					copy.name = constraints.name
 					copy.owner = owner
-				apply = layout.operator("apply.constraints", emboss=False, icon='CHECKMARK', text="")
+				apply = layout.operator("ken.apply_constraints_list", emboss=False, icon='CHECKMARK', text="")
 				apply.name = constraints.name
 				apply.owner = owner
 				delete = layout.operator("ken.delete_constraints_list", emboss=False, icon='X', text="")
@@ -516,19 +865,27 @@ class BONE_Constraints(bpy.types.UIList):
 
 			if constraints:
 				owner = "BONE"
-				duplicate = layout.operator("duplicate.constraints", text="", emboss=False, icon = "LAYER_ACTIVE" if index == context.object.con_index else "LAYER_USED")
+				duplicate = layout.operator("ken.duplicate_constraints_list", text="", emboss=False, icon = "LAYER_ACTIVE" if index == context.object.bcon_index else "LAYER_USED")
 				duplicate.name = constraints.name
 				duplicate.owner = owner
 				row = layout.row()
 				row.alert = is_constraint_disabled(constraints)
 				row.label(text="", icon_value=layout.icon(constraints))
 				layout.prop(constraints, "name", text="", emboss=False)
+				row = layout.row()
+				row.prop(constraints, "influence", text="", emboss=False)
+				if constraints.influence == 0:
+					row = row.row()
+					row.enabled = False
+				disable = row.operator("disable.constraint", text="", icon='CANCEL', emboss=False)
+				disable.con = constraints.name
+				disable.owner  = owner
 				layout.prop(constraints, "enabled", text="", icon = "HIDE_ON", emboss=False)
 				if len(context.selected_pose_bones) > 1:
 					copy = layout.operator("ken.copy_to_selected_constraints_list", emboss = False, icon='COPYDOWN', text="")
 					copy.name = constraints.name
 					copy.owner = owner
-				apply = layout.operator("apply.constraints", emboss=False, icon='CHECKMARK', text="")
+				apply = layout.operator("ken.apply_constraints_list", emboss=False, icon='CHECKMARK', text="")
 				apply.name = constraints.name
 				apply.owner = owner
 				delete = layout.operator("ken.delete_constraints_list", emboss=False, icon='X', text="")
@@ -600,7 +957,6 @@ class BONE_PT_constraints(BoneConstraintPanel, Panel):
 
 def drawconstraints(self, context, layout, owner, row, obj):
 	scene = context.scene
-	bone = context.active_pose_bone
 	if obj.constraints:
 		row.operator("ken.toggle_constraints", emboss = False, icon='HIDE_OFF', text="").owner = owner
 		if len(context.selected_objects) > 1:
@@ -620,10 +976,10 @@ def drawconstraints(self, context, layout, owner, row, obj):
 	row.template_list("Constraints", "", obj, "constraints", obj, "con_index")
 
 	col = row.column()
-	col.operator("constraints.list_first", text="", icon='TRIA_UP_BAR').owner = owner
-	col.operator("constraints.list_up", text="", icon='TRIA_UP').owner = owner
-	col.operator("constraints.list_down", text="", icon='TRIA_DOWN').owner = owner
-	col.operator("constraints.list_last", text="", icon='TRIA_DOWN_BAR').owner = owner
+	col.operator("ken.constraints_list_first_button", text="", icon='TRIA_UP_BAR').owner = owner
+	col.operator("ken.constraints_list_up_button", text="", icon='TRIA_UP').owner = owner
+	col.operator("ken.constraints_list_down_button", text="", icon='TRIA_DOWN').owner = owner
+	col.operator("ken.constraints_list_last_button", text="", icon='TRIA_DOWN_BAR').owner = owner
 
 	if context.scene.con_panel == True:
 		try:
@@ -637,7 +993,7 @@ def drawconstraints(self, context, layout, owner, row, obj):
 
 			row = box.row()
 
-			duplicate = row.operator("duplicate.constraints", text="", emboss=False, icon = "LAYER_ACTIVE")
+			duplicate = row.operator("ken.duplicate_constraints_list", text="", emboss=False, icon = "LAYER_ACTIVE")
 			duplicate.name = constraints.name
 			duplicate.owner = owner
 			lrow = row.row()
@@ -649,7 +1005,7 @@ def drawconstraints(self, context, layout, owner, row, obj):
 				copy = row.operator("ken.copy_to_selected_constraints_list", emboss = False, icon='COPYDOWN', text="")
 				copy.name = constraints.name
 				copy.owner = owner
-			apply = row.operator("apply.constraints", emboss=False, icon='CHECKMARK', text="")
+			apply = row.operator("ken.apply_constraints_list", emboss=False, icon='CHECKMARK', text="")
 			apply.name = constraints.name
 			apply.owner = owner
 			delete = row.operator("ken.delete_constraints_list", emboss=False, icon='X', text="")
@@ -682,28 +1038,28 @@ def draw_boneconstraints(self, context, layout, owner, row, obj):
 
 	layout.operator_menu_enum("pose.constraint_add", "type", text="Add Bone Constraint")
 	row = layout.row()
-	row.template_list("BONE_Constraints", "", bone, "constraints", obj, "con_index")
+	row.template_list("BONE_Constraints", "", bone, "constraints", obj, "bcon_index")
 
 	col = row.column()
-	col.operator("constraints.list_first", text="", icon='TRIA_UP_BAR').owner = owner
-	col.operator("constraints.list_up", text="", icon='TRIA_UP').owner = owner
-	col.operator("constraints.list_down", text="", icon='TRIA_DOWN').owner = owner
-	col.operator("constraints.list_last", text="", icon='TRIA_DOWN_BAR').owner = owner
+	col.operator("ken.constraints_list_first_button", text="", icon='TRIA_UP_BAR').owner = owner
+	col.operator("ken.constraints_list_up_button", text="", icon='TRIA_UP').owner = owner
+	col.operator("ken.constraints_list_down_button", text="", icon='TRIA_DOWN').owner = owner
+	col.operator("ken.constraints_list_last_button", text="", icon='TRIA_DOWN_BAR').owner = owner
 
 	if obj.mode == "POSE":
 		if context.scene.con_panel == True:
 			try:
 				con_list = []
-				for con in context.active_pose_bone.constraints:
+				for con in bone.constraints:
 					con_list.append(con)
-				constraints = con_list[obj.con_index]
+				constraints = con_list[obj.bcon_index]
 				
 				# === General settings ===
 				box = layout.box()
 
 				row = box.row()
 
-				duplicate = row.operator("duplicate.constraints", text="", emboss=False, icon = "LAYER_ACTIVE")
+				duplicate = row.operator("ken.duplicate_constraints_list", text="", emboss=False, icon = "LAYER_ACTIVE")
 				duplicate.name = constraints.name
 				duplicate.owner = owner
 				lrow = row.row()
@@ -715,7 +1071,7 @@ def draw_boneconstraints(self, context, layout, owner, row, obj):
 					copy = row.operator("ken.copy_to_selected_constraints_list", emboss = False, icon='COPYDOWN', text="")
 					copy.name = constraints.name
 					copy.owner = owner
-				apply = row.operator("apply.constraints", emboss=False, icon='CHECKMARK', text="")
+				apply = row.operator("ken.apply_constraints_list", emboss=False, icon='CHECKMARK', text="")
 				apply.name = constraints.name
 				apply.owner = owner
 				delete = row.operator("ken.delete_constraints_list", emboss=False, icon='X', text="")
@@ -729,7 +1085,7 @@ def draw_boneconstraints(self, context, layout, owner, row, obj):
 				layout.label(text = "No Constraint has selected.")
 
 	else:
-		layout.label(text = "Object mode is not Pose mode.")
+		layout.label(text = "Interaction mode is not Pose Mode.")
 		layout.operator("object.posemode_toggle", text = "Toggle Pose Mode")
 
 def KEN_MT_con_menu_main(self, context):
@@ -784,20 +1140,35 @@ bpy.types.Object.con_index = bpy.props.IntProperty(
 	description="Constraints List Index",
 )
 
+bpy.types.Object.bcon_index = bpy.props.IntProperty(
+	name="Bone Constraints List Index",
+	description="Bone Constraints List Index",
+)
+
 classes = (
 	Disable_constraint,
 	Constraints_OT_List_Up,
 	Constraints_OT_List_Down,
 	Constraints_OT_List_First,
 	Constraints_OT_List_Last,
+	Constraints_OT_List_Up_Button,
+	Constraints_OT_List_Down_Button,
+	Constraints_OT_List_First_Button,
+	Constraints_OT_List_Last_Button,
 	KEN_OT_ToggleConstraints,
 	KEN_OT_ApplyAllConstraints,
 	KEN_OT_DeleteAllConstraints,
 	KEN_OT_CopyToSelected_ListConstraintsAll,
 	KEN_OT_CopyToSelected_ListConstraints,
-	KEN_OT_DeleteListConstraints,
-	Apply_Constraints,
-	Duplicate_Constraints,
+	KEN_OT_Delete_Constraints_List,
+	KEN_OT_Apply_Constraints_List,
+	KEN_OT_Duplicate_Constraints_List,
+	KEN_OT_Delete_Constraints,
+	KEN_OT_Apply_Constraints,
+	KEN_OT_Duplicate_Constraints,
+	KEN_OT_Toggle_Constraints_View,
+	KEN_OT_Solo_Constraints_View,
+	KEN_OT_Show_Constraints_View,
 	Constraints,
 	BONE_Constraints,
 		  ) 
