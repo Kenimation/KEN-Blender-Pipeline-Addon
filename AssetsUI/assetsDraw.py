@@ -605,9 +605,10 @@ def draw_data(self, context, obj):
 	if scene.showconstraints == True:
 		if obj.mode != 'POSE':
 			icon = "CONSTRAINT"
+			text = "Constraints List"
 		if obj.mode == 'POSE':
 			icon = "CONSTRAINT_BONE"
-		text = "Constraints List"
+			text = "Bone Constraints List"
 	else:
 		icon = "HIDE_OFF"
 		text = "Expand Constraints List"

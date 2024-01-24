@@ -973,6 +973,30 @@ class BONE_PT_constraints(BoneConstraintPanel, Panel):
 		owner = "BONE"
 		draw_boneconstraints(self, context, layout, owner, row, obj)
 
+class Constraints_OT_Object_Constraints_Add(bpy.types.Operator):
+	bl_idname = "constraints_list.object_constraint_add"
+	bl_label = "Add Constraints in list"
+	bl_options = {'REGISTER', 'UNDO'}
+
+	type: bpy.props.StringProperty(options={'HIDDEN'})
+
+	def execute(self, context):
+		bpy.ops.object.constraint_add(type=self.type)
+		context.object.con_index = len(context.object.constraints) - 1
+		return {"FINISHED"}
+
+class Constraints_OT_Pose_Constraints_Add(bpy.types.Operator):
+	bl_idname = "constraints_list.pose_constraint_add"
+	bl_label = "Add Bone Constraints in list"
+	bl_options = {'REGISTER', 'UNDO'}
+
+	type: bpy.props.StringProperty(options={'HIDDEN'})
+
+	def execute(self, context):
+		bpy.ops.pose.constraint_add(type=self.type)
+		context.object.bcon_index = len(context.active_pose_bone.constraints) - 1
+		return {"FINISHED"}
+
 class ConstraintAddMenu:
 	Constraint_TYPES_TO_LABELS = {
 		enum_it.identifier: enum_it.name
@@ -986,24 +1010,44 @@ class ConstraintAddMenu:
 
 	@classmethod
 	def operator_constraint_add(cls, layout, con_type):
-		if bpy.context.space_data.context == 'CONSTRAINT':
-			layout.operator(
-				"object.constraint_add",
-				text=cls.Constraint_TYPES_TO_LABELS[con_type],
-				# Although these are operators, the label actually comes from an (enum) property,
-				# so the property's translation context must be used here.
-				text_ctxt=cls.Constraint_TYPES_I18N_CONTEXT,
-				icon=cls.Constraint_TYPES_TO_ICONS[con_type],
-			).type = con_type
-		elif bpy.context.space_data.context == 'BONE_CONSTRAINT':
-			layout.operator(
-				"pose.constraint_add",
-				text=cls.Constraint_TYPES_TO_LABELS[con_type],
-				# Although these are operators, the label actually comes from an (enum) property,
-				# so the property's translation context must be used here.
-				text_ctxt=cls.Constraint_TYPES_I18N_CONTEXT,
-				icon=cls.Constraint_TYPES_TO_ICONS[con_type],
-			).type = con_type
+		try:
+			if bpy.context.space_data.context == 'CONSTRAINT':
+				layout.operator(
+					"constraints_list.object_constraint_add",
+					text=cls.Constraint_TYPES_TO_LABELS[con_type],
+					# Although these are operators, the label actually comes from an (enum) property,
+					# so the property's translation context must be used here.
+					text_ctxt=cls.Constraint_TYPES_I18N_CONTEXT,
+					icon=cls.Constraint_TYPES_TO_ICONS[con_type],
+				).type = con_type
+			elif bpy.context.space_data.context == 'BONE_CONSTRAINT':
+				layout.operator(
+					"constraints_list.pose_constraint_add",
+					text=cls.Constraint_TYPES_TO_LABELS[con_type],
+					# Although these are operators, the label actually comes from an (enum) property,
+					# so the property's translation context must be used here.
+					text_ctxt=cls.Constraint_TYPES_I18N_CONTEXT,
+					icon=cls.Constraint_TYPES_TO_ICONS[con_type],
+				).type = con_type
+		except:
+			if bpy.context.object.mode != "POSE":
+				layout.operator(
+					"constraints_list.object_constraint_add",
+					text=cls.Constraint_TYPES_TO_LABELS[con_type],
+					# Although these are operators, the label actually comes from an (enum) property,
+					# so the property's translation context must be used here.
+					text_ctxt=cls.Constraint_TYPES_I18N_CONTEXT,
+					icon=cls.Constraint_TYPES_TO_ICONS[con_type],
+				).type = con_type
+			else:
+				layout.operator(
+					"constraints_list.pose_constraint_add",
+					text=cls.Constraint_TYPES_TO_LABELS[con_type],
+					# Although these are operators, the label actually comes from an (enum) property,
+					# so the property's translation context must be used here.
+					text_ctxt=cls.Constraint_TYPES_I18N_CONTEXT,
+					icon=cls.Constraint_TYPES_TO_ICONS[con_type],
+				).type = con_type
 
 class OBJECT_MT_constraints_add(ConstraintAddMenu, Menu):
 	bl_label = "Add Constraints"
@@ -1013,10 +1057,16 @@ class OBJECT_MT_constraints_add(ConstraintAddMenu, Menu):
 		layout = self.layout
 		ob_type = context.object.type
 
-		if context.space_data.context == 'CONSTRAINT':
-			self.bl_label = "Add Constraints"
-		elif context.space_data.context == 'BONE_CONSTRAINT':
-			self.bl_label = "Add Bone Constraints"
+		try:
+			if context.space_data.context == 'CONSTRAINT':
+				self.bl_label = "Add Constraints"
+			elif context.space_data.context == 'BONE_CONSTRAINT':
+				self.bl_label = "Add Bone Constraints"
+		except:
+			if context.object.mode != "POSE":
+				self.bl_label = "Add Constraints"
+			else:
+				self.bl_label = "Add Bone Constraints"
 
 		if layout.operator_context == 'EXEC_REGION_WIN':
 			layout.operator_context = 'INVOKE_REGION_WIN'
@@ -1069,11 +1119,19 @@ class OBJECT_MT_constraint_add_tracking(ConstraintAddMenu, Menu):
 		layout = self.layout
 		self.operator_constraint_add(layout, 'CLAMP_TO')
 		self.operator_constraint_add(layout, 'DAMPED_TRACK')
-		if context.space_data.context == 'BONE_CONSTRAINT':
-			self.operator_constraint_add(layout, 'IK')
+		try:
+			if context.space_data.context == 'BONE_CONSTRAINT':
+				self.operator_constraint_add(layout, 'IK')
+		except:
+			if context.object.mode == "POSE":
+				self.operator_constraint_add(layout, 'IK')
 		self.operator_constraint_add(layout, 'LOCKED_TRACK')
-		if context.space_data.context == 'BONE_CONSTRAINT':
-			self.operator_constraint_add(layout, 'SPLINE_IK')
+		try:
+			if context.space_data.context == 'BONE_CONSTRAINT':
+				self.operator_constraint_add(layout, 'SPLINE_IK')
+		except:
+			if context.object.mode == "POSE":
+				self.operator_constraint_add(layout, 'SPLINE_IK')
 		self.operator_constraint_add(layout, 'STRETCH_TO')
 		self.operator_constraint_add(layout, 'TRACK_TO')
 
@@ -1319,6 +1377,8 @@ classes = (
 	Constraints_OT_Show_Constraints_View,
 	ConstraintsList,
 	BONE_ConstraintsList,
+	Constraints_OT_Object_Constraints_Add,
+	Constraints_OT_Pose_Constraints_Add,
 	OBJECT_MT_constraints_add,
 	OBJECT_MT_constraint_add_motion_tracking,
 	OBJECT_MT_constraint_add_transform,
