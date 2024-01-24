@@ -72,102 +72,107 @@ def add_hotkey():
 	if kc:
 		################################################
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.constraints_list_down', 'Z', 'PRESS')
+		kmi = km.keymap_items.new('object.add_constraint_menu', 'A', 'PRESS', shift=True)
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.constraints_list_up', 'C', 'PRESS')
+		kmi = km.keymap_items.new('constraints_list.constraints_list_down', 'Z', 'PRESS')
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.constraints_list_first', 'C', 'PRESS', shift=True)
+		kmi = km.keymap_items.new('constraints_list.constraints_list_up', 'C', 'PRESS')
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.constraints_list_last', 'Z', 'PRESS', shift=True)
+		kmi = km.keymap_items.new('constraints_list.constraints_list_first', 'C', 'PRESS', shift=True)
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.toggle_constraints_view', 'H', 'PRESS')
+		kmi = km.keymap_items.new('constraints_list.constraints_list_last', 'Z', 'PRESS', shift=True)
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.solo_constraints_view', 'H', 'PRESS', shift=True)
+		kmi = km.keymap_items.new('constraints_list.toggle_constraints_view', 'H', 'PRESS')
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.show_constraints_view', 'H', 'PRESS', alt=True)
+		kmi = km.keymap_items.new('constraints_list.solo_constraints_view', 'H', 'PRESS', shift=True)
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.delete_constraints', 'X', 'PRESS')
+		kmi = km.keymap_items.new('constraints_list.show_constraints_view', 'H', 'PRESS', alt=True)
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.apply_constraints', 'A', 'PRESS', ctrl=True)
+		kmi = km.keymap_items.new('constraints_list.delete_constraint', 'X', 'PRESS')
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.duplicate_constraints', 'D', 'PRESS', shift=True)
+		kmi = km.keymap_items.new('constraints_list.apply_constraint', 'A', 'PRESS', ctrl=True)
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.delete_modifiers', 'X', 'PRESS')
+		kmi = km.keymap_items.new('constraints_list.duplicate_constraint', 'D', 'PRESS', shift=True)
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.apply_modifiers', 'A', 'PRESS', ctrl=True)
+		kmi = km.keymap_items.new('modifiers_list.delete_modifier', 'X', 'PRESS')
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.duplicate_modifiers', 'D', 'PRESS', shift=True)
+		kmi = km.keymap_items.new('modifiers_list.apply_modifier', 'A', 'PRESS', ctrl=True)
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.toggle_modifiers_view', 'H', 'PRESS')
+		kmi = km.keymap_items.new('modifiers_list.duplicate_modifier', 'D', 'PRESS', shift=True)
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.solo_modifiers_view', 'H', 'PRESS', shift=True)
+		kmi = km.keymap_items.new('modifiers_list.toggle_modifier_view', 'H', 'PRESS')
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.show_modifiers_view', 'H', 'PRESS', alt=True)
+		kmi = km.keymap_items.new('modifiers_list.solo_modifier_view', 'H', 'PRESS', shift=True)
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.modifiers_list_down', 'Z', 'PRESS')
+		kmi = km.keymap_items.new('modifiers_list.show_modifier_view', 'H', 'PRESS', alt=True)
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.modifiers_list_up', 'C', 'PRESS')
+		kmi = km.keymap_items.new('modifiers_list.modifiers_list_down', 'Z', 'PRESS')
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.modifiers_list_first', 'C', 'PRESS', shift=True)
+		kmi = km.keymap_items.new('modifiers_list.modifiers_list_up', 'C', 'PRESS')
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('ken.modifiers_list_last', 'Z', 'PRESS', shift=True)
+		kmi = km.keymap_items.new('modifiers_list.modifiers_list_first', 'C', 'PRESS', shift=True)
+		kmi.active = True
+		addon_keymaps.append((km, kmi))
+
+		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
+		kmi = km.keymap_items.new('modifiers_list.modifiers_list_last', 'Z', 'PRESS', shift=True)
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
@@ -602,7 +607,7 @@ class AddonPref(bpy.types.AddonPreferences):
             col.label(text="Modifier Panel")
             if self.use_modifier_panel == True:
                 km = kc.keymaps[property_editor_reg_location]
-                kmi = get_hotkey_entry_item(km, 'ken.apply_modifiers', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'modifiers_list.apply_modifier', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -610,7 +615,7 @@ class AddonPref(bpy.types.AddonPreferences):
                 else:
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
-                kmi = get_hotkey_entry_item(km, 'ken.duplicate_modifiers', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'modifiers_list.duplicate_modifier', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -618,7 +623,7 @@ class AddonPref(bpy.types.AddonPreferences):
                 else:
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
-                kmi = get_hotkey_entry_item(km, 'ken.toggle_modifiers_view', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'modifiers_list.toggle_modifier_view', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -626,7 +631,7 @@ class AddonPref(bpy.types.AddonPreferences):
                 else:
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
-                kmi = get_hotkey_entry_item(km, 'ken.solo_modifiers_view', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'modifiers_list.solo_modifier_view', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -634,7 +639,7 @@ class AddonPref(bpy.types.AddonPreferences):
                 else:
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
-                kmi = get_hotkey_entry_item(km, 'ken.show_modifiers_view', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'modifiers_list.show_modifier_view', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -642,7 +647,7 @@ class AddonPref(bpy.types.AddonPreferences):
                 else:
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
-                kmi = get_hotkey_entry_item(km, 'ken.modifiers_list_up', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'modifiers_list.modifiers_list_up', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -650,7 +655,7 @@ class AddonPref(bpy.types.AddonPreferences):
                 else:
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
-                kmi = get_hotkey_entry_item(km, 'ken.modifiers_list_down', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'modifiers_list.modifiers_list_down', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -658,7 +663,7 @@ class AddonPref(bpy.types.AddonPreferences):
                 else:
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
-                kmi = get_hotkey_entry_item(km, 'ken.modifiers_list_last', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'modifiers_list.modifiers_list_first', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -666,7 +671,7 @@ class AddonPref(bpy.types.AddonPreferences):
                 else:
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
-                kmi = get_hotkey_entry_item(km, 'ken.modifiers_list_first', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'modifiers_list.modifiers_list_last', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -674,7 +679,7 @@ class AddonPref(bpy.types.AddonPreferences):
                 else:
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
-                kmi = get_hotkey_entry_item(km, 'ken.delete_modifiers', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'modifiers_list.delete_modifier', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -685,7 +690,7 @@ class AddonPref(bpy.types.AddonPreferences):
             col.label(text="Constraint Panel")
             if self.use_constraint_panel == True:
                 km = kc.keymaps[property_editor_reg_location]
-                kmi = get_hotkey_entry_item(km, 'ken.apply_constraints', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'object.add_constraint_menu', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -693,7 +698,7 @@ class AddonPref(bpy.types.AddonPreferences):
                 else:
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
-                kmi = get_hotkey_entry_item(km, 'ken.duplicate_constraints', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'constraints_list.apply_constraint', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -701,7 +706,7 @@ class AddonPref(bpy.types.AddonPreferences):
                 else:
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
-                kmi = get_hotkey_entry_item(km, 'ken.toggle_constraints_view', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'constraints_list.duplicate_constraint', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -709,7 +714,7 @@ class AddonPref(bpy.types.AddonPreferences):
                 else:
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
-                kmi = get_hotkey_entry_item(km, 'ken.solo_constraints_view', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'constraints_list.toggle_constraints_view', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -717,7 +722,7 @@ class AddonPref(bpy.types.AddonPreferences):
                 else:
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
-                kmi = get_hotkey_entry_item(km, 'ken.show_constraints_view', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'constraints_list.solo_constraints_view', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -725,7 +730,7 @@ class AddonPref(bpy.types.AddonPreferences):
                 else:
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
-                kmi = get_hotkey_entry_item(km, 'ken.constraints_list_up', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'constraints_list.show_constraints_view', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -733,7 +738,7 @@ class AddonPref(bpy.types.AddonPreferences):
                 else:
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
-                kmi = get_hotkey_entry_item(km, 'ken.constraints_list_down', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'constraints_list.constraints_list_up', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -741,7 +746,7 @@ class AddonPref(bpy.types.AddonPreferences):
                 else:
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
-                kmi = get_hotkey_entry_item(km, 'ken.constraints_list_last', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'constraints_list.constraints_list_down', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -749,7 +754,7 @@ class AddonPref(bpy.types.AddonPreferences):
                 else:
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
-                kmi = get_hotkey_entry_item(km, 'ken.constraints_list_first', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'constraints_list.constraints_list_first', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -757,7 +762,15 @@ class AddonPref(bpy.types.AddonPreferences):
                 else:
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
-                kmi = get_hotkey_entry_item(km, 'ken.delete_constraints', '')  # ← オペレーターと、プロパティを設定するs
+                kmi = get_hotkey_entry_item(km, 'constraints_list.constraints_list_last', '')  # ← オペレーターと、プロパティを設定するs
+                if kmi:
+                    col.context_pointer_set("keymap", km)
+                    rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
+                    col.separator()
+                else:
+                    col.label(text="No hotkey entry found")
+                    col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
+                kmi = get_hotkey_entry_item(km, 'constraints_list.delete_constraint', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
                     col.context_pointer_set("keymap", km)
                     rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)

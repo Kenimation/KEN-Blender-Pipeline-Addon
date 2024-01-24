@@ -44,29 +44,28 @@ def draw_ken_animerig(self, context, obj):
             row.prop(rig, "MeshSelect", text = "", icon = icon, emboss = False)
             row.prop(scene, "object_properties", icon = "ARMATURE_DATA", text = "")
             row.operator("render.anime_snap", text = "", icon = "RESTRICT_RENDER_OFF").mode = "Final"
-            for item in addon_prefs.registered_name:
-                if  item.registered_name == AnimeProperties.registered_name[2]:
-                    if rig.mode == 'EDIT':
-                        assetsDraw.drawbone_properties(box, context, obj)
-                    else:
-                        row = box.row()
-                        row.prop(scene, rig_class, expand = True)
-                        if rig_get_class == "Setup":
-                            drawrigsetup(self, context)
-                        if rig_get_class == "Design":
-                            drawrigdesign(self, context)
-                        if rig_get_class == "Posing":
-                            if rig_class != "myanimerigAddition":
-                                drawrigposing(self, context)
-                            else:
-                                AnimeExtraProperties.drawrigAddition(self, context)
-                        if rig_get_class == "Addition":
-                            AnimeExtraProperties.drawrigAddition(self, context)
+            if all(item.registered_name == AnimeProperties.registered_name[2] for item in addon_prefs.registered_name):
+                if rig.mode == 'EDIT':
+                    assetsDraw.drawbone_properties(box, context, obj)
                 else:
-                    layout = self.layout
-                    box = layout.box()
                     row = box.row()
-                    row.label(text = "Registered name is not available to edit the rig.")
+                    row.prop(scene, rig_class, expand = True)
+                    if rig_get_class == "Setup":
+                        drawrigsetup(self, context)
+                    if rig_get_class == "Design":
+                        drawrigdesign(self, context)
+                    if rig_get_class == "Posing":
+                        if rig_class != "myanimerigAddition":
+                            drawrigposing(self, context)
+                        else:
+                            AnimeExtraProperties.drawrigAddition(self, context)
+                    if rig_get_class == "Addition":
+                        AnimeExtraProperties.drawrigAddition(self, context)
+            else:
+                layout = self.layout
+                box = layout.box()
+                row = box.row()
+                row.label(text = "Registered name is not available to edit the rig.")
     
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

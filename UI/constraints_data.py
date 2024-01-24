@@ -160,6 +160,26 @@ class DATA_constraints:
 
         self.draw_influence(layout, con, owner)
 
+    def LIMIT_DISTANCE(self, layout, ob, con, owner):
+        
+        
+        layout.use_property_split = True
+        layout.use_property_decorate = True
+
+        self.target_template(layout, con)
+
+        row = layout.row()
+        row.prop(con, "distance")
+        row.operator("constraint.limitdistance_reset", text="", icon='X')
+
+        layout.prop(con, "limit_mode", text="Clamp Region")
+
+        layout.prop(con, "use_transform_limit")
+
+        self.space_template(layout, con)
+
+        self.draw_influence(layout, con, owner)
+
     def LIMIT_ROTATION(self, layout, ob, con, owner):
         
         
@@ -428,6 +448,20 @@ class DATA_constraints:
 
         self.draw_influence(layout, con, owner)
 
+    def COPY_TRANSFORMS(self, layout, ob, con, owner):
+        
+        layout.use_property_split = True
+        layout.use_property_decorate = True
+
+        self.target_template(layout, con)
+
+        layout.prop(con, "remove_target_shear")
+        layout.prop(con, "mix_mode", text="Mix", text_ctxt=i18n_contexts.constraint)
+
+        self.space_template(layout, con)
+
+        self.draw_influence(layout, con, owner)
+
     def MAINTAIN_VOLUME(self, layout, ob, con, owner):
         
         layout.use_property_split = True
@@ -441,20 +475,6 @@ class DATA_constraints:
         layout.prop(con, "volume")
 
         self.space_template(layout, con, target=False, owner=True)
-
-        self.draw_influence(layout, con, owner)
-
-    def COPY_TRANSFORMS(self, layout, ob, con, owner):
-        
-        layout.use_property_split = True
-        layout.use_property_decorate = True
-
-        self.target_template(layout, con)
-
-        layout.prop(con, "remove_target_shear")
-        layout.prop(con, "mix_mode", text="Mix", text_ctxt=i18n_contexts.constraint)
-
-        self.space_template(layout, con)
 
         self.draw_influence(layout, con, owner)
 
@@ -492,26 +512,6 @@ class DATA_constraints:
         row.prop(con, "track_axis", expand=True)
         row = layout.row()
         row.prop(con, "lock_axis", expand=True)
-
-        self.draw_influence(layout, con, owner)
-
-    def LIMIT_DISTANCE(self, layout, ob, con, owner):
-        
-        
-        layout.use_property_split = True
-        layout.use_property_decorate = True
-
-        self.target_template(layout, con)
-
-        row = layout.row()
-        row.prop(con, "distance")
-        row.operator("constraint.limitdistance_reset", text="", icon='X')
-
-        layout.prop(con, "limit_mode", text="Clamp Region")
-
-        layout.prop(con, "use_transform_limit")
-
-        self.space_template(layout, con)
 
         self.draw_influence(layout, con, owner)
 
@@ -781,7 +781,7 @@ class DATA_constraints:
 
         self.draw_influence(layout, con, owner)
 
-    def draw_transform_cache(self, layout, ob, con, owner):
+    def TRANSFORM_CACHE(self, layout, ob, con, owner):
         
         
         layout.use_property_split = True
@@ -795,10 +795,6 @@ class DATA_constraints:
             layout.prop_search(con, "object_path", cache_file, "object_paths")
 
         self.draw_influence(layout, con, owner)
-
-    def TRANSFORM_CACHE(self, layout, ob, con, owner):
-        
-        layout.label(text="Blender 2.6 doesn't support Python constraints yet")
 
     def ARMATURE(self, layout, ob, con, owner):
         

@@ -122,8 +122,8 @@ def is_modifier_disabled(mod):
 
 	return False
 
-class KEN_OT_ApplyAllModifiers(Operator):
-	bl_idname = "ken.apply_all_modifiers"
+class ModifiersList_OT_ApplyAllModifiers(Operator):
+	bl_idname = "modifiers_list.apply_all_modifiers"
 	bl_label = "Apply All Modifiers"
 	bl_description = "Applies to all modifiers of selected object"
 	bl_options = {'REGISTER', 'UNDO'}
@@ -145,8 +145,8 @@ class KEN_OT_ApplyAllModifiers(Operator):
 				bpy.ops.object.gpencil_modifiers_apply(modifier=mod.name)
 		return {'FINISHED'}
 
-class KEN_OT_DeleteAllModifiers(Operator):
-	bl_idname = "ken.delete_all_modifiers"
+class ModifiersList_OT_DeleteAllModifiers(Operator):
+	bl_idname = "modifiers_list.delete_all_modifiers"
 	bl_label = "Remove All Modifiers"
 	bl_description = "Remove all modifiers of selected object"
 	bl_options = {'REGISTER', 'UNDO'}
@@ -168,8 +168,8 @@ class KEN_OT_DeleteAllModifiers(Operator):
 				obj.grease_pencil_modifiers.remove(mod)
 		return {'FINISHED'}
 
-class KEN_OT_ToggleApplyModifiersCage(Operator):
-	bl_idname = "ken.toggle_apply_modifiers_cage"
+class ModifiersList_OT_ToggleApplyModifiersCage(Operator):
+	bl_idname = "modifiers_list.toggle_apply_modifier_cage"
 	bl_label = "Switch Modifiers Apply/Unapply to show on Cage"
 	bl_description = "Shows or hides application to show on Cage all modifiers of selected object"
 	bl_options = {'REGISTER', 'UNDO'}
@@ -207,8 +207,8 @@ class KEN_OT_ToggleApplyModifiersCage(Operator):
 			self.report(type={"INFO"}, message="Unregistered modifiers apply to show on Cage")
 		return {'FINISHED'}
 
-class KEN_OT_ToggleApplyModifiersEditMode(Operator):
-	bl_idname = "ken.toggle_apply_modifiers_editmode"
+class ModifiersList_OT_ToggleApplyModifiersEditMode(Operator):
+	bl_idname = "modifiers_list.toggle_apply_modifier_editmode"
 	bl_label = "Switch Modifiers Apply/Unapply to show in Edit Mode"
 	bl_description = "Shows or hides application to show in Edit Mode all modifiers of selected object"
 	bl_options = {'REGISTER', 'UNDO'}
@@ -246,8 +246,8 @@ class KEN_OT_ToggleApplyModifiersEditMode(Operator):
 			self.report(type={"INFO"}, message="Unregistered modifiers apply to show in Edit Mode")
 		return {'FINISHED'}
 
-class KEN_OT_ToggleApplyModifiersView(Operator):
-	bl_idname = "ken.toggle_apply_modifiers_view"
+class ModifiersList_OT_ToggleApplyModifiersView(Operator):
+	bl_idname = "modifiers_list.toggle_apply_modifier_view"
 	bl_label = "Switch Modifiers Apply/Unapply to View"
 	bl_description = "Shows or hides application to view all modifiers of selected object"
 	bl_options = {'REGISTER', 'UNDO'}
@@ -285,8 +285,8 @@ class KEN_OT_ToggleApplyModifiersView(Operator):
 			self.report(type={"INFO"}, message="Unregistered modifiers apply to view")
 		return {'FINISHED'}
 
-class KEN_OT_ToggleApplyModifiersRender(Operator):
-	bl_idname = "ken.toggle_apply_modifiers_render"
+class ModifiersList_OT_ToggleApplyModifiersRender(Operator):
+	bl_idname = "modifiers_list.toggle_apply_modifier_render"
 	bl_label = "Switch Modifiers Apply/Unapply to Render"
 	bl_description = "Shows or hides application to Render all modifiers of selected object"
 	bl_options = {'REGISTER', 'UNDO'}
@@ -324,8 +324,8 @@ class KEN_OT_ToggleApplyModifiersRender(Operator):
 			self.report(type={"INFO"}, message="Unregistered modifiers apply to Render")
 		return {'FINISHED'}
 
-class KEN_OT_CopyToSelected_ListModifiers(Operator):
-	bl_idname = "ken.copy_to_selected_modifiers_list"
+class ModifiersList_OT_CopyToSelected_ListModifiers(Operator):
+	bl_idname = "modifiers_list.copy_to_selected_modifier"
 	bl_label = "Copy To Selected Modifiers"
 	bl_description = "Copy To Selected Modifiers"
 	bl_options = {'REGISTER', 'UNDO'}
@@ -349,8 +349,8 @@ class KEN_OT_CopyToSelected_ListModifiers(Operator):
 			bpy.ops.object.gpencil_modifier_copy_to_selected(modifier=self.name)
 		return {'FINISHED'}
 
-class KEN_OT_CopyToSelected_ListModifiersAll(Operator):
-	bl_idname = "ken.copy_to_selected_modifiers_list_all"
+class ModifiersList_OT_CopyToSelected_ListModifiersAll(Operator):
+	bl_idname = "modifiers_list.copy_to_selected_all_modifiers"
 	bl_label = "Copy All Modifiers To Selected"
 	bl_description = "Copy All Modifiers To Selected"
 	bl_options = {'REGISTER', 'UNDO'}
@@ -372,8 +372,8 @@ class KEN_OT_CopyToSelected_ListModifiersAll(Operator):
 			bpy.ops.object.gpencil_modifier_copy_to_selected(modifier=mod.name)
 		return {'FINISHED'}
 
-class KEN_OT_Delete_Modifiers_List(Operator):
-	bl_idname = "ken.delete_modifiers_list"
+class ModifiersList_OT_Delete_Modifiers_List(Operator):
+	bl_idname = "modifiers_list.delete_modifiers_list"
 	bl_label = "Delete Modifiers List"
 	bl_description = "Delete Modifiers"
 	bl_options = {'REGISTER', 'UNDO'}
@@ -403,8 +403,8 @@ class KEN_OT_Delete_Modifiers_List(Operator):
 
 		return {'FINISHED'}
 
-class KEN_OT_Duplicate_Modifiers_List(bpy.types.Operator):
-	bl_idname = "ken.duplicate_modifiers_list"
+class ModifiersList_OT_Duplicate_Modifiers_List(bpy.types.Operator):
+	bl_idname = "modifiers_list.duplicate_modifiers_list"
 	bl_label = "Duplicate Modifiers"
 	bl_options = {'REGISTER', 'UNDO'}
 
@@ -422,8 +422,8 @@ class KEN_OT_Duplicate_Modifiers_List(bpy.types.Operator):
 
 		return {"FINISHED"}
 
-class KEN_OT_Apply_Modifiers_List(bpy.types.Operator):
-	bl_idname = "ken.apply_modifiers_list"
+class ModifiersList_OT_Apply_Modifiers_List(bpy.types.Operator):
+	bl_idname = "modifiers_list.apply_modifiers_list"
 	bl_label = "Apply Modifiers"
 	bl_options = {'REGISTER', 'UNDO'}
 
@@ -441,15 +441,22 @@ class KEN_OT_Apply_Modifiers_List(bpy.types.Operator):
 
 		return {"FINISHED"}
 
-class KEN_OT_Delete_Modifiers(Operator):
-	bl_idname = "ken.delete_modifiers"
+class ModifiersList_OT_Delete_Modifier(Operator):
+	bl_idname = "modifiers_list.delete_modifier"
 	bl_label = "Delete Modifiers List"
 	bl_description = "Delete Modifiers"
 	bl_options = {'REGISTER', 'UNDO'}
 
 	@classmethod
 	def poll(cls, context):
-		if context.space_data.context == 'MODIFIER':
+		try:
+			if context.space_data.context == 'MODIFIER':
+				for obj in context.selected_objects:
+					if obj.modifiers:
+						return True
+					if obj.grease_pencil_modifiers:
+						return True
+		except:
 			for obj in context.selected_objects:
 				if obj.modifiers:
 					return True
@@ -482,14 +489,17 @@ class KEN_OT_Delete_Modifiers(Operator):
 
 		return {'FINISHED'}
 
-class KEN_OT_Duplicate_Modifiers(bpy.types.Operator):
-	bl_idname = "ken.duplicate_modifiers"
+class ModifiersList_OT_Duplicate_Modifier(bpy.types.Operator):
+	bl_idname = "modifiers_list.duplicate_modifier"
 	bl_label = "Duplicate Modifiers List"
 	bl_options = {'REGISTER', 'UNDO'}
 
 	@classmethod
 	def poll(cls, context):
-		if context.space_data.context == 'MODIFIER':
+		try:
+			if context.space_data.context == 'MODIFIER':
+				return True
+		except:
 			return True
 		return False
 
@@ -515,14 +525,17 @@ class KEN_OT_Duplicate_Modifiers(bpy.types.Operator):
 
 		return {"FINISHED"}
 
-class KEN_OT_Apply_Modifiers(bpy.types.Operator):
-	bl_idname = "ken.apply_modifiers"
+class ModifiersList_OT_Apply_Modifier(bpy.types.Operator):
+	bl_idname = "modifiers_list.apply_modifier"
 	bl_label = "Apply Modifiers List"
 	bl_options = {'REGISTER', 'UNDO'}
 
 	@classmethod
 	def poll(cls, context):
-		if context.space_data.context == 'MODIFIER':
+		try:
+			if context.space_data.context == 'MODIFIER':
+				return True
+		except:
 			return True
 		return False
 
@@ -549,8 +562,8 @@ class KEN_OT_Apply_Modifiers(bpy.types.Operator):
 
 		return {"FINISHED"}
 
-class KEN_OT_Toggle_Modifiers_View(bpy.types.Operator):
-	bl_idname = "ken.toggle_modifiers_view"
+class ModifiersList_OT_Toggle_Modifiers_View(bpy.types.Operator):
+	bl_idname = "modifiers_list.toggle_modifier_view"
 	bl_label = "Toggle Modifiers View"
 	bl_options = {'REGISTER', 'UNDO'}
 
@@ -588,8 +601,8 @@ class KEN_OT_Toggle_Modifiers_View(bpy.types.Operator):
 
 		return {"FINISHED"}
 
-class KEN_OT_Solo_Modifiers_View(bpy.types.Operator):
-	bl_idname = "ken.solo_modifiers_view"
+class ModifiersList_OT_Solo_Modifiers_View(bpy.types.Operator):
+	bl_idname = "modifiers_list.solo_modifier_view"
 	bl_label = "Solo Modifiers List"
 	bl_options = {'REGISTER', 'UNDO'}
 
@@ -627,8 +640,8 @@ class KEN_OT_Solo_Modifiers_View(bpy.types.Operator):
 				
 		return {"FINISHED"}
 
-class KEN_OT_Show_Modifiers_View(bpy.types.Operator):
-	bl_idname = "ken.show_modifiers_view"
+class ModifiersList_OT_Show_Modifiers_View(bpy.types.Operator):
+	bl_idname = "modifiers_list.show_modifier_view"
 	bl_label = "Show All Modifiers List"
 	bl_options = {'REGISTER', 'UNDO'}
 
@@ -656,7 +669,7 @@ class ModifierButtonsPanel:
 	bl_context = "modifier"
 	bl_options = {'HIDE_HEADER'}
 
-class MODIFIERS(bpy.types.UIList):
+class ModifiersList(bpy.types.UIList):
 	# The draw_item function is called for each item of the collection that is visible in the list.
 	#   data is the RNA object containing the collection,
 	#   item is the current drawn item of the collection,
@@ -681,7 +694,7 @@ class MODIFIERS(bpy.types.UIList):
 
 			if modifiers:
 
-				duplicate = layout.operator("ken.duplicate_modifiers_list", text="", emboss=False, icon = "LAYER_ACTIVE" if index == context.object.mod_index else "LAYER_USED")
+				duplicate = layout.operator("modifiers_list.duplicate_modifiers_list", text="", emboss=False, icon = "LAYER_ACTIVE" if index == context.object.mod_index else "LAYER_USED")
 				duplicate.name = modifiers.name
 				duplicate.index = index
 				row = layout.row()
@@ -695,24 +708,27 @@ class MODIFIERS(bpy.types.UIList):
 				layout.prop(modifiers, "show_viewport", text="", emboss=False, icon="RESTRICT_VIEW_ON")
 				layout.prop(modifiers, "show_render", text="", emboss=False, icon="RESTRICT_RENDER_ON")
 				if len(context.selected_objects) > 1:
-					layout.operator("ken.copy_to_selected_modifiers_list", emboss = False, icon='COPYDOWN', text="").name = modifiers.name
-				layout.operator("ken.apply_modifiers_list", emboss=False, icon='CHECKMARK', text="").name = modifiers.name
-				layout.operator("ken.delete_modifiers_list", emboss=False, icon='X', text="").name = modifiers.name
+					layout.operator("modifiers_list.copy_to_selected_modifier", emboss = False, icon='COPYDOWN', text="").name = modifiers.name
+				layout.operator("modifiers_list.apply_modifiers_list", emboss=False, icon='CHECKMARK', text="").name = modifiers.name
+				layout.operator("modifiers_list.delete_modifiers_list", emboss=False, icon='X', text="").name = modifiers.name
 
 		# 'GRID' layout type should be as compact as possible (typically a single icon!).
 		elif self.layout_type == 'GRID':
 			layout.alignment = 'CENTER'
 			layout.label(text="", icon_value=icon)
 
-class MODIFIERS_OT_List_Up(Operator):
-	bl_idname = "ken.modifiers_list_up"
+class ModifiersList_OT_List_Up(Operator):
+	bl_idname = "modifiers_list.modifiers_list_up"
 	bl_label = "Modifiers List Move Up"
 	bl_description = "Modifiers List Move Up"
 	bl_options = {'REGISTER', 'UNDO'}
 
 	@classmethod
 	def poll(cls, context):
-		if context.space_data.context == 'MODIFIER':
+		try:
+			if context.space_data.context == 'MODIFIER':
+				return ((len(context.object.modifiers) > 0 or len(context.object.grease_pencil_modifiers) > 0) and context.object.mod_index > 0)
+		except:
 			return ((len(context.object.modifiers) > 0 or len(context.object.grease_pencil_modifiers) > 0) and context.object.mod_index > 0)
 
 	def execute(self, context):
@@ -734,15 +750,18 @@ class MODIFIERS_OT_List_Up(Operator):
 			bpy.ops.object.gpencil_modifier_move_to_index(modifier=name, index=context.object.mod_index)
 		return{'FINISHED'}
 
-class MODIFIERS_OT_List_Down(Operator):
-	bl_idname = "ken.modifiers_list_down"
+class ModifiersList_OT_List_Down(Operator):
+	bl_idname = "modifiers_list.modifiers_list_down"
 	bl_label = "Modifiers List Move Down"
 	bl_description = "Modifiers List Move Down"
 	bl_options = {'REGISTER', 'UNDO'}
 
 	@classmethod
 	def poll(cls, context):
-		if context.space_data.context == 'MODIFIER':
+		try:
+			if context.space_data.context == 'MODIFIER':
+				return ((len(context.object.modifiers) > 0 or len(context.object.grease_pencil_modifiers) > 0) and ((context.object.mod_index < len(context.object.modifiers) - 1) or(context.object.mod_index < len(context.object.grease_pencil_modifiers) - 1)))
+		except:
 			return ((len(context.object.modifiers) > 0 or len(context.object.grease_pencil_modifiers) > 0) and ((context.object.mod_index < len(context.object.modifiers) - 1) or(context.object.mod_index < len(context.object.grease_pencil_modifiers) - 1)))
 
 	def execute(self, context):
@@ -765,15 +784,18 @@ class MODIFIERS_OT_List_Down(Operator):
 
 		return{'FINISHED'}
 
-class MODIFIERS_OT_List_First(Operator):
-	bl_idname = "ken.modifiers_list_first"
+class ModifiersList_OT_List_First(Operator):
+	bl_idname = "modifiers_list.modifiers_list_first"
 	bl_label = "Modifiers List Move to First"
 	bl_description = "Modifiers List Move to First"
 	bl_options = {'REGISTER', 'UNDO'}
 
 	@classmethod
 	def poll(cls, context):
-		if context.space_data.context == 'MODIFIER':
+		try:
+			if context.space_data.context == 'MODIFIER':
+				return ((len(context.object.modifiers) > 0 or len(context.object.grease_pencil_modifiers) > 0) and context.object.mod_index > 0)
+		except:
 			return ((len(context.object.modifiers) > 0 or len(context.object.grease_pencil_modifiers) > 0) and context.object.mod_index > 0)
 
 	def execute(self, context):
@@ -788,15 +810,18 @@ class MODIFIERS_OT_List_First(Operator):
 			context.object.mod_index = 0
 		return{'FINISHED'}
 
-class MODIFIERS_OT_List_Last(Operator):
-	bl_idname = "ken.modifiers_list_last"
+class ModifiersList_OT_List_Last(Operator):
+	bl_idname = "modifiers_list.modifiers_list_last"
 	bl_label = "Modifiers List Move to Last"
 	bl_description = "Modifiers List Move to Last"
 	bl_options = {'REGISTER', 'UNDO'}
 
 	@classmethod
 	def poll(cls, context):
-		if context.space_data.context == 'MODIFIER':
+		try:
+			if context.space_data.context == 'MODIFIER':
+				return ((len(context.object.modifiers) > 0 or len(context.object.grease_pencil_modifiers) > 0) and ((context.object.mod_index < len(context.object.modifiers) - 1) or(context.object.mod_index < len(context.object.grease_pencil_modifiers) - 1)))
+		except:
 			return ((len(context.object.modifiers) > 0 or len(context.object.grease_pencil_modifiers) > 0) and ((context.object.mod_index < len(context.object.modifiers) - 1) or(context.object.mod_index < len(context.object.grease_pencil_modifiers) - 1)))
 
 	def execute(self, context):
@@ -879,14 +904,14 @@ def KEN_MT_mod_menu_main(self, context):
 def drawmodifiers(self, context, layout, row, obj):
 	scene = context.scene
 	if obj.modifiers or obj.grease_pencil_modifiers:
-		row.operator("ken.toggle_apply_modifiers_cage", icon='MESH_DATA', text="")
-		row.operator("ken.toggle_apply_modifiers_editmode", icon='EDITMODE_HLT', text="")
-		row.operator("ken.toggle_apply_modifiers_view", icon='RESTRICT_VIEW_OFF', text="")
-		row.operator("ken.toggle_apply_modifiers_render", icon='RESTRICT_RENDER_OFF', text="")
+		row.operator("modifiers_list.toggle_apply_modifier_cage", icon='MESH_DATA', text="")
+		row.operator("modifiers_list.toggle_apply_modifier_editmode", icon='EDITMODE_HLT', text="")
+		row.operator("modifiers_list.toggle_apply_modifier_view", icon='RESTRICT_VIEW_OFF', text="")
+		row.operator("modifiers_list.toggle_apply_modifier_render", icon='RESTRICT_RENDER_OFF', text="")
 		if len(context.selected_objects) > 1:
-			row.operator("ken.copy_to_selected_modifiers_list_all", emboss = False, icon='COPYDOWN', text="")
-		row.operator("ken.apply_all_modifiers", emboss = False, icon='CHECKMARK', text="")
-		row.operator("ken.delete_all_modifiers", emboss = False, icon='X', text="")
+			row.operator("modifiers_list.copy_to_selected_all_modifiers", emboss = False, icon='COPYDOWN', text="")
+		row.operator("modifiers_list.apply_all_modifiers", emboss = False, icon='CHECKMARK', text="")
+		row.operator("modifiers_list.delete_all_modifiers", emboss = False, icon='X', text="")
 
 	if scene.mod_panel == True:
 		icon ="FULLSCREEN_ENTER"
@@ -899,17 +924,17 @@ def drawmodifiers(self, context, layout, row, obj):
 	if obj.type != "GPENCIL":
 		layout.operator("wm.call_menu", text="Add Modifier", icon='ADD').name = "OBJECT_MT_modifier_add"
 		row = layout.row()
-		row.template_list("MODIFIERS", "", obj, "modifiers", obj, "mod_index")
+		row.template_list("ModifiersList", "", obj, "modifiers", obj, "mod_index")
 	else:
 		layout.operator_menu_enum("object.gpencil_modifier_add", "type")
 		row = layout.row()
-		row.template_list("MODIFIERS", "", obj, "grease_pencil_modifiers", obj, "mod_index")
+		row.template_list("ModifiersList", "", obj, "grease_pencil_modifiers", obj, "mod_index")
 
 	col = row.column()
-	col.operator("ken.modifiers_list_first", text="", icon='TRIA_UP_BAR')
-	col.operator("ken.modifiers_list_up", text="", icon='TRIA_UP')
-	col.operator("ken.modifiers_list_down", text="", icon='TRIA_DOWN')
-	col.operator("ken.modifiers_list_last", text="", icon='TRIA_DOWN_BAR')
+	col.operator("modifiers_list.modifiers_list_first", text="", icon='TRIA_UP_BAR')
+	col.operator("modifiers_list.modifiers_list_up", text="", icon='TRIA_UP')
+	col.operator("modifiers_list.modifiers_list_down", text="", icon='TRIA_DOWN')
+	col.operator("modifiers_list.modifiers_list_last", text="", icon='TRIA_DOWN_BAR')
 
 	if context.scene.mod_panel == True:
 		if obj.modifiers or obj.grease_pencil_modifiers:
@@ -932,7 +957,7 @@ def drawmodifiers(self, context, layout, row, obj):
 
 				row = box.row()
 
-				row.operator("ken.duplicate_modifiers", text="", emboss=False, icon = "LAYER_ACTIVE")
+				row.operator("modifiers_list.duplicate_modifiers", text="", emboss=False, icon = "LAYER_ACTIVE")
 				lrow = row.row()
 				lrow.alert = is_modifier_disabled(modifiers)
 				lrow.label(text="", icon_value=layout.icon(modifiers))
@@ -944,9 +969,9 @@ def drawmodifiers(self, context, layout, row, obj):
 				row.prop(modifiers, "show_viewport", text="", emboss=False, icon="RESTRICT_VIEW_ON")
 				row.prop(modifiers, "show_render", text="", emboss=False, icon="RESTRICT_RENDER_ON")
 				if len(context.selected_objects) > 1:
-					row.operator("ken.copy_to_selected_modifiers_list", emboss = False, icon='COPYDOWN', text="").name = modifiers.name
-				row.operator("ken.apply_modifiers", emboss=False, icon='CHECKMARK', text="")
-				row.operator("ken.delete_modifiers", emboss=False, icon='X', text="")
+					row.operator("modifiers_list.copy_to_selected_modifier", emboss = False, icon='COPYDOWN', text="").name = modifiers.name
+				row.operator("modifiers_list.apply_modifier", emboss=False, icon='CHECKMARK', text="")
+				row.operator("modifiers_list.delete_modifier", emboss=False, icon='X', text="")
 				
 				try:
 					mp = DATA_modifiers(context)
@@ -991,28 +1016,28 @@ bpy.types.Object.mod_index = bpy.props.IntProperty(
 )
 
 classes = (
-			KEN_OT_ApplyAllModifiers,
-			KEN_OT_DeleteAllModifiers,
-			KEN_OT_ToggleApplyModifiersCage,
-			KEN_OT_ToggleApplyModifiersEditMode,
-			KEN_OT_ToggleApplyModifiersView,
-			KEN_OT_ToggleApplyModifiersRender,
-			KEN_OT_CopyToSelected_ListModifiers,
-			KEN_OT_CopyToSelected_ListModifiersAll,
-			KEN_OT_Duplicate_Modifiers_List,
-			KEN_OT_Apply_Modifiers_List,
-			KEN_OT_Delete_Modifiers_List,
-			KEN_OT_Duplicate_Modifiers,
-			KEN_OT_Apply_Modifiers,
-			KEN_OT_Delete_Modifiers,
-			KEN_OT_Toggle_Modifiers_View,
-			KEN_OT_Solo_Modifiers_View,
-			KEN_OT_Show_Modifiers_View,
-			MODIFIERS_OT_List_Up,
-			MODIFIERS_OT_List_Down,
-			MODIFIERS_OT_List_First,
-			MODIFIERS_OT_List_Last,
-			MODIFIERS,
+			ModifiersList_OT_ApplyAllModifiers,
+			ModifiersList_OT_DeleteAllModifiers,
+			ModifiersList_OT_ToggleApplyModifiersCage,
+			ModifiersList_OT_ToggleApplyModifiersEditMode,
+			ModifiersList_OT_ToggleApplyModifiersView,
+			ModifiersList_OT_ToggleApplyModifiersRender,
+			ModifiersList_OT_CopyToSelected_ListModifiers,
+			ModifiersList_OT_CopyToSelected_ListModifiersAll,
+			ModifiersList_OT_Duplicate_Modifiers_List,
+			ModifiersList_OT_Apply_Modifiers_List,
+			ModifiersList_OT_Delete_Modifiers_List,
+			ModifiersList_OT_Duplicate_Modifier,
+			ModifiersList_OT_Apply_Modifier,
+			ModifiersList_OT_Delete_Modifier,
+			ModifiersList_OT_Toggle_Modifiers_View,
+			ModifiersList_OT_Solo_Modifiers_View,
+			ModifiersList_OT_Show_Modifiers_View,
+			ModifiersList_OT_List_Up,
+			ModifiersList_OT_List_Down,
+			ModifiersList_OT_List_First,
+			ModifiersList_OT_List_Last,
+			ModifiersList,
 		  ) 
 
 def register():
