@@ -1108,6 +1108,8 @@ class AddConstraintMenu(Operator):
 		return bpy.ops.wm.call_menu(name="OBJECT_MT_constraints_add")
 
 def drawconstraints(self, context, layout, owner, row, obj):
+	addon_prefs = addonPreferences.getAddonPreferences(bpy.context)
+	use_old_constraint_menu = addon_prefs.use_old_constraint_menu
 	scene = context.scene
 	if obj.constraints:
 		row.operator("constraints_list.toggle_constraints", emboss = False, icon='HIDE_OFF', text="").owner = owner
@@ -1120,10 +1122,14 @@ def drawconstraints(self, context, layout, owner, row, obj):
 		icon ="FULLSCREEN_ENTER"
 	else:
 		icon ="FULLSCREEN_EXIT"
-		
+
 	row.prop(scene, "con_panel", emboss = False, icon=icon, text="")
 
-	layout.operator("wm.call_menu", text="Add Constraints", icon='ADD').name = "OBJECT_MT_constraints_add"
+	if use_old_constraint_menu:	
+		layout.operator_menu_enum("object.constraint_add", "type", text="Add Object Constraint")
+	else:
+		layout.operator("wm.call_menu", text="Add Constraints", icon='ADD').name = "OBJECT_MT_constraints_add"
+		
 	row = layout.row()
 	row.template_list("ConstraintsList", "", obj, "constraints", obj, "con_index")
 
@@ -1171,6 +1177,8 @@ def drawconstraints(self, context, layout, owner, row, obj):
 			layout.label(text = "No Constraint has selected.")
 
 def draw_boneconstraints(self, context, layout, owner, row, obj):
+	addon_prefs = addonPreferences.getAddonPreferences(bpy.context)
+	use_old_constraint_menu = addon_prefs.use_old_constraint_menu
 	scene = context.scene
 	bone = context.active_pose_bone
 	if obj.mode == "POSE":
@@ -1188,7 +1196,10 @@ def draw_boneconstraints(self, context, layout, owner, row, obj):
 		
 	row.prop(scene, "con_panel", emboss = False, icon=icon, text="")
 
-	layout.operator("wm.call_menu", text="Add Bone Constraints", icon='ADD').name = "OBJECT_MT_constraints_add"
+	if use_old_constraint_menu:
+		layout.operator_menu_enum("pose.constraint_add", "type", text="Add Bone Constraint")
+	else:
+		layout.operator("wm.call_menu", text="Add Bone Constraints", icon='ADD').name = "OBJECT_MT_constraints_add"
 	row = layout.row()
 	row.template_list("BONE_ConstraintsList", "", bone, "constraints", obj, "bcon_index")
 

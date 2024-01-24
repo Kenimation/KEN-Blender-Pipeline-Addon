@@ -382,6 +382,16 @@ class AddonPref(bpy.types.AddonPreferences):
 		default=1,
 		min=1)
     
+    use_old_modifier_menu: BoolProperty(
+        name="Old Modifier Menu",
+        description="Enable/disable Modifier Panel",
+        default=False,)
+
+    use_old_constraint_menu: BoolProperty(
+        name="Old Constraint Menu",
+        description="Enable/disable Constraint Panel",
+        default=False,)
+    
     registered_name_index : bpy.props.IntProperty(
     name="registered_name_index",
     description="registered_name_index",
@@ -490,10 +500,14 @@ class AddonPref(bpy.types.AddonPreferences):
             row = col.row()
             row.label(text = "", icon = "MODIFIER")
             row.prop(self, "use_modifier_panel", text = "Modifier Panel")
+            if self.use_modifier_panel:
+                row.prop(self, "use_old_modifier_menu", text = "Old Modifier Menu")
             col = col.column()
             row = col.row()
             row.label(text = "", icon = "CONSTRAINT")
             row.prop(self, "use_constraint_panel", text = "Constraint Panel")
+            if self.use_constraint_panel:
+                row.prop(self, "use_old_constraint_menu", text = "Old Constraint Menu")
             col = col.column()
             row = col.row()
             row.label(text = "", icon = "MATERIAL")

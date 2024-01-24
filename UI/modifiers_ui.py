@@ -902,6 +902,8 @@ def KEN_MT_mod_menu_main(self, context):
 		row.prop(addon_prefs, "use_modifier_panel", text = "Toggle Modifier List", icon = "MODIFIER_OFF", emboss = False)
 
 def drawmodifiers(self, context, layout, row, obj):
+	addon_prefs = addonPreferences.getAddonPreferences(bpy.context)
+	use_old_modifier_menu = addon_prefs.use_old_modifier_menu
 	scene = context.scene
 	if obj.modifiers or obj.grease_pencil_modifiers:
 		row.operator("modifiers_list.toggle_apply_modifier_cage", icon='MESH_DATA', text="")
@@ -922,7 +924,10 @@ def drawmodifiers(self, context, layout, row, obj):
 	rrow.prop(scene, "mod_panel", emboss = False, icon=icon, text="")
 
 	if obj.type != "GPENCIL":
-		layout.operator("wm.call_menu", text="Add Modifier", icon='ADD').name = "OBJECT_MT_modifier_add"
+		if use_old_modifier_menu:
+			layout.operator_menu_enum("object.modifier_add", "type")
+		else:
+			layout.operator("wm.call_menu", text="Add Modifier", icon='ADD').name = "OBJECT_MT_modifier_add"
 		row = layout.row()
 		row.template_list("ModifiersList", "", obj, "modifiers", obj, "mod_index")
 	else:
@@ -957,7 +962,7 @@ def drawmodifiers(self, context, layout, row, obj):
 
 				row = box.row()
 
-				row.operator("modifiers_list.duplicate_modifiers", text="", emboss=False, icon = "LAYER_ACTIVE")
+				row.operator("modifiers_list.duplicate_modifier", text="", emboss=False, icon = "LAYER_ACTIVE")
 				lrow = row.row()
 				lrow.alert = is_modifier_disabled(modifiers)
 				lrow.label(text="", icon_value=layout.icon(modifiers))
