@@ -7,29 +7,21 @@ class DATA_modifiers:
 		pass
 	
 	def ARMATURE(self, layout, ob, md):
-			split = layout.split()
 
-			col = split.column()
-			col.label(text="Object:")
-			col.prop(md, "object", text="")
-			col.prop(md, "use_deform_preserve_volume")
-
-			col = split.column()
-			col.label(text="Bind To:")
-			col.prop(md, "use_vertex_groups", text="Vertex Groups")
-			col.prop(md, "use_bone_envelopes", text="Bone Envelopes")
-
-			layout.separator()
-
-			split = layout.split()
-
-			row = split.row(align=True)
+			layout.label(text="Object:")
+			layout.prop(md, "object", text="")
+			row = layout.row(align=True)
 			row.prop_search(md, "vertex_group", ob, "vertex_groups", text="")
 			sub = row.row(align=True)
 			sub.active = bool(md.vertex_group)
 			sub.prop(md, "invert_vertex_group", text="", icon='ARROW_LEFTRIGHT')
+			
+			layout.prop(md, "use_deform_preserve_volume")
+			layout.prop(md, "use_multi_modifier")
 
-			split.prop(md, "use_multi_modifier")
+			layout.label(text="Bind To:")
+			layout.prop(md, "use_vertex_groups", text="Vertex Groups")
+			layout.prop(md, "use_bone_envelopes", text="Bone Envelopes")
 
 	def ARRAY(self, layout, _ob, md):
 		layout.prop(md, "fit_type")
@@ -906,25 +898,17 @@ class DATA_modifiers:
 	def SHRINKWRAP(self, layout, ob, md):
 		split = layout.split()
 		col = split.column()
-		col.label(text="Target:")
+		col.prop(md, "wrap_method", text="")
+		if md.wrap_method in {'PROJECT', 'NEAREST_SURFACEPOINT', 'TARGET_PROJECT'}:
+			col.prop(md, "wrap_mode", text="")
 		col.prop(md, "target", text="")
-		col = split.column()
+		col.prop(md, "offset")
 		col.label(text="Vertex Group:")
 		row = col.row(align=True)
 		row.prop_search(md, "vertex_group", ob, "vertex_groups", text="")
 		row.prop(md, "invert_vertex_group", text="", icon='ARROW_LEFTRIGHT')
 
 		split = layout.split()
-
-		col = split.column()
-		col.prop(md, "offset")
-
-		col = split.column()
-		col.label(text="Mode:")
-		col.prop(md, "wrap_method", text="")
-
-		if md.wrap_method in {'PROJECT', 'NEAREST_SURFACEPOINT', 'TARGET_PROJECT'}:
-			col.prop(md, "wrap_mode", text="")
 
 		if md.wrap_method == 'PROJECT':
 			split = layout.split()

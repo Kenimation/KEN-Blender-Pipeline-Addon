@@ -16,9 +16,10 @@ class RestCursor(bpy.types.Operator):
 
     def execute(self, context):
         try:
-            bpy.context.scene.cursor.location[0] = 0
-            bpy.context.scene.cursor.location[1] = 0
-            bpy.context.scene.cursor.location[2] = 0
+            context.scene.cursor.location[0] = 0
+            context.scene.cursor.location[1] = 0
+            context.scene.cursor.location[2] = 0
+            self.report({"ERROR"}, "Cursor Rest.")
         except:
             self.report({"ERROR"}, "Cannot Rest Cursor!!!")
         return {'FINISHED'}
@@ -66,9 +67,13 @@ class Operators(bpy.types.Operator):
         if self.id == "emptyselect":
             bpy.ops.object.select_all(action='DESELECT')  # Deselect all objects
 
-            for obj in bpy.context.scene.objects:
+            for obj in context.scene.objects:
                 if obj.type == scene.Object_Type:
-                    obj.select_set(True)    
+                    obj.select_set(True)
+
+            count = len([obj for obj in context.scene.objects if obj.type == scene.Object_Type])
+                    
+            self.report(type={"INFO"}, message= str(count) + " " + str(scene.Object_Type) + " Objects have been selected")
 
         if self.id == "add_paticles_start_frame":
             if context.active_object.particle_systems:

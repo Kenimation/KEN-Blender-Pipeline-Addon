@@ -366,21 +366,14 @@ class AddonPref(bpy.types.AddonPreferences):
     use_modifier_panel: BoolProperty(
         name="Modifier Panel",
         description="Enable/disable Modifier Panel",
-        default=True,
+        default=False,
         update=use_modifier_panel)
 
     use_constraint_panel: BoolProperty(
         name="Constraint Panel",
         description="Enable/disable Constraint Panel",
-        default=True,
+        default=False,
         update=use_constraint_panel)
-
-    rig_scale : bpy.props.FloatProperty(
-		name='Rig Scale',
-		description="Rig Scale of Anime Rig",
-        update = AnimeDefs.write_rig_scale,
-		default=1,
-		min=1)
     
     use_old_modifier_menu: BoolProperty(
         name="Old Modifier Menu",
@@ -391,6 +384,13 @@ class AddonPref(bpy.types.AddonPreferences):
         name="Old Constraint Menu",
         description="Enable/disable Constraint Panel",
         default=False,)
+    
+    rig_scale : bpy.props.FloatProperty(
+		name='Rig Scale',
+		description="Rig Scale of Anime Rig",
+        update = AnimeDefs.write_rig_scale,
+		default=1,
+		min=1)
     
     registered_name_index : bpy.props.IntProperty(
     name="registered_name_index",
@@ -456,7 +456,7 @@ class AddonPref(bpy.types.AddonPreferences):
 
     subClasses : EnumProperty(default = "one",
                                 items = [('one', 'Settings', ''),
-                                        ('two', 'Functions', ''),
+                                        ('two', 'Hotkey', ''),
                                         ('three', 'Contact / Contributors', ''),
                                         ('four', 'Update', ''),
                                         ])
@@ -562,18 +562,17 @@ class AddonPref(bpy.types.AddonPreferences):
             wm = context.window_manager
             kc = wm.keyconfigs.user
             
-            if self.pie_menu == True:
-                view3d_reg_location = "3D View"
-                km = kc.keymaps[view3d_reg_location]
-                kmi = get_hotkey_entry_item(km, 'view3d.open_object_pie_menu', '')  # ← オペレーターと、プロパティを設定するs
-                col.label(text=view3d_reg_location)
-                if kmi:
-                    col.context_pointer_set("keymap", km)
-                    rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
-                    col.separator()
-                else:
-                    col.label(text="No hotkey entry found")
-                    col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
+            view3d_reg_location = "3D View"
+            km = kc.keymaps[view3d_reg_location]
+            kmi = get_hotkey_entry_item(km, 'view3d.open_object_pie_menu', '')  # ← オペレーターと、プロパティを設定するs
+            col.label(text=view3d_reg_location)
+            if kmi:
+                col.context_pointer_set("keymap", km)
+                rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
+                col.separator()
+            else:
+                col.label(text="No hotkey entry found")
+                col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
 
             dopesheet_reg_location = "Dopesheet"
             km = kc.keymaps[dopesheet_reg_location]

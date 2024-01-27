@@ -568,10 +568,10 @@ class PARTICLES(bpy.types.UIList):
                 layout.prop(particles.settings, "name", text="", emboss=False, icon_value=icon)
                 layout.prop(particles, "seed", text="Seed", emboss=False)
                 layout.prop(particles.settings, "count", text="N", emboss=False)
-                addstart = layout.operator("bpy.ops", text = "", icon = "KEYFRAME_HLT", emboss=False)
+                addstart = layout.operator("bpy.ops", text = "", icon = "PREV_KEYFRAME", emboss=False)
                 addstart.id = "add_paticles_start_frame"
                 layout.prop(particles.settings, "frame_start", text="S", emboss=False)
-                addend = layout.operator("bpy.ops", text = "", icon = "KEYFRAME_HLT", emboss=False)
+                addend = layout.operator("bpy.ops", text = "", icon = "NEXT_KEYFRAME", emboss=False)
                 addend.id = "add_paticles_end_frame"
                 layout.prop(particles.settings, "frame_end", text="E", emboss=False)
                 jump = layout.operator("bpy.ops", text = "", icon = "KEYFRAME_HLT", emboss=False)
@@ -610,12 +610,13 @@ class Assets_UI(bpy.types.Panel):
         row.prop(scene, "myProps", expand = True)
         row.scale_y = 1.25
         if scene.myProps == 'one':
-            row = box.row()
             if addon_prefs.view == True:
                 if scene.view == True:
-                    assetsDraw.draw_view(addon_prefs, context, box, row, obj)
                     row = box.row()
+                    assetsDraw.draw_view(addon_prefs, context, box, row, obj)
+                    box = layout.box()
             if obj:
+                row = box.row()
                 assetsDraw.draw_properties(addon_prefs, context, row, obj, pcoll)
 
                 if obj.mode != 'EDIT':
@@ -630,10 +631,11 @@ class Assets_UI(bpy.types.Panel):
                     
                 assetsDraw.draw_edit(scene, box)
 
-                if addon_prefs.tools == True:
-                    if scene.tools == True:
-                        assetsDraw.draw_tools(scene, obj, self)
+            if addon_prefs.tools == True:
+                if scene.tools == True:
+                    assetsDraw.draw_tools(scene, obj, self)
 
+            if obj:
                 if scene.mat == True:
                     if obj.type == 'MESH':
                         assetsDraw.drawmaterial_properties(self, context)
@@ -654,7 +656,7 @@ class Assets_UI(bpy.types.Panel):
                         assetsDraw.drawobj_properties(self,context, obj)
 
             else:
-               row.label(text = "No Active Object.", icon = "OBJECT_DATAMODE")
+                box.label(text = "No Active Object.", icon = "OBJECT_DATAMODE")
 
         if scene.myProps == 'two':
             row = box.row()

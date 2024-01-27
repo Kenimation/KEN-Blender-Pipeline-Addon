@@ -506,8 +506,8 @@ class Import_MinecraftModel(bpy.types.Operator, ImportHelper):
                 for count in range(matnum):
                     context.object.active_material_index = count
                     mat = obj.active_material
-                    material_tool.fixmaterial(mat)
-                    material_tool.fixnormal(mat)
+                    material_tool.prep_material(mat)
+                    material_tool.prep_normal(mat)
             objg = assetsDefs.collections().new(name=colname)
             context.scene.collection.children.link(objg)  # Add to outliner.
             for obj in context.selected_objects:
@@ -560,7 +560,7 @@ class ImportMinecraftJSON(Operator, ImportHelper):
             return self.report({"ERROR"}, "This json.format cannot be imported!!!")
 
 class Import_item(bpy.types.Operator, ImportHelper):
-    bl_idname = "3d.item"
+    bl_idname = "import.3d_item"
     bl_label = "Import image"
     bl_options = {'REGISTER', 'UNDO'}
     
@@ -597,7 +597,8 @@ class Import_item(bpy.types.Operator, ImportHelper):
             filepath = os.path.join(directory, file_elem.name)
             (path, file) = os.path.split(filepath)
             image = bpy.data.images.load(filepath=filepath, check_existing=True)
-            script_file = os.path.realpath(__file__)
+
+            script_file = os.path.realpath(os.path.dirname(__file__))
             script_directory = os.path.dirname(script_file)
             script_directory = os.path.normpath(script_directory)
 
@@ -636,7 +637,7 @@ class Import_item(bpy.types.Operator, ImportHelper):
         layout.prop(self, "offset", toggle = True)
 
 class Alpha_Import(bpy.types.Operator, ImportHelper):
-    bl_idname = "alpha.import"
+    bl_idname = "import.alpha_image"
     bl_label = "Import image"
     bl_options = {'REGISTER', 'UNDO'}
     
@@ -730,20 +731,20 @@ class Alpha_Import(bpy.types.Operator, ImportHelper):
                 material = bpy.data.materials.get(name)
                 context.active_object.data.materials.append(material)
                 tex_node = material.node_tree.nodes.new('ShaderNodeTexImage')
-                tex_node.location = assetsDefs.tex_node_loc
+                tex_node.location = material_tool.tex_node_loc
                 tex_node.image = image
                 bsdf = material.node_tree.nodes["Principled BSDF"]
                 if n_approve == 1:
                     n_name = (file.replace('.png', '') + "_n.png")
                     n_node = material.node_tree.nodes.new('ShaderNodeTexImage')
-                    n_node.location = assetsDefs.n_map_node_loc
+                    n_node.location = material_tool.n_map_node_loc
                     n_node.image = n_image
                     n_node.name = "Normal Map Node"
                     bpy.data.materials[name].node_tree.nodes["Normal Map Node"].interpolation = 'Closest'
                     bpy.data.images[n_name].colorspace_settings.name = 'Non-Color'
                     n_map = material.node_tree.nodes.new('ShaderNodeNormalMap')
                     n_map.name = "Normal Map"
-                    n_map.location = assetsDefs.n_node_loc
+                    n_map.location = material_tool.n_node_loc
                     material.node_tree.links.new(n_map.inputs['Color'], n_node.outputs['Color'])
                     material.node_tree.links.new(bsdf.inputs['Normal'], n_map.outputs['Normal'])
                 bpy.data.materials[name].node_tree.nodes["Image Texture"].interpolation = 'Closest'

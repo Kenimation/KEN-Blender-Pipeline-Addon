@@ -120,8 +120,8 @@ def min_bv(version, *, inclusive=True):
 
 class World_Import(bpy.types.Operator, ImportHelper):
 	"""Imports an obj file, and auto splits it by material"""
-	bl_idname = "world.import"
-	bl_label = "Import World"
+	bl_idname = "import.mc_world"
+	bl_label = "Import Minecraft World"
 	bl_options = {'REGISTER', 'UNDO'}
         
 	filename_ext = '.obj'

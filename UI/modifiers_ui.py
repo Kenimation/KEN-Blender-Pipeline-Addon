@@ -347,6 +347,9 @@ class ModifiersList_OT_CopyToSelected_ListModifiers(Operator):
 			bpy.ops.object.modifier_copy_to_selected(modifier=self.name)
 		else:
 			bpy.ops.object.gpencil_modifier_copy_to_selected(modifier=self.name)
+
+		self.report(type={"INFO"}, message= self.name + " Modifier has selected to the active object")
+			
 		return {'FINISHED'}
 
 class ModifiersList_OT_CopyToSelected_ListModifiersAll(Operator):
@@ -370,6 +373,9 @@ class ModifiersList_OT_CopyToSelected_ListModifiersAll(Operator):
 			bpy.ops.object.modifier_copy_to_selected(modifier=mod.name)
 		for mod in context.object.grease_pencil_modifiers[:]:
 			bpy.ops.object.gpencil_modifier_copy_to_selected(modifier=mod.name)
+
+		self.report(type={"INFO"}, message= "All Modifiers has selected to the active object")
+
 		return {'FINISHED'}
 
 class ModifiersList_OT_Delete_Modifiers_List(Operator):
@@ -984,7 +990,7 @@ def drawmodifiers(self, context, layout, row, obj):
 				except:
 					box.label(text = "Modifier has no panel")
 			except:
-				layout.label(text = "No Modifier has selected.")
+				layout.label(text = "No Modifier is selected.")
 
 def ken_modifier_panel(self, context):
 	addon_prefs = addonPreferences.getAddonPreferences(context)
@@ -1013,6 +1019,7 @@ def ken_modifier_panel(self, context):
 bpy.types.Scene.mod_panel = bpy.props.BoolProperty(
 	name="Expand Modifiers Settings",
 	description="Expand Modifiers Settings Panel",
+	default=True
 )
 
 bpy.types.Object.mod_index = bpy.props.IntProperty(
@@ -1043,7 +1050,7 @@ classes = (
 			ModifiersList_OT_List_First,
 			ModifiersList_OT_List_Last,
 			ModifiersList,
-		  ) 
+		  )
 
 def register():
 	from bpy.utils import register_class

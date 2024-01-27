@@ -11,7 +11,7 @@ ramp_node_h_loc = (-650,-125)
 h_node_loc = (-200,-250)
 tex_node_loc = (-1100, 350)
 
-def fixmaterial(mat):
+def prep_material(mat):
     node_tree = mat.node_tree
     for node in node_tree.nodes:
         if node.type == "BSDF_PRINCIPLED":
@@ -27,7 +27,7 @@ def fixmaterial(mat):
     except:
         print({'WARNING'}, "Active object has no material")
 
-def fixSSS(mat, type):
+def prep_SSS(mat, type):
     if type == 1:
         node_tree = mat.node_tree
         num = len(node_tree.nodes)
@@ -70,7 +70,7 @@ def fixSSS(mat, type):
                 except:
                     print("No More Tex Node Found!!!")
 
-def fixnormal(mat):
+def prep_normal(mat):
     node_tree = mat.node_tree
     num = len(node_tree.nodes)
     for number in range(num):
@@ -163,7 +163,7 @@ def fixnormal(mat):
             except:
                 print("No More Mode Found.")
 
-def fixRamp(mat):
+def prep_Ramp(mat):
     node_tree = mat.node_tree
     num = len(node_tree.nodes)
     for number in range(num):
@@ -220,7 +220,7 @@ def fixRamp(mat):
             except:
                 print("No More Mode Found.")
 
-def fixBump(mat):
+def prep_Bump(mat):
     node_tree = mat.node_tree
     num = len(node_tree.nodes)
     for number in range(num):
@@ -356,25 +356,30 @@ class New_Material(bpy.types.Operator):
 
     def execute(self, context):
         ob = context.active_object
-        if ob.type == "MESH":
-            # Get material
+        if ob:
+            if ob.type == "MESH":
+                # Get material
+                mat = bpy.data.materials.new(name="Material")
+                mat.use_nodes = True
+
+                # Assign it to object
+                if ob.data.materials:
+                    # assign to 1st material slot
+                    slot = context.object.active_material_index
+                    ob.data.materials[slot] = mat
+                else:
+                    # no slots
+                    ob.data.materials.append(mat)
+                prep_material(mat)
+        else:
             mat = bpy.data.materials.new(name="Material")
             mat.use_nodes = True
-
-            # Assign it to object
-            if ob.data.materials:
-                # assign to 1st material slot
-                slot = context.object.active_material_index
-                ob.data.materials[slot] = mat
-            else:
-                # no slots
-                ob.data.materials.append(mat)
-            fixmaterial(mat)
-            return {"FINISHED"}
+            prep_material(mat)
+        return {"FINISHED"}
 
 class Fix_Material(bpy.types.Operator):
-    bl_idname = "fix.material"
-    bl_label = "Fix Material"
+    bl_idname = "prep.material"
+    bl_label = "Prep Material"
     bl_options = {'REGISTER', 'UNDO'}
 
     type: bpy.props.StringProperty(options={'HIDDEN'})
@@ -426,17 +431,17 @@ class Fix_Material(bpy.types.Operator):
                         context.object.active_material_index = count
                         mat = obj.active_material
                         try:
-                            fixmaterial(mat)
+                            prep_material(mat)
                             if self.ramp == True:
-                                fixRamp(mat)
+                                prep_Ramp(mat)
                             if self.bump == True:
-                                fixBump(mat)
+                                prep_Bump(mat)
                             if self.nomral == True:
-                                fixnormal(mat)
+                                prep_normal(mat)
                             if self.SSS == True:
-                                fixSSS(mat, 1)
+                                prep_SSS(mat, 1)
                             else:
-                                fixSSS(mat, 0)
+                                prep_SSS(mat, 0)
                         except:
                             continue
                                 
@@ -444,32 +449,32 @@ class Fix_Material(bpy.types.Operator):
 
         if self.type == "index":
             mat = mat_data
-            fixmaterial(mat)
+            prep_material(mat)
             if self.ramp == True:
-                fixRamp(mat)
+                prep_Ramp(mat)
             if self.bump == True:
-                fixBump(mat)
+                prep_Bump(mat)
             if self.nomral == True:
-                fixnormal(mat)
+                prep_normal(mat)
             if self.SSS == True:
-                fixSSS(mat, 1)
+                prep_SSS(mat, 1)
             else:
-                fixSSS(mat, 0)
+                prep_SSS(mat, 0)
 
         if self.type == "scene":
             for mat in bpy.data.materials:
                 try:
-                    fixmaterial(mat)
+                    prep_material(mat)
                     if self.ramp == True:
-                        fixRamp(mat)
+                        prep_Ramp(mat)
                     if self.bump == True:
-                        fixBump(mat)
+                        prep_Bump(mat)
                     if self.nomral == True:
-                        fixnormal(mat)
+                        prep_normal(mat)
                     if self.SSS == True:
-                        fixSSS(mat, 1)
+                        prep_SSS(mat, 1)
                     else:
-                        fixSSS(mat, 0)
+                        prep_SSS(mat, 0)
                 except:
                     continue
         return {'FINISHED'}
@@ -620,14 +625,14 @@ class EEVEE_MATERIAL_PT_context_material(MaterialButtonsPanel, Panel):
         if mat:
             box.label(text = "Fix Tools", icon = "TOOL_SETTINGS")
             if state == "Object Material":
-                objmat = box.operator("fix.material", text = "Fix Materials")
+                objmat = box.operator("prep.material", text = "Prep Materials")
                 objmat.type = "obj"
             else:
                 row = box.row()
-                indexmat = row.operator("fix.material", text = "Fix Scene Material")
+                indexmat = row.operator("prep.material", text = "Fix Scene Material")
                 indexmat.type = "index"
                 indexmat.mat = mat.name
-                allmat = row.operator("fix.material", text = "Fix All Materials")
+                allmat = row.operator("prep.material", text = "Fix All Materials")
                 allmat.type = "scene"
 
 class CyclesButtonsPanel:
@@ -750,14 +755,14 @@ class CYCLES_PT_context_material(CyclesButtonsPanel, Panel):
         if mat:
             box.label(text = "Fix Tools", icon = "TOOL_SETTINGS")
             if state == "Object Material":
-                objmat = box.operator("fix.material", text = "Fix Materials")
+                objmat = box.operator("prep.material", text = "Prep Materials")
                 objmat.type = "obj"
             else:
                 row = box.row()
-                indexmat = row.operator("fix.material", text = "Fix Scene Material")
+                indexmat = row.operator("prep.material", text = "Fix Scene Material")
                 indexmat.type = "index"
                 indexmat.mat = mat.name
-                allmat = row.operator("fix.material", text = "Fix All Materials")
+                allmat = row.operator("prep.material", text = "Fix All Materials")
                 allmat.type = "scene"
 
 def ken_material_panel(self, context):
@@ -784,14 +789,14 @@ def ken_material_panel(self, context):
         except RuntimeError:
             pass
 
-def menu_fixmaterial(self, context):
+def menu_prep_material(self, context):
     if context.object.type == "MESH":
         if context.object.material_slots:
             for slot in context.object.material_slots:
                 # Check if a material is assigned to the slot
                 if slot.material is not None:
                     self.layout.separator()
-                    self.layout.operator("fix.material", text = "Fix Material")
+                    self.layout.operator("prep.material", text = "Prep Material")
                     delete = self.layout.operator("data.blend", text = "Clear Material")
                     delete.type = "mat"
                     delete.subtype = "del"
@@ -811,7 +816,7 @@ def register():
     for cls in classes:
         register_class(cls)
 
-    bpy.types.VIEW3D_MT_object_context_menu.append(menu_fixmaterial)
+    bpy.types.VIEW3D_MT_object_context_menu.append(menu_prep_material)
 
     addon_prefs = addonPreferences.getAddonPreferences(bpy.context)
     use_material_panel = addon_prefs.use_material_panel
@@ -829,7 +834,7 @@ def unregister():
     for cls in reversed(classes):
         unregister_class(cls)
 
-    bpy.types.VIEW3D_MT_object_context_menu.remove(menu_fixmaterial)
+    bpy.types.VIEW3D_MT_object_context_menu.remove(menu_prep_material)
 
     try:
         unregister_class(EEVEE_MATERIAL_PT_context_material)

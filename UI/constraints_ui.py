@@ -16,6 +16,9 @@ def is_constraint_disabled(con):
 	if con.type in con_targer:
 		if not con.target:
 			return True
+		
+	if con.type == "ARMATURE" and not con.targets:
+		return True
 	
 	return False
 
@@ -510,9 +513,13 @@ class Constraints_OT_CopyToSelected_ListConstraintsAll(Operator):
 		if owner == 'OBJECT':
 			for con in context.object.constraints[:]:
 				bpy.ops.constraint.copy_to_selected(constraint=con.name, owner = owner)
+
+				self.report(type={"INFO"}, message= "All Constraints has selected to the active object")
 		elif owner == 'BONE':
 			for con in context.active_pose_bone.constraints[:]:
 				bpy.ops.constraint.copy_to_selected(constraint=con.name, owner = owner)
+
+				self.report(type={"INFO"}, message= "All Constraints has selected to the active bone")
 
 		return {'FINISHED'}
 
@@ -527,6 +534,12 @@ class Constraints_OT_CopyToSelected_ListConstraints(Operator):
 
 	def execute(self, context):
 		bpy.ops.constraint.copy_to_selected(constraint=self.name, owner = self.owner)
+
+		if self.owner == "OBJECT":
+			self.report(type={"INFO"}, message= self.name + " Constraint has selected to the active object")
+		elif self.owner == "BONE":
+			self.report(type={"INFO"}, message= self.name + " Constraint has selected to the active bone")
+
 		return {'FINISHED'}
 
 class Constraints_OT_Delete_Constraints_List(Operator):
@@ -1053,6 +1066,17 @@ class OBJECT_MT_constraints_add(ConstraintAddMenu, Menu):
 	bl_label = "Add Constraints"
 	bl_options = {'SEARCH_ON_KEY_PRESS'}
 
+	@classmethod
+	def poll(cls, context):
+		space = context.space_data
+		if space and space.type == 'PROPERTIES':
+			if space.context == 'BONE_CONSTRAINT' and context.object.mode == "POSE":
+				return True
+			elif space.context == 'CONSTRAINT':
+				return True
+		else:
+			return True
+
 	def draw(self, context):
 		layout = self.layout
 		ob_type = context.object.type
@@ -1198,41 +1222,42 @@ def drawconstraints(self, context, layout, owner, row, obj):
 	col.operator("constraints_list.constraints_list_last_button", text="", icon='TRIA_DOWN_BAR').owner = owner
 
 	if context.scene.con_panel == True:
-		try:
-			con_list = []
-			for con in obj.constraints:
-				con_list.append(con)
-			constraints = con_list[obj.con_index]
+		if obj.constraints:
+			try:
+				con_list = []
+				for con in obj.constraints:
+					con_list.append(con)
+				constraints = con_list[obj.con_index]
 
-			# === General settings ===
-			box = layout.box()
+				# === General settings ===
+				box = layout.box()
 
-			row = box.row()
+				row = box.row()
 
-			duplicate = row.operator("constraints_list.duplicate_constraints_list", text="", emboss=False, icon = "LAYER_ACTIVE")
-			duplicate.name = constraints.name
-			duplicate.owner = owner
-			lrow = row.row()
-			lrow.alert = is_constraint_disabled(constraints)
-			lrow.label(text="", icon_value=layout.icon(constraints))
-			row.prop(constraints, "name", text = "")
-			row.prop(constraints, "enabled", text="", icon = "HIDE_ON", emboss=False)
-			if len(context.selected_objects) > 1:
-				copy = row.operator("constraints_list.copy_to_selected_constraints_list", emboss = False, icon='COPYDOWN', text="")
-				copy.name = constraints.name
-				copy.owner = owner
-			apply = row.operator("constraints_list.apply_constraints_list", emboss=False, icon='CHECKMARK', text="")
-			apply.name = constraints.name
-			apply.owner = owner
-			delete = row.operator("constraints_list.delete_constraints_list", emboss=False, icon='X', text="")
-			delete.name = constraints.name
-			delete.owner = owner
+				duplicate = row.operator("constraints_list.duplicate_constraints_list", text="", emboss=False, icon = "LAYER_ACTIVE")
+				duplicate.name = constraints.name
+				duplicate.owner = owner
+				lrow = row.row()
+				lrow.alert = is_constraint_disabled(constraints)
+				lrow.label(text="", icon_value=layout.icon(constraints))
+				row.prop(constraints, "name", text = "")
+				row.prop(constraints, "enabled", text="", icon = "HIDE_ON", emboss=False)
+				if len(context.selected_objects) > 1:
+					copy = row.operator("constraints_list.copy_to_selected_constraints_list", emboss = False, icon='COPYDOWN', text="")
+					copy.name = constraints.name
+					copy.owner = owner
+				apply = row.operator("constraints_list.apply_constraints_list", emboss=False, icon='CHECKMARK', text="")
+				apply.name = constraints.name
+				apply.owner = owner
+				delete = row.operator("constraints_list.delete_constraints_list", emboss=False, icon='X', text="")
+				delete.name = constraints.name
+				delete.owner = owner
 
-			mp = DATA_constraints(context)
-			getattr(mp, constraints.type)(box, obj, constraints, owner)
+				mp = DATA_constraints(context)
+				getattr(mp, constraints.type)(box, obj, constraints, owner)
 
-		except:
-			layout.label(text = "No Constraint has selected.")
+			except:
+				layout.label(text = "No Constraint is selected.")
 
 def draw_boneconstraints(self, context, layout, owner, row, obj):
 	addon_prefs = addonPreferences.getAddonPreferences(bpy.context)
@@ -1253,11 +1278,13 @@ def draw_boneconstraints(self, context, layout, owner, row, obj):
 		icon ="FULLSCREEN_EXIT"
 		
 	row.prop(scene, "con_panel", emboss = False, icon=icon, text="")
+	
 
 	if use_old_constraint_menu:
 		layout.operator_menu_enum("pose.constraint_add", "type", text="Add Bone Constraint")
 	else:
 		layout.operator("wm.call_menu", text="Add Bone Constraints", icon='ADD').name = "OBJECT_MT_constraints_add"
+		
 	row = layout.row()
 	row.template_list("BONE_ConstraintsList", "", bone, "constraints", obj, "bcon_index")
 
@@ -1269,41 +1296,42 @@ def draw_boneconstraints(self, context, layout, owner, row, obj):
 
 	if obj.mode == "POSE":
 		if context.scene.con_panel == True:
-			try:
-				con_list = []
-				for con in bone.constraints:
-					con_list.append(con)
-				constraints = con_list[obj.bcon_index]
-				
-				# === General settings ===
-				box = layout.box()
+			if context.active_pose_bone.constraints:
+				try:
+					con_list = []
+					for con in bone.constraints:
+						con_list.append(con)
+					constraints = con_list[obj.bcon_index]
+					
+					# === General settings ===
+					box = layout.box()
 
-				row = box.row()
+					row = box.row()
 
-				duplicate = row.operator("constraints_list.duplicate_constraints_list", text="", emboss=False, icon = "LAYER_ACTIVE")
-				duplicate.name = constraints.name
-				duplicate.owner = owner
-				lrow = row.row()
-				lrow.alert = is_constraint_disabled(constraints)
-				lrow.label(text="", icon_value=layout.icon(constraints))
-				row.prop(constraints, "name", text = "")
-				row.prop(constraints, "enabled", text="", icon = "HIDE_ON", emboss=False)
-				if len(context.selected_pose_bones) > 1:
-					copy = row.operator("constraints_list.copy_to_selected_constraints_list", emboss = False, icon='COPYDOWN', text="")
-					copy.name = constraints.name
-					copy.owner = owner
-				apply = row.operator("constraints_list.apply_constraints_list", emboss=False, icon='CHECKMARK', text="")
-				apply.name = constraints.name
-				apply.owner = owner
-				delete = row.operator("constraints_list.delete_constraints_list", emboss=False, icon='X', text="")
-				delete.name = constraints.name
-				delete.owner = owner
+					duplicate = row.operator("constraints_list.duplicate_constraints_list", text="", emboss=False, icon = "LAYER_ACTIVE")
+					duplicate.name = constraints.name
+					duplicate.owner = owner
+					lrow = row.row()
+					lrow.alert = is_constraint_disabled(constraints)
+					lrow.label(text="", icon_value=layout.icon(constraints))
+					row.prop(constraints, "name", text = "")
+					row.prop(constraints, "enabled", text="", icon = "HIDE_ON", emboss=False)
+					if len(context.selected_pose_bones) > 1:
+						copy = row.operator("constraints_list.copy_to_selected_constraints_list", emboss = False, icon='COPYDOWN', text="")
+						copy.name = constraints.name
+						copy.owner = owner
+					apply = row.operator("constraints_list.apply_constraints_list", emboss=False, icon='CHECKMARK', text="")
+					apply.name = constraints.name
+					apply.owner = owner
+					delete = row.operator("constraints_list.delete_constraints_list", emboss=False, icon='X', text="")
+					delete.name = constraints.name
+					delete.owner = owner
 
-				mp = DATA_constraints(context)
-				getattr(mp, constraints.type)(box, obj, constraints, owner)
+					mp = DATA_constraints(context)
+					getattr(mp, constraints.type)(box, obj, constraints, owner)
 
-			except:
-				layout.label(text = "No Constraint has selected.")
+				except:
+					layout.label(text = "No Constraint is selected.")
 
 	else:
 		layout.label(text = "Interaction mode is not Pose Mode.")
@@ -1384,7 +1412,7 @@ classes = (
 	OBJECT_MT_constraint_add_transform,
 	OBJECT_MT_constraint_add_tracking,
 	OBJECT_MT_constraint_add_relationship,
-		  ) 
+		  )
 
 def register():
 	from bpy.utils import register_class
@@ -1394,6 +1422,7 @@ def register():
 	bpy.types.Scene.con_panel = bpy.props.BoolProperty(
 		name="Expand Constraints Settings",
 		description="Expand Constraint Settings Panel",
+		default=True
 	)
 
 	bpy.types.Object.con_index = IntProperty(

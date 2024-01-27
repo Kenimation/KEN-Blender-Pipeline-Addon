@@ -35,9 +35,8 @@ def draw_tools(scene, obj, self):
 	box = layout.box()
 	row = box.row()
 	row.label(text = "Tools", icon = "TOOL_SETTINGS")
-	if obj.mode == 'OBJECT':
-		row.prop(scene, "Object_Type", text = "")
-		row.operator("bpy.ops", text = "", icon = "RESTRICT_SELECT_OFF", emboss=False).id = "emptyselect"
+	row.prop(scene, "Object_Type", text = "")
+	row.operator("bpy.ops", text = "", icon = "RESTRICT_SELECT_OFF", emboss=False).id = "emptyselect"
 	row = box.row()
 	if scene.QuickImport == True:
 		icon = "DOWNARROW_HLT"
@@ -49,7 +48,7 @@ def draw_tools(scene, obj, self):
 		row = QuickImport.row()
 		row.label(text = "Object Import")
 		row = QuickImport.row()
-		row.operator("world.import", text = "World Import")
+		row.operator("import.mc_world", text = "Minecraft World Import")
 		row = QuickImport.row()
 		col = row.column_flow(columns = 2)
 		col.operator("import.minecraftmodel", text = "Minecraft Obj")
@@ -57,93 +56,95 @@ def draw_tools(scene, obj, self):
 		row = QuickImport.row()
 		row.label(text = "Image Import")
 		row = QuickImport.row()
-		row.operator("alpha.import", text = "Alpha Plane")
+		row.operator("import.alpha_image", text = "Alpha Plane")
 		row = QuickImport.row()
-		row.operator("3d.item", text = "3D Item from file")
+		row.operator("import.3d_item", text = "3D Item from file")
 
-	if obj.type == 'MESH':
-		row = box.row()
-		if scene.EditingTools == True:
-			icon = "DOWNARROW_HLT"
-		else:
-			icon = "RIGHTARROW"
-		row.prop(scene, "EditingTools", text = "Editing Tools", icon = icon, emboss=False)
-		if scene.EditingTools == True:
-			EditingTools = box.box()
-			row = EditingTools.row()
-			row.label(text = "Editing Tools")
-			row = EditingTools.row()
-			row.operator("select.alphauv", text = "Select Alpha")
-			row.operator("scale.uv", text = "Scale Faces")
-			row = EditingTools.row()
-			row.operator("alpha.delete", text = "Delete Alpha")
+	if obj:
 
-		row = box.row()
-		if scene.VertexGroupTool == True:
-			icon = "DOWNARROW_HLT"
-		else:
-			icon = "RIGHTARROW"
-		row.prop(scene, "VertexGroupTool", text = "Vertex Group Tool", icon = icon, emboss=False)
-		if scene.VertexGroupTool == True:
-			VertexGroupTool = box.box()
-			row = VertexGroupTool.row()
-			row.label(text = "Add Vertex Group")
-			row = VertexGroupTool.row()
-			row.prop(scene, "VertexGroupMenu", expand = True)
-			row = VertexGroupTool.row()  
-			if scene.VertexGroupMenu == 'one':
-				row.prop(scene, "VertexGroupName", text = "")
-			else:
-				row = VertexGroupTool.row()
-				row.prop(scene, "VertexGroupPart", text = "")
-				row.prop(scene, "VertexGroupLR", expand = True)
-				
-			row = VertexGroupTool.row()
-			row.prop(scene, "FixName", text = "")
-			row.prop(scene, "FixNameType", expand = True)
-			row = VertexGroupTool.row()
-			row.operator("add.vertex_group", text = "Add")
-
-			row = VertexGroupTool.row()
-			row.label(text = "Add Vertex Group Loop")
-			row = VertexGroupTool.row()
-			row.prop(scene, "VertexGroupName", text = "Name")
-			row.prop(scene, "VertexGroupCount", text = "")
-			row.prop(scene, "VertexGroupMiiror", text = "", icon = "ARROW_LEFTRIGHT")
-			row = VertexGroupTool.row()
-			row.operator("add.vertex_group_loop", text = "Add Vertex Group Loop")
-
-	if obj.type == 'ARMATURE':
-		if obj.mode == 'POSE':
+		if obj.type == 'MESH':
 			row = box.row()
-			if scene.BoneTool == True:
+			if scene.EditingTools == True:
 				icon = "DOWNARROW_HLT"
 			else:
 				icon = "RIGHTARROW"
-			row.prop(scene, "BoneTool", text = "Bone Tool", icon = icon, emboss=False)
-			if scene.BoneTool == True:
-				BoneTool = box.box()
-				row = BoneTool.row()
-				row.label(text = "Constraints Driver")
-				row = BoneTool.row()
-				row.prop(scene, "Constraints_Type", text = "")
-				row.prop(scene, "Rig_Prop", text = "")
-				row = BoneTool.row()
-				row.operator("add.constraintsdriver", text = "Add")
-				row.operator("remove.constraintsdriver", text = "Remove")
-				row = BoneTool.row()
-				row.label(text = "Damped Track Child")
-				row = BoneTool.row()
-				row.operator("add.dampedtrackchild", text = "Track Child")
-				row.prop(scene, "Damped_Track_Influence", slider = True)
-				row = BoneTool.row()
-				row.operator("add.copyrotationparent", text = "Copy Parent Rotation")
-				row.prop(scene, "Copy_Rotation_Influence", slider = True)
-				row = BoneTool.row()
-				row.label(text = "Damped Track Loop")
-				row = BoneTool.row()
-				row.prop(scene, "Track_Prefix", text = "")
-				row.operator("add.dampedtrackloop", text = "Add")
+			row.prop(scene, "EditingTools", text = "Editing Tools", icon = icon, emboss=False)
+			if scene.EditingTools == True:
+				EditingTools = box.box()
+				row = EditingTools.row()
+				row.label(text = "Editing Tools")
+				row = EditingTools.row()
+				row.operator("select.alphauv", text = "Select Alpha")
+				row.operator("scale.uv", text = "Scale Faces")
+				row = EditingTools.row()
+				row.operator("alpha.delete", text = "Delete Alpha")
+
+			row = box.row()
+			if scene.VertexGroupTool == True:
+				icon = "DOWNARROW_HLT"
+			else:
+				icon = "RIGHTARROW"
+			row.prop(scene, "VertexGroupTool", text = "Vertex Group Tool", icon = icon, emboss=False)
+			if scene.VertexGroupTool == True:
+				VertexGroupTool = box.box()
+				row = VertexGroupTool.row()
+				row.label(text = "Add Vertex Group")
+				row = VertexGroupTool.row()
+				row.prop(scene, "VertexGroupMenu", expand = True)
+				row = VertexGroupTool.row()  
+				if scene.VertexGroupMenu == 'one':
+					row.prop(scene, "VertexGroupName", text = "")
+				else:
+					row = VertexGroupTool.row()
+					row.prop(scene, "VertexGroupPart", text = "")
+					row.prop(scene, "VertexGroupLR", expand = True)
+					
+				row = VertexGroupTool.row()
+				row.prop(scene, "FixName", text = "")
+				row.prop(scene, "FixNameType", expand = True)
+				row = VertexGroupTool.row()
+				row.operator("add.vertex_group", text = "Add")
+
+				row = VertexGroupTool.row()
+				row.label(text = "Add Vertex Group Loop")
+				row = VertexGroupTool.row()
+				row.prop(scene, "VertexGroupName", text = "Name")
+				row.prop(scene, "VertexGroupCount", text = "")
+				row.prop(scene, "VertexGroupMiiror", text = "", icon = "ARROW_LEFTRIGHT")
+				row = VertexGroupTool.row()
+				row.operator("add.vertex_group_loop", text = "Add Vertex Group Loop")
+
+		if obj.type == 'ARMATURE':
+			if obj.mode == 'POSE':
+				row = box.row()
+				if scene.BoneTool == True:
+					icon = "DOWNARROW_HLT"
+				else:
+					icon = "RIGHTARROW"
+				row.prop(scene, "BoneTool", text = "Bone Tool", icon = icon, emboss=False)
+				if scene.BoneTool == True:
+					BoneTool = box.box()
+					row = BoneTool.row()
+					row.label(text = "Constraints Driver")
+					row = BoneTool.row()
+					row.prop(scene, "Constraints_Type", text = "")
+					row.prop(scene, "Rig_Prop", text = "")
+					row = BoneTool.row()
+					row.operator("add.constraintsdriver", text = "Add")
+					row.operator("remove.constraintsdriver", text = "Remove")
+					row = BoneTool.row()
+					row.label(text = "Damped Track Child")
+					row = BoneTool.row()
+					row.operator("add.dampedtrackchild", text = "Track Child")
+					row.prop(scene, "Damped_Track_Influence", slider = True)
+					row = BoneTool.row()
+					row.operator("add.copyrotationparent", text = "Copy Parent Rotation")
+					row.prop(scene, "Copy_Rotation_Influence", slider = True)
+					row = BoneTool.row()
+					row.label(text = "Damped Track Loop")
+					row = BoneTool.row()
+					row.prop(scene, "Track_Prefix", text = "")
+					row.operator("add.dampedtrackloop", text = "Add")
 
 def draw_edit(scene, box):
 	if scene.object_properties == False:
@@ -170,10 +171,10 @@ def draw_transform(addon_prefs, context, box, obj):
 			row.prop(context.object.pose, "use_auto_ik", icon = "CON_KINEMATIC", text = "")
 			row.prop(context.object.pose, "use_mirror_x", icon = "MOD_MIRROR", text = "")
 		else:
-			actobj = context.view_layer.objects.active
+			actobj = context.active_object
 			row.label(text = "Object Transforms", icon = "OBJECT_DATAMODE")
 	elif obj.type != 'ARMATURE':
-		actobj = context.view_layer.objects.active
+		actobj = context.active_object
 		row.label(text = "Object Transforms", icon = "OBJECT_DATAMODE")
 
 	if actobj:
@@ -187,7 +188,7 @@ def draw_transform(addon_prefs, context, box, obj):
 			row.label(text = "Rotation")
 		row.prop(actobj, "rotation_mode", text = "")
 		row = box.row()
-		if obj.rotation_mode == 'QUATERNION':
+		if actobj.rotation_mode == 'QUATERNION':
 			row.prop(actobj, "rotation_quaternion", text = "")
 		else:
 			row.prop(actobj, "rotation_euler", text = "")
@@ -656,7 +657,7 @@ def drawmaterial_properties(self, context):
 	layout = self.layout
 	box = layout.box()
 	scene = context.scene
-	obj = context.view_layer.objects.active
+	obj = context.active_object
 	row = box.row()
 	row.label(text = "Quick Material", icon = "MATERIAL")
 	box.template_list("MATERIALS", "", obj, "material_slots", obj, "active_material_index")
@@ -697,14 +698,14 @@ def drawmaterial(scene, box, obj, mat, state):
 
 		box.label(text = "Fix Tools", icon = "TOOL_SETTINGS")
 		if state == "Object Material":
-			objmat = box.operator("fix.material", text = "Fix Materials")
+			objmat = box.operator("prep.material", text = "Fix Materials")
 			objmat.type = "obj"
 		else:
 			row = box.row()
-			indexmat = row.operator("fix.material", text = "Fix Scene Material")
+			indexmat = row.operator("prep.material", text = "Fix Scene Material")
 			indexmat.type = "index"
 			indexmat.mat = mat.name
-			allmat = row.operator("fix.material", text = "Fix All Materials")
+			allmat = row.operator("prep.material", text = "Fix All Materials")
 			allmat.type = "scene"
 			   
 		row = box.row()

@@ -26,6 +26,70 @@ def draw_horse_animerig(self, context, obj):
             row.prop(rig, "horse_belt", text = "Belt", toggle = True)
             row = box.row()
             row.prop(rig, "horse_saddle", text = "Saddle", toggle = True)
+            row = box.row()
+            row.label(text = "Hair:")
+            row = box.row()
+            row.prop(rig, "horse_hair", expand = True)
+            row = box.row()
+            row.label(text = "Shading:")
+
+            material_obj = rig.children[0]
+            horse_shading = material_obj.material_slots[0].material.node_tree.nodes['Horse_Shading'].inputs
+
+            row = box.row()
+            row.label(text = "Base:")
+            row = box.row()
+            row.prop(horse_shading['Base Color'], "default_value", text = "")
+            row.prop(horse_shading['Base Shadow'], "default_value", text = "")
+
+            row = box.row()
+            row.label(text = "Hoof:")
+            row = box.row()
+            row.prop(horse_shading['Hoof Color'], "default_value", text = "")
+            row.prop(horse_shading['Hoof Shadow'], "default_value", text = "")
+
+            row = box.row()
+            row.label(text = "Hair:")
+            row = box.row()
+            row.prop(horse_shading['Hair Color'], "default_value", text = "")
+            row.prop(horse_shading['Hair Shadow'], "default_value", text = "")
+
+            row = box.row()
+            row.label(text = "Eyes:")
+            row = box.row()
+            row.prop(horse_shading['Eyes'], "default_value", text = "")
+            row.prop(horse_shading['Eyes Highlight'], "default_value", text = "")
+
+            row = box.row()
+            row.label(text = "Belt:")
+            row = box.row()
+            row.prop(horse_shading['Belt Color'], "default_value", text = "")
+            row.prop(horse_shading['Belt Shadow'], "default_value", text = "")
+
+            row = box.row()
+            row.label(text = "Metal:")
+            row = box.row()
+            row.prop(horse_shading['Metal Color'], "default_value", text = "")
+            row.prop(horse_shading['Metal Shadow'], "default_value", text = "")
+
+            row = box.row()
+            row.label(text = "Saddle:")
+            row = box.row()
+            row.prop(horse_shading['Saddle Color'], "default_value", text = "")
+            row.prop(horse_shading['Saddle Shadow'], "default_value", text = "")
+
+            row = box.row()
+            row.label(text = "Tooth:")
+            row = box.row()
+            row.prop(horse_shading['Tooth Color'], "default_value", text = "")
+            row.prop(horse_shading['Tooth Shadow'], "default_value", text = "")
+
+            row = box.row()
+            row.label(text = "Gum:")
+            row = box.row()
+            row.prop(horse_shading['Gum Color'], "default_value", text = "")
+            row.prop(horse_shading['Gum Shadow'], "default_value", text = "")
+
         elif rig.horse_rig_class == "Posing":
             layout = self.layout
             box = layout.box()
@@ -95,4 +159,11 @@ bpy.types.Object.horse_rig_class = EnumProperty(
     default='Setup',
     items=[('Setup', 'Setup', ''),
             ('Posing', 'Posing', ''),
+            ])
+
+bpy.types.Object.horse_hair = EnumProperty(
+    default='Both',
+    items=[('Both', 'Both', ''),
+            ('Left', 'Left', ''),
+            ('Right', 'Right', ''),
             ])
