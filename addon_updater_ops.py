@@ -869,7 +869,7 @@ def show_reload_popup():
 # -----------------------------------------------------------------------------
 # Example UI integrations
 # -----------------------------------------------------------------------------
-def update_notice_box_ui(self, context, row):
+def update_notice_box_ui(self, context, box):
     """Update notice draw, to add to the end or beginning of a panel.
 
     After a check for update has occurred, this function will draw a box
@@ -901,7 +901,7 @@ def update_notice_box_ui(self, context, row):
     if not updater.update_ready:
         return
 
-    box = row.box()
+    box = box.box()
     col = box.column(align=True)
     col.alert = True
     col.label(text="Latest update is ready!", icon="ERROR")

@@ -604,7 +604,7 @@ class Assets_UI(bpy.types.Panel):
         assetsDraw.drawheader(context, addon_prefs, row, obj)
         row.operator("open.addonprefsofaddon", icon = "SETTINGS", text = "")
         addon_updater_ops.check_for_update_background(context)
-        addon_updater_ops.update_notice_box_ui(self, context, row)
+        addon_updater_ops.update_notice_box_ui(self, context, box)
         box = layout.box()
         row = box.row()
         row.prop(scene, "myProps", expand = True)
