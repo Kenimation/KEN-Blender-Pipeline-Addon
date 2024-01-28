@@ -526,15 +526,14 @@ class AddonPref(bpy.types.AddonPreferences):
             row.prop(self, "tools", icon = "TOOL_SETTINGS", text = "")
 
             if self.registered_name:
-                if all(item.registered_name in AnimeProperties.registered_name for item in self.registered_name):
+                if any(item.registered_name in AnimeProperties.registered_name for item in self.registered_name):
                     box = layout.box()
                     row = box.row()
                     row.label(text = "Rig Settings:")
-                    for item in self.registered_name:
-                        if  item.registered_name == AnimeProperties.registered_name[2]:
-                            row = box.row()
-                            row.label(text = "Rig Scale:")
-                            row.prop(self, "rig_scale", text = "Rig Scale")
+                    if any(item.registered_name == AnimeProperties.registered_name[2] for item in self.registered_name):
+                        row = box.row()
+                        row.label(text = "Rig Scale:")
+                        row.prop(self, "rig_scale", text = "Rig Scale")
 
                     row = box.row()
                     row.label(text = "Flip bone:")
@@ -810,7 +809,7 @@ class AddonPref(bpy.types.AddonPreferences):
             row = box.row()
             row.operator("wm.url_open", text="Kenimation Discord Server", icon_value = discord_icon.icon_id).url = "https://discord.gg/zgksz7E"
 
-            if all(item.registered_name in AnimeProperties.registered_name for item in self.registered_name):
+            if any(item.registered_name in AnimeProperties.registered_name for item in self.registered_name):
                 box = layout.box()
                 box.label(text = "Original Addons / Rig")
                 box.label(text = "BlueEvilGFXs")
