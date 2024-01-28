@@ -645,10 +645,8 @@ class Assets_UI(bpy.types.Panel):
                         if obj:
                             assetsDraw.draw_data(self, context, obj)
                 if addon_prefs.registered_name:
-                    if all(item.registered_name in AnimeProperties.registered_name for item in addon_prefs.registered_name):
+                    if any(item.registered_name in AnimeProperties.registered_name for item in addon_prefs.registered_name):
                         minecraftUI.draw_ken_mcrig(self, context, obj)
-                for item in addon_prefs.registered_name:
-                    if item.registered_name == AnimeProperties.registered_name[2]:
                         AnimeUI.draw_ken_animerig(self, context, obj)
                         AnimeRig.draw_horse_animerig(self, context, obj)
                 if obj.RIG_ID in AnimeProperties.kenriglist:

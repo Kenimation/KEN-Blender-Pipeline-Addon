@@ -177,7 +177,7 @@ class VIEW3D_MT_ObjectEditotherModes(Menu):
 
 class VIEW3D_MT_PIE_OBJECT(Menu):
     bl_idname = "VIEW3D_MT_PIE_OBJECT"
-    bl_label = "Quick Object Tool"
+    bl_label = "Object Tools Pie Menu"
 
     def draw(self, context):
         layout = self.layout

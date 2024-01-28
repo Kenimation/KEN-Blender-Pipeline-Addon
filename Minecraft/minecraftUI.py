@@ -17,7 +17,7 @@ def draw_ken_mcrig(self, context, obj):
         elif obj.mode == 'POSE':
             rig_class = "myrigpose"
             rig_get_class = scene.myrigpose
-        if scene.ken_rig == True:
+        if obj.ken_mc_rig == True:
             layout = self.layout
             rig = context.active_object
             box = layout.box()
@@ -54,7 +54,7 @@ def draw_ken_mcrig(self, context, obj):
         elif obj.mode == 'POSE':
             rig_class = "riglayoutpose"
             rig_get_class = scene.riglayoutpose
-        if scene.ken_rig == True:
+        if obj.ken_mc_rig == True:
             layout = self.layout
             rig = context.active_object
             box = layout.box()
@@ -468,7 +468,7 @@ def menu_func_mc(self, context):
     ken_icon = pcoll["Minecraft"]
     addon_prefs = addonPreferences.getAddonPreferences(context)
     if addon_prefs.registered_name:
-        if all(item.registered_name in AnimeProperties.registered_name for item in addon_prefs.registered_name):
+        if any(item.registered_name in AnimeProperties.registered_name for item in addon_prefs.registered_name):
             self.layout.separator()
             self.layout.menu("MC_RIG_Menu", text = "KEN MC RIG Presnt", icon_value = ken_icon.icon_id)
 

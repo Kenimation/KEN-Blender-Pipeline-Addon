@@ -324,21 +324,24 @@ def draw_properties(addon_prefs, context, row, obj, pcoll):
 		row.label(text = "", icon = "OUTLINER_OB_ARMATURE")
 		row.prop(obj, "name", text = "Name")
 
-		if all(item.registered_name in AnimeProperties.registered_name for item in addon_prefs.registered_name):
+		if any(item.registered_name in AnimeProperties.registered_name for item in addon_prefs.registered_name):
 			if obj.mode != 'EDIT' and context.active_object.RIG_ID in AnimeProperties.kenriglist:
 				if context.active_object.RIG_ID == AnimeProperties.kenriglist[2]:
 					ken_icon = pcoll["Dual"]
 					ken_icon02 = pcoll["Dual_02"]
+					if obj.ken_anime_rig == True:
+						rig_icon = ken_icon02
+					else:
+						rig_icon = ken_icon
+					row.prop(obj, "ken_anime_rig", icon_value = rig_icon.icon_id, text = "", emboss=False)
 				else:
 					ken_icon = pcoll["Minecraft"]
 					ken_icon02 = pcoll["Minecraft_02"]
-				if scene.ken_rig == True:
-					rig_icon = ken_icon02
-				else:
-					rig_icon = ken_icon
-				row.prop(scene, "ken_rig", icon_value = rig_icon.icon_id, text = "", emboss=False)
-			else:
-				row.prop(scene, "object_properties", icon = "ARMATURE_DATA", text = "")
+					if obj.ken_mc_rig == True:
+						rig_icon = ken_icon02
+					else:
+						rig_icon = ken_icon
+					row.prop(obj, "ken_mc_rig", icon_value = rig_icon.icon_id, text = "", emboss=False)
 		else:
 			row.prop(scene, "object_properties", icon = "ARMATURE_DATA", text = "")
 			
@@ -586,10 +589,10 @@ def draw_data(self, context, obj):
 		row = box.row()
 		if scene.showmodifier == True:
 			icon = "MODIFIER"
-			text = "Modifier List"
+			text = "Modifiers List"
 		else:
 			icon = "MODIFIER_DATA"
-			text = "Expand Modifier List"
+			text = "Expand Modifiers List"
 		row.prop(scene, "showmodifier", text = text, icon = icon, emboss=False)
 		if scene.showmodifier == True:
 			modifiers_ui.drawmodifiers(self, context, box, row, obj)
@@ -698,14 +701,14 @@ def drawmaterial(scene, box, obj, mat, state):
 
 		box.label(text = "Fix Tools", icon = "TOOL_SETTINGS")
 		if state == "Object Material":
-			objmat = box.operator("prep.material", text = "Fix Materials")
+			objmat = box.operator("prep.material", text = "Prep Materials")
 			objmat.type = "obj"
 		else:
 			row = box.row()
-			indexmat = row.operator("prep.material", text = "Fix Scene Material")
+			indexmat = row.operator("prep.material", text = "Prep Scene Material")
 			indexmat.type = "index"
 			indexmat.mat = mat.name
-			allmat = row.operator("prep.material", text = "Fix All Materials")
+			allmat = row.operator("prep.material", text = "Prep All Materials")
 			allmat.type = "scene"
 			   
 		row = box.row()

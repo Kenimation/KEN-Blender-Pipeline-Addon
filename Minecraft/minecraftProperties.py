@@ -154,6 +154,12 @@ bpy.types.Object.SparkleTextureType = IntProperty(
 #                  Enum Property
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+bpy.types.Object.ken_mc_rig = bpy.props.BoolProperty(
+    name="KEN Remastered v1.0_Rig",
+    description="KEN Remastered v1.0 Properties",
+    default=False,
+)
+
 bpy.types.Scene.myrig = bpy.props.EnumProperty(default = "one",
                         items = [('one', 'Design', ''),
                                 ('two', 'Materials', ''),

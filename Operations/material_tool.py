@@ -377,7 +377,7 @@ class New_Material(bpy.types.Operator):
             prep_material(mat)
         return {"FINISHED"}
 
-class Fix_Material(bpy.types.Operator):
+class Prep_Material(bpy.types.Operator):
     bl_idname = "prep.material"
     bl_label = "Prep Material"
     bl_options = {'REGISTER', 'UNDO'}
@@ -387,25 +387,25 @@ class Fix_Material(bpy.types.Operator):
 
     ramp: BoolProperty(
         name="Specular/Roughness",
-        description="Fix Specular/Roughness.",
+        description="Prep Specular/Roughness.",
         default=False,
     )
 
     bump: BoolProperty(
-        name="Fix Bump",
-        description="Fix Bump.",
+        name="Prep Bump",
+        description="Prep Bump.",
         default=False,
     )
 
     nomral: BoolProperty(
-        name="Fix Nomral",
-        description="Fix Nomral.",
+        name="Prep Nomral",
+        description="Prep Nomral.",
         default=False,
     )
 
     SSS: BoolProperty(
-        name="Subsurface",
-        description="Fix Subsurface.",
+        name="Prep Subsurface",
+        description="Prep Subsurface.",
         default=False,
     )
     def draw(self, context):
@@ -623,16 +623,16 @@ class EEVEE_MATERIAL_PT_context_material(MaterialButtonsPanel, Panel):
             row.template_ID(space, "pin_id")
 
         if mat:
-            box.label(text = "Fix Tools", icon = "TOOL_SETTINGS")
+            box.label(text = "Prep Tools", icon = "TOOL_SETTINGS")
             if state == "Object Material":
                 objmat = box.operator("prep.material", text = "Prep Materials")
                 objmat.type = "obj"
             else:
                 row = box.row()
-                indexmat = row.operator("prep.material", text = "Fix Scene Material")
+                indexmat = row.operator("prep.material", text = "Prep Scene Material")
                 indexmat.type = "index"
                 indexmat.mat = mat.name
-                allmat = row.operator("prep.material", text = "Fix All Materials")
+                allmat = row.operator("prep.material", text = "Prep All Materials")
                 allmat.type = "scene"
 
 class CyclesButtonsPanel:
@@ -753,16 +753,16 @@ class CYCLES_PT_context_material(CyclesButtonsPanel, Panel):
             row.template_ID(space, "pin_id")
 
         if mat:
-            box.label(text = "Fix Tools", icon = "TOOL_SETTINGS")
+            box.label(text = "Prep Tools", icon = "TOOL_SETTINGS")
             if state == "Object Material":
                 objmat = box.operator("prep.material", text = "Prep Materials")
                 objmat.type = "obj"
             else:
                 row = box.row()
-                indexmat = row.operator("prep.material", text = "Fix Scene Material")
+                indexmat = row.operator("prep.material", text = "Prep Scene Material")
                 indexmat.type = "index"
                 indexmat.mat = mat.name
-                allmat = row.operator("prep.material", text = "Fix All Materials")
+                allmat = row.operator("prep.material", text = "Prep All Materials")
                 allmat.type = "scene"
 
 def ken_material_panel(self, context):
@@ -807,7 +807,7 @@ def menu_prep_material(self, context):
 classes = (
             Add_Image,
             New_Material,
-            Fix_Material,
+            Prep_Material,
             Select_Material,
           )
 

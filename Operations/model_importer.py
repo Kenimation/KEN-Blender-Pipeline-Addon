@@ -588,7 +588,7 @@ class Import_item(bpy.types.Operator, ImportHelper):
     offset: BoolProperty(
         name="Item Offset",
         description="Set Item Offset",
-        default=True,
+        default=False,
     )
 
     def execute(self, context):
@@ -740,17 +740,17 @@ class Alpha_Import(bpy.types.Operator, ImportHelper):
                     n_node.location = material_tool.n_map_node_loc
                     n_node.image = n_image
                     n_node.name = "Normal Map Node"
-                    bpy.data.materials[name].node_tree.nodes["Normal Map Node"].interpolation = 'Closest'
+                    n_node.interpolation = 'Closest'
                     bpy.data.images[n_name].colorspace_settings.name = 'Non-Color'
                     n_map = material.node_tree.nodes.new('ShaderNodeNormalMap')
                     n_map.name = "Normal Map"
                     n_map.location = material_tool.n_node_loc
                     material.node_tree.links.new(n_map.inputs['Color'], n_node.outputs['Color'])
                     material.node_tree.links.new(bsdf.inputs['Normal'], n_map.outputs['Normal'])
-                bpy.data.materials[name].node_tree.nodes["Image Texture"].interpolation = 'Closest'
+                tex_node.interpolation = 'Closest'
                 material.node_tree.links.new(bsdf.inputs['Base Color'], tex_node.outputs['Color'])
                 material.node_tree.links.new(bsdf.inputs['Alpha'], tex_node.outputs['Alpha'])
-                bpy.data.materials[name].node_tree.nodes["Principled BSDF"].subsurface_method = 'BURLEY'
+                bsdf.subsurface_method = 'BURLEY'
                 material.blend_method = 'HASHED'
             else:
                 context.active_object.data.materials.append(material)

@@ -120,11 +120,6 @@ bpy.types.Scene.myrig_ui_setting = bpy.props.BoolProperty(
     description="Rig UI Setting",
     default=False,
 )
-bpy.types.Scene.ken_rig = bpy.props.BoolProperty(
-    name="KEN Remastered v1.0_Rig",
-    description="KEN Remastered v1.0 Properties",
-    default=False,
-)
 bpy.types.Scene.ray_visility = bpy.props.BoolProperty(
     name="Ray Visility",
     description="Ray Visility",

@@ -216,6 +216,8 @@ class Data_Blend(bpy.types.Operator):
                 else:
                     img_data.pack()
             if self.subtype == "remove":
+                if img_data.packed_files:
+                    img_data.unpack(method='USE_ORIGINAL')
                 bpy.data.images.remove(img_data)
 
         if self.type == "mat":

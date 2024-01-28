@@ -24,7 +24,7 @@ class DATA_modifiers:
 			layout.prop(md, "use_bone_envelopes", text="Bone Envelopes")
 
 	def ARRAY(self, layout, _ob, md):
-		layout.prop(md, "fit_type")
+		layout.prop(md, "fit_type", text = "")
 
 		if md.fit_type == 'FIXED_COUNT':
 			layout.prop(md, "count")
@@ -510,8 +510,6 @@ class DATA_modifiers:
 		row = col.row(align=True)
 		row.prop_search(md, "vertex_group", ob, "vertex_groups", text="")
 		row.prop(md, "invert_vertex_group", text="", icon='ARROW_LEFTRIGHT')
-
-		layout.separator()
 		layout.prop(md, "strength", slider=True)
 
 	def MASK(self, layout, ob, md):
@@ -1662,84 +1660,52 @@ class DATA_modifiers:
 		row.prop(md, "object")
 		sub = row.row(align=True)
 		sub.active = bool(md.object)
-		sub.prop(md, "use_object_transform", text="", icon='GROUP')
+		sub.prop(md, "use_object_transform", text="", icon='ORIENTATION_GLOBAL')
+		layout.prop(md, "mix_mode")
+		layout.prop(md, "mix_factor")
+		row = layout.row(align=True)
+		row.prop_search(md, "vertex_group", ob, "vertex_groups", text="")
+		row = row.row()
+		row.active = bool(md.vertex_group)
+		row.prop(md, "invert_vertex_group", text="", icon='ARROW_LEFTRIGHT')
+		row = layout.row(align=True)
+		row.active = bool(md.object)
+		row.operator("object.datalayout_transfer", text="Generate Data Layers").modifier = md.name
 
-		layout.separator()
-
-		split = layout.split(factor=0.333)
-		split.prop(md, "use_vert_data")
+		layout.prop(md, "use_vert_data")
 		use_vert = md.use_vert_data
-		row = split.row()
-		row.active = use_vert
-		row.prop(md, "vert_mapping", text="")
 		if use_vert:
-			col = layout.column(align=True)
-			split = col.split(factor=0.333, align=True)
-			sub = split.column(align=True)
-			sub.prop(md, "data_types_verts")
-			sub = split.column(align=True)
-			row = sub.row(align=True)
-			row.prop(md, "layers_vgroup_select_src", text="")
-			row.label(icon='RIGHTARROW')
-			row.prop(md, "layers_vgroup_select_dst", text="")
-			row = sub.row(align=True)
-			row.label(text="", icon='NONE')
+			row = layout.row(align=True)
+			row.prop(md, "data_types_verts")
+			layout.prop(md, "vert_mapping", text="")
+			layout.prop(md, "layers_vgroup_select_src", text="")
+			layout.prop(md, "layers_vgroup_select_dst", text="")
 
-		layout.separator()
-
-		split = layout.split(factor=0.333)
-		split.prop(md, "use_edge_data")
+		layout.prop(md, "use_edge_data")
 		use_edge = md.use_edge_data
-		row = split.row()
-		row.active = use_edge
-		row.prop(md, "edge_mapping", text="")
 		if use_edge:
-			col = layout.column(align=True)
-			split = col.split(factor=0.333, align=True)
-			sub = split.column(align=True)
-			sub.prop(md, "data_types_edges")
+			row = layout.row(align=True)
+			row.prop(md, "data_types_edges")
+			layout.prop(md, "edge_mapping", text="")
 
-		layout.separator()
-
-		split = layout.split(factor=0.333)
-		split.prop(md, "use_loop_data")
+		layout.prop(md, "use_loop_data")
 		use_loop = md.use_loop_data
-		row = split.row()
-		row.active = use_loop
-		row.prop(md, "loop_mapping", text="")
 		if use_loop:
-			col = layout.column(align=True)
-			split = col.split(factor=0.333, align=True)
-			sub = split.column(align=True)
-			sub.prop(md, "data_types_loops")
-			sub = split.column(align=True)
-			row = sub.row(align=True)
-			row.label(text="", icon='NONE')
-			row = sub.row(align=True)
-			row.prop(md, "layers_vcol_select_src", text="")
-			row.label(icon='RIGHTARROW')
-			row.prop(md, "layers_vcol_select_dst", text="")
-			row = sub.row(align=True)
-			row.prop(md, "layers_uv_select_src", text="")
-			row.label(icon='RIGHTARROW')
-			row.prop(md, "layers_uv_select_dst", text="")
-			col.prop(md, "islands_precision")
+			row = layout.row(align=True)
+			row.prop(md, "data_types_loops")
+			layout.prop(md, "loop_mapping", text="")
+			layout.prop(md, "layers_vcol_select_src", text="")
+			layout.prop(md, "layers_vcol_select_dst", text="")
+			layout.prop(md, "layers_uv_select_src", text="")
+			layout.prop(md, "layers_uv_select_dst", text="")
+			layout.prop(md, "islands_precision")
 
-		layout.separator()
-
-		split = layout.split(factor=0.333)
-		split.prop(md, "use_poly_data")
+		layout.prop(md, "use_poly_data")
 		use_poly = md.use_poly_data
-		row = split.row()
-		row.active = use_poly
-		row.prop(md, "poly_mapping", text="")
 		if use_poly:
-			col = layout.column(align=True)
-			split = col.split(factor=0.333, align=True)
-			sub = split.column(align=True)
-			sub.prop(md, "data_types_polys")
-
-		layout.separator()
+			row = layout.row(align=True)
+			row.prop(md, "data_types_polys")
+			layout.prop(md, "poly_mapping", text="")
 
 		split = layout.split()
 		col = split.column()
@@ -1752,22 +1718,6 @@ class DATA_modifiers:
 		col = split.column()
 		col.prop(md, "ray_radius")
 
-		layout.separator()
-
-		split = layout.split()
-		col = split.column()
-		col.prop(md, "mix_mode")
-		col.prop(md, "mix_factor")
-
-		col = split.column()
-		row = col.row()
-		row.active = bool(md.object)
-		row.operator("object.datalayout_transfer", text="Generate Data Layers")
-		row = col.row(align=True)
-		row.prop_search(md, "vertex_group", ob, "vertex_groups", text="")
-		sub = row.row(align=True)
-		sub.active = bool(md.vertex_group)
-		sub.prop(md, "invert_vertex_group", text="", icon='ARROW_LEFTRIGHT')
 
 	def NORMAL_EDIT(self, layout, ob, md):
 		has_vgroup = bool(md.vertex_group)

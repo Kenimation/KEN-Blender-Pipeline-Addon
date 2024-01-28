@@ -261,6 +261,11 @@ bpy.types.Object.FootSize = FloatProperty(
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #                  Bool Property
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+bpy.types.Object.ken_anime_rig = bpy.props.BoolProperty(
+    name="KEN Anime Rig",
+    description="KEN Anime Rig Properties",
+    default=False,
+)
 
 bpy.types.Object.Main_Bone = BoolProperty(
     default=True, name = "Main Bone", update = AnimeDefs.update_Main_Bone)

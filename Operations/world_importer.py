@@ -300,7 +300,7 @@ class World_Import(bpy.types.Operator, ImportHelper):
 				mat.node_tree.nodes["Principled BSDF"].subsurface_method = 'BURLEY'
 				mat.node_tree.nodes["Image Texture"].interpolation = 'Closest'
 				mat.node_tree.links.new(mat.node_tree.nodes["Principled BSDF"].inputs['Alpha'], mat.node_tree.nodes["Image Texture"].outputs['Alpha'])
-				material_tool.fixmaterial(mat)
+				material_tool.prep_material(mat)
 				matname = mat.node_tree.nodes["Image Texture"].image.filepath
 				str_1 = str(matname)
 				str_list = list(str_1)
@@ -325,7 +325,7 @@ class World_Import(bpy.types.Operator, ImportHelper):
 				mat.node_tree.links.new(bsdf.inputs['Normal'], n_map.outputs['Normal'])
 				mat.blend_method = 'HASHED'
 				if self.set_ramp == True:
-					material_tool.fixRamp(mat)
+					material_tool.prep_Ramp(mat)
 			except:
 				pass
 		if not mat:

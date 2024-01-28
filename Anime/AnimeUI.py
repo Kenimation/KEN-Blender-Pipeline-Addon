@@ -32,19 +32,20 @@ def draw_ken_animerig(self, context, obj):
                 rig_class = "myanimerigpose"
                 rig_get_class = scene.myanimerigpose           
 
-        if scene.ken_rig == True:
+        if obj.ken_anime_rig == True:
             layout = self.layout
             box = layout.box()
             row = box.row()
             row.label(text = "KEN Anime Rig v1.0 (Female)", icon_value = ken_icon.icon_id)
-            if rig.MeshSelect == True:
-                icon = "RESTRICT_SELECT_OFF"
-            else:
-                icon = "RESTRICT_SELECT_ON"
-            row.prop(rig, "MeshSelect", text = "", icon = icon, emboss = False)
+            if any(item.registered_name == AnimeProperties.registered_name[2] for item in addon_prefs.registered_name):
+                if rig.MeshSelect == True:
+                    icon = "RESTRICT_SELECT_OFF"
+                else:
+                    icon = "RESTRICT_SELECT_ON"
+                row.prop(rig, "MeshSelect", text = "", icon = icon, emboss = False)
             row.prop(scene, "object_properties", icon = "ARMATURE_DATA", text = "")
-            row.operator("render.anime_snap", text = "", icon = "RESTRICT_RENDER_OFF").mode = "Final"
-            if all(item.registered_name == AnimeProperties.registered_name[2] for item in addon_prefs.registered_name):
+            if any(item.registered_name == AnimeProperties.registered_name[2] for item in addon_prefs.registered_name):
+                row.operator("render.anime_snap", text = "", icon = "RESTRICT_RENDER_OFF").mode = "Final"
                 if rig.mode == 'EDIT':
                     assetsDraw.drawbone_properties(box, context, obj)
                 else:
@@ -62,10 +63,7 @@ def draw_ken_animerig(self, context, obj):
                     if rig_get_class == "Addition":
                         AnimeExtraProperties.drawrigAddition(self, context)
             else:
-                layout = self.layout
-                box = layout.box()
-                row = box.row()
-                row.label(text = "Registered name is not available to edit the rig.")
+                box.label(text = "Registered name is not available to edit the rig.")
     
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -746,7 +744,7 @@ def menu_func_anime(self, context):
     ken_icon = pcoll["Dual"]
     addon_prefs = addonPreferences.getAddonPreferences(context)
     if addon_prefs.registered_name:
-        if all(item.registered_name in AnimeProperties.registered_name for item in addon_prefs.registered_name):
+        if any(item.registered_name in AnimeProperties.registered_name for item in addon_prefs.registered_name):
             self.layout.menu("Anime_RIG_Menu", text = "KEN Anime RIG Presnt", icon_value = ken_icon.icon_id)
 
 def draw_anime_snap(self, context):
@@ -778,18 +776,16 @@ class Anime_RIG_Menu(bpy.types.Menu):
         script_file = os.path.dirname(script_file)
 
         addon_prefs = addonPreferences.getAddonPreferences(context)
-        for item in addon_prefs.registered_name:
-            if  item.registered_name == AnimeProperties.registered_name[2]:
+        if any(item.registered_name == AnimeProperties.registered_name[2] for item in addon_prefs.registered_name):
+            layout = self.layout
 
-                layout = self.layout
+            split = layout.split()
+            col = split.column()
 
-                split = layout.split()
-                col = split.column()
+            pcoll = preview_collections["main"]
+            ken_icon = pcoll["Dual"]
 
-                pcoll = preview_collections["main"]
-                ken_icon = pcoll["Dual"]
-
-                col.operator("append.kenanimefemale", icon_value = ken_icon.icon_id)
+            col.operator("append.kenanimefemale", icon_value = ken_icon.icon_id)
 
 preview_collections = {}
 
