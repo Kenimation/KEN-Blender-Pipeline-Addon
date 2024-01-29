@@ -397,13 +397,11 @@ def drawrigposing(self, context):
     row.prop(rig, "WristWorld_r", text = "Right", toggle = True)
     row.prop(rig, "WristWorld_l", text = "Left" ,toggle = True)
 
-    split = box.split()
-    col = split.column()
-    col.prop(rig, "FullRiggedFace", text = "Face Full Rigged" , toggle = True)
     if rig.get("Finger") == True:
-        col.prop(rig, "FingerPlus", text = "Finger Full Rigged", toggle = True)
+        box.prop(rig, "FingerPlus", text = "Finger Full Rigged", toggle = True)
 
-        
+    box.prop(rig, "FullRiggedFace", text = "Face Full Rigged" , toggle = True)
+
     box = layout.box()
     split = box.split()
     col = split.column()

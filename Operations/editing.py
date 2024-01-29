@@ -61,7 +61,7 @@ def scale_uv(factor):
         for loop_ind in f.loop_indices:
             uv.data[loop_ind].uv[0] = uv.data[loop_ind].uv[0]*(1-factor)+x/n*(factor)
             uv.data[loop_ind].uv[1] = uv.data[loop_ind].uv[1]*(1-factor)+y/n*(factor)
-    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.object.mode_set(mode = 'OBJECT')
 
 def selectalpha(threshold):
     obj = bpy.context.active_object
@@ -166,10 +166,7 @@ class ScaleUV(bpy.types.Operator):
         layout.prop(self, "factor", slider = True)
 
     def execute(self, context):
-        try:
-            scale_uv(self.factor)
-        except:
-            print("Selected object can't not select uv.")
+        scale_uv(self.factor)
         return {'FINISHED'}
     
 class SelectalphaUV(bpy.types.Operator):
@@ -208,10 +205,10 @@ class SelectalphaUV(bpy.types.Operator):
     def draw(self, context):
         layout = self.layout
         layout.prop(self, "threshold", slider = True)
-        layout.prop(self, "delete_faces")
         layout.prop(self, "scale_uv")
         if self.scale_uv == True:
             layout.prop(self, "factor", slider = True)
+        layout.prop(self, "delete_faces")
 
     def execute(self, context):
         try:
@@ -230,65 +227,9 @@ class SelectalphaUV(bpy.types.Operator):
 
         return {'FINISHED'}
 
-class Alpha_Delete(bpy.types.Operator):
-    bl_idname = "alpha.delete"
-    bl_label = "Alpha.delete"
-    bl_options = {'REGISTER', 'UNDO'}
- 
-    threshold: FloatProperty(
-        name="Alpha threshold",
-        description="Set alpha threshold",
-        default=0.01,
-        min = 0,
-        max = 1
-    )
-
-    scale_uv: BoolProperty(
-        name="Scale UV Faces",
-        description="Scale UV Faces",
-        default=False,
-    )
-
-    factor: FloatProperty(
-        name="Scale UV Faces Factor",
-        description="Set Scale UV Faces Factor",
-        default=0.25,
-        min = 0,
-        max = 1
-    )
-
-    def draw(self, context):
-        layout = self.layout
-        layout.prop(self, "threshold", slider = True)
-        layout.prop(self, "delete_faces")
-        layout.prop(self, "scale_uv")
-        if self.scale_uv == True:
-            layout.prop(self, "factor", slider = True)
-
-    def execute(self, context):
-        try:
-            for obj in bpy.context.selected_objects:
-                if self.scale_uv == True:
-                    scale_uv(self.factor)
-                context.view_layer.objects.active = obj
-                bpy.ops.object.mode_set(mode = 'EDIT')
-                bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
-                bpy.ops.mesh.select_all(action='SELECT')
-                bpy.context.scene.tool_settings.uv_select_mode = 'FACE'
-                bpy.ops.uv.select_all(action='SELECT')
-                bpy.ops.object.mode_set(mode = 'OBJECT')
-                selectalpha(self.threshold)
-                bpy.ops.mesh.delete(type='FACE')
-                bpy.ops.object.mode_set(mode = 'OBJECT')
-        except:
-            pass
-
-        return {'FINISHED'}
-
 classes = (
             ScaleUV,
             SelectalphaUV,
-            Alpha_Delete,
           )        
 
 register, unregister = bpy.utils.register_classes_factory(classes)

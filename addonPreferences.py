@@ -71,6 +71,27 @@ def add_hotkey():
 
 	if kc:
 		################################################
+
+		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
+		kmi = km.keymap_items.new('object.vertex_group_index_add', 'A', 'PRESS', shift=True)
+		kmi.active = True
+		addon_keymaps.append((km, kmi))
+
+		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
+		kmi = km.keymap_items.new('object.vertex_group_index_remove', 'X', 'PRESS')
+		kmi.active = True
+		addon_keymaps.append((km, kmi))
+
+		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
+		kmi = km.keymap_items.new('object.vertex_group_down', 'Z', 'PRESS')
+		kmi.active = True
+		addon_keymaps.append((km, kmi))
+
+		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
+		kmi = km.keymap_items.new('object.vertex_group_up', 'C', 'PRESS')
+		kmi.active = True
+		addon_keymaps.append((km, kmi))
+
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
 		kmi = km.keymap_items.new('object.add_constraint_menu', 'A', 'PRESS', shift=True)
 		kmi.active = True
@@ -468,6 +489,17 @@ class AddonPref(bpy.types.AddonPreferences):
         script_file = os.path.realpath(__file__)
         script_directory = os.path.dirname(script_file)
 
+        if context.preferences.view.language != "en_US":
+            if context.preferences.view.use_translate_new_dataname == True:
+                layout.label(text = "Notice!!! If you are using translating, some functions are not working!", icon = "ERROR")
+            else:
+                layout.label(text = "New Data won't be translated.")
+            row = layout.row()
+            row.alignment = "LEFT"
+            row.prop(context.preferences.view, "use_translate_new_dataname", text="New Data")
+            if context.preferences.view.use_translate_new_dataname == True:
+                row.label(text = "(Turn Off | Addon functions will be working.)")
+
         row = layout.row()
         row.prop(self, "subClasses", expand = True)
         row.operator("addonprefs.sync", text = "", icon = "FILE_REFRESH")
@@ -548,7 +580,10 @@ class AddonPref(bpy.types.AddonPreferences):
                     row.prop(self, "legIK", expand = True, text = "Legs")
 
                     row = box.row()
-                    row.label(text = "Fingers(Minecraft):")
+                    if any(item.registered_name == AnimeProperties.registered_name[2] for item in self.registered_name):
+                        row.label(text = "Fingers(Minecraft):")
+                    else:
+                        row.label(text = "Fingers:")
                     row.prop(self, "finger", expand = True, text = "Fingers")
 
         #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -565,6 +600,42 @@ class AddonPref(bpy.types.AddonPreferences):
             km = kc.keymaps[view3d_reg_location]
             kmi = get_hotkey_entry_item(km, 'view3d.open_object_pie_menu', '')  # ← オペレーターと、プロパティを設定するs
             col.label(text=view3d_reg_location)
+            if kmi:
+                col.context_pointer_set("keymap", km)
+                rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
+                col.separator()
+            else:
+                col.label(text="No hotkey entry found")
+                col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
+
+            property_editor_reg_location = "Property Editor"
+            km = kc.keymaps[property_editor_reg_location]
+            col.label(text="Property Editor")
+            kmi = get_hotkey_entry_item(km, 'object.vertex_group_index_add', '')  # ← オペレーターと、プロパティを設定するs
+            if kmi:
+                col.context_pointer_set("keymap", km)
+                rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
+                col.separator()
+            else:
+                col.label(text="No hotkey entry found")
+                col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
+            kmi = get_hotkey_entry_item(km, 'object.vertex_group_up', '')  # ← オペレーターと、プロパティを設定するs
+            if kmi:
+                col.context_pointer_set("keymap", km)
+                rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
+                col.separator()
+            else:
+                col.label(text="No hotkey entry found")
+                col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
+            kmi = get_hotkey_entry_item(km, 'object.vertex_group_down', '')  # ← オペレーターと、プロパティを設定するs
+            if kmi:
+                col.context_pointer_set("keymap", km)
+                rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
+                col.separator()
+            else:
+                col.label(text="No hotkey entry found")
+                col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
+            kmi = get_hotkey_entry_item(km, 'object.vertex_group_index_remove', '')  # ← オペレーターと、プロパティを設定するs
             if kmi:
                 col.context_pointer_set("keymap", km)
                 rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
@@ -616,6 +687,7 @@ class AddonPref(bpy.types.AddonPreferences):
                 col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
 
             property_editor_reg_location = "Property Editor"
+            
             col.label(text="Modifier Panel")
             if self.use_modifier_panel == True:
                 km = kc.keymaps[property_editor_reg_location]
@@ -699,6 +771,7 @@ class AddonPref(bpy.types.AddonPreferences):
                 else:
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
+            
             col.label(text="Constraint Panel")
             if self.use_constraint_panel == True:
                 km = kc.keymaps[property_editor_reg_location]

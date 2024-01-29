@@ -85,7 +85,7 @@ class ADD_MT_kennode(bpy.types.Menu):
 			layout.operator(ADD_OT_kennode.bl_idname, text="Color Mask(HSV)").choice = "Color Mask(HSV)"
 			layout.operator(ADD_OT_kennode.bl_idname, text="Switch Color").choice = "Switch Color"
 			layout.operator(ADD_OT_kennode.bl_idname, text="Switch Shader").choice = "Switch Shader"
-			layout.operator(ADD_OT_kennode.bl_idname, text="Combine Nomral Map").choice = "Combine Nomral Map"
+			layout.operator(ADD_OT_kennode.bl_idname, text="Combine Normal Map").choice = "Combine Normal Map"
 			layout.separator()
 			layout.label(text = "Filter")
 			layout.operator(ADD_OT_kennode.bl_idname, text="Enchanted Node").choice = "Enchanted Node"

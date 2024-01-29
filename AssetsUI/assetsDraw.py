@@ -71,13 +71,10 @@ def draw_tools(scene, obj, self):
 			row.prop(scene, "EditingTools", text = "Editing Tools", icon = icon, emboss=False)
 			if scene.EditingTools == True:
 				EditingTools = box.box()
+				EditingTools.label(text = "Editing Tools")
 				row = EditingTools.row()
-				row.label(text = "Editing Tools")
-				row = EditingTools.row()
-				row.operator("select.alphauv", text = "Select Alpha")
+				row.operator("select.alphauv", text = "Alpha Editing")
 				row.operator("scale.uv", text = "Scale Faces")
-				row = EditingTools.row()
-				row.operator("alpha.delete", text = "Delete Alpha")
 
 			row = box.row()
 			if scene.VertexGroupTool == True:
@@ -699,7 +696,7 @@ def drawmaterial_properties(self, context):
 def drawmaterial(scene, box, obj, mat, state):
 	if mat and mat.name != 'Dots Stroke':
 
-		box.label(text = "Fix Tools", icon = "TOOL_SETTINGS")
+		box.label(text = "Prep Tools", icon = "TOOL_SETTINGS")
 		if state == "Object Material":
 			objmat = box.operator("prep.material", text = "Prep Materials")
 			objmat.type = "obj"
@@ -786,13 +783,25 @@ def drawnode_tree(scene, box, mat):
 				drawnoderamp(node, box, 'ColorRamp_Specular', "Specular Color Ramp")
 				drawnoderamp(node, box, 'ColorRamp_Roughness', "Roughness Color Ramp")
 				drawnoderamp(node, box, 'ColorRamp_Bump', "Bump Color Ramp")
-				if node.name.split(".")[0] == 'Combine Nomral Map':
+				if node.name.split(".")[0] == 'Combine Normal Map':
 					if all(len(outputs_socket.links) > 0 for outputs_socket in node.outputs):
 						box.label(text = node.name)
 						nodebox = box.box()
 						nodebox.prop(node.inputs[3], "default_value", text = "Bump Strength")
-						row = nodebox.row()
-						row.prop(node.inputs[1], "default_value", text = "Nomral Strength")
+						nodebox.prop(node.inputs[1], "default_value", text = "Nomral Strength")
+
+				if node.name.split(".")[0] == 'Bump Map':
+					if all(len(outputs_socket.links) > 0 for outputs_socket in node.outputs):
+						box.label(text = node.name)
+						nodebox = box.box()
+						nodebox.prop(node.inputs[0], "default_value", text = "Bump Strength")
+						nodebox.prop(node.inputs[1], "default_value", text = "Distance")
+
+				if node.name.split(".")[0] == 'Normal Map':
+					if all(len(outputs_socket.links) > 0 for outputs_socket in node.outputs):
+						box.label(text = node.name)
+						nodebox = box.box()
+						nodebox.prop(node.inputs[0], "default_value", text = "Normal Strength")
 
 				drawnodelist(box, node, id, "Glass_Dispersion")
 				drawnodelist(box, node, id, "Emission Object")
