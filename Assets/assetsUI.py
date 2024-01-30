@@ -50,7 +50,7 @@ class Assets_UI(bpy.types.Panel):
                 row = box.row()
                 assetsDraw.draw_properties(addon_prefs, context, row, obj, pcoll)
 
-                if obj.mode == 'OBJECT':
+                if obj.mode != 'EDIT':
                     assetsDraw.draw_transform(addon_prefs, context, box, obj)
                 else:
                     assetsDraw.drawedit_transform(addon_prefs, context, box, obj)
