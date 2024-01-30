@@ -14,53 +14,67 @@ if "bpy" in locals():
     importlib.reload(uv_drag),
     importlib.reload(vertex_groups),
     importlib.reload(clean_resources),
-    importlib.reload(modifiers_ui),
-    importlib.reload(constraints_ui),
-    importlib.reload(pose_tools),
-    importlib.reload(animation_tools),
     importlib.reload(copytransform),
-    importlib.reload(material_tool),
-    importlib.reload(pie_menu),
     importlib.reload(model_importer),
     importlib.reload(world_importer),
-    importlib.reload(editing),
+    importlib.reload(materials),
+    importlib.reload(lights),
+    importlib.reload(cameras),
+    importlib.reload(images),
+    importlib.reload(particles),
+    importlib.reload(pie_menu),
+    importlib.reload(modifiers_panel),
+    importlib.reload(constraints_panel),
+    importlib.reload(materials_panel),
+    importlib.reload(pose_tools),
+    importlib.reload(editing_tools),
+    importlib.reload(animation_tools),
+    importlib.reload(materials_tools),
 
 else:
     from . import (
         addonPreferences,
         icons,
     )
-    from .AssetsUI import(
+    from .Assets import(
         assetsUI,
         assetsOperators,
         assetsNodePreset,
     )
-    from .Minecraft import(
-        minecraftUI,
-        minecraftOperators,
-    )
-    from .Anime import(
+    from .Assets.Anime import(
         AnimeUI,
         AnimeOperators,
     )
-    from .Operations import(
+    from .Assets.Minecraft import(
+        minecraftUI,
+        minecraftOperators,
+    )
+    from .Assets.Libraries import(
+        materials,
+        lights,
+        cameras,
+        images,
+        particles,
+    )
+    from .Operatiors import(
         save_cams,
         camera_shakify,
         uv_drag,
         vertex_groups,
         clean_resources,
         pose_tools,
-        pie_menu,
         animation_tools,
+        materials_tools,
+        editing_tools,
         copytransform,
-        material_tool,
         model_importer,
         world_importer,
-        editing,
     )
     from .UI import(
-        modifiers_ui,
-        constraints_ui,
+        pie_menu,
+        modifiers_panel,
+        constraints_panel,
+        materials_panel,
     )
 
 module_list = (
@@ -75,18 +89,24 @@ module_list = (
     assetsNodePreset,
     camera_shakify,
     uv_drag,
-    pose_tools,
-    modifiers_ui,
-    constraints_ui,
-    pie_menu,
-    animation_tools,
     copytransform,
     vertex_groups,
     clean_resources,
-    material_tool,
+    materials,
+    lights,
+    cameras,
+    images,
+    particles,
     model_importer,
     world_importer,
-    editing,
+    editing_tools,
+    animation_tools,
+    pose_tools,
+    materials_tools,
+    modifiers_panel,
+    constraints_panel,
+    materials_panel,
+    pie_menu,
 )
 
 def register(bl_info):

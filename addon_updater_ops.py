@@ -926,8 +926,105 @@ def update_notice_box_ui(self, context, box):
         # ops.url=updater.update_link
         col.operator("wm.url_open", text="Get it now").url = updater.website
 
+def update_settings_ui(col, context, element=None):
+    box = col
 
-def update_settings_ui(self, context, element=None):
+    row = box.row(align=True)
+
+    # special case to tell user to restart blender, if set that way
+    if not updater.auto_reload_post_update:
+        saved_state = updater.json
+        if "just_updated" in saved_state and saved_state["just_updated"]:
+            row.alert = True
+            row.operator("wm.quit_blender",
+                         text="Restart blender to complete update",
+                         icon="ERROR")
+            return
+    settings = get_user_preferences(context)
+
+    lrow = row.row()
+    lrow.scale_x = 0.45
+    lrow.prop(settings, "auto_check_update", text = "Auto", toggle = True)
+
+    row.scale_x = 0.5
+
+
+    '''
+    if not settings.auto_check_update:
+    sub_col.enabled = False
+    sub_row = sub_col.row()
+    sub_row.label(text="Interval between checks")
+    check_col = sub_row.column(align=True)
+    check_col.prop(settings, "updater_interval_months")
+    check_col = sub_row.column(align=True)
+    check_col.prop(settings, "updater_interval_days")
+    check_col = sub_row.column(align=True)
+    '''
+
+    # Consider un-commenting for local dev (e.g. to set shorter intervals)
+    # check_col.prop(settings,"updater_interval_hours")
+    # check_col = sub_row.column(align=True)
+    # check_col.prop(settings,"updater_interval_minutes")
+
+    # Checking / managing updates.
+    if updater.error is not None:
+        if "ssl" in updater.error_msg.lower():
+            row.operator(AddonUpdaterInstallManually.bl_idname,
+                           text=updater.error, emboss = False)
+        else:
+            row.operator(AddonUpdaterCheckNow.bl_idname,
+                           text=updater.error, icon="FILE_REFRESH", emboss = False)
+
+    elif updater.update_ready is None and not updater.async_checking:
+        row.operator(AddonUpdaterCheckNow.bl_idname, text = "Check Update", emboss = False)
+    elif updater.update_ready is None:  # async is running
+        lrow = row.row()
+        lrow.scale_x = 0.7
+        lrow.enabled = False
+        lrow.operator(AddonUpdaterCheckNow.bl_idname, text="Checking...", emboss = False)
+        row.operator(AddonUpdaterEndBackground.bl_idname, text="", icon="X", emboss = False)
+
+    elif updater.include_branches and \
+            len(updater.tags) == len(updater.include_branch_list) and not \
+            updater.manual_only:
+        # No releases found, but still show the appropriate branch.
+        update_now_txt = "Update {}".format(
+            updater.include_branch_list[0])
+        row.operator(AddonUpdaterUpdateNow.bl_idname, text=update_now_txt, icon="SORT_DESC", emboss = False)
+
+    elif updater.update_ready and not updater.manual_only:
+        row.operator(AddonUpdaterUpdateNow.bl_idname,
+                       text="Update" + str(updater.update_version), icon = "SORT_DESC", emboss = False)
+
+    elif updater.update_ready and updater.manual_only:
+        dl_now_txt = "Download " + str(updater.update_version)
+        row.operator("wm.url_open",
+                     text=dl_now_txt).url = updater.website
+    else:  # i.e. that updater.update_ready == False.
+        row.operator(AddonUpdaterCheckNow.bl_idname,
+                       text="Up to date", emboss = False)
+
+    if not updater.manual_only:
+        if updater.include_branches and len(updater.include_branch_list) > 0:
+            branch = updater.include_branch_list[0]
+            row.operator(AddonUpdaterUpdateTarget.bl_idname,
+                         text="Version".format(branch), icon ="FILE_FOLDER", emboss = False)
+        else:
+            row.operator(AddonUpdaterUpdateTarget.bl_idname,
+                         text="(Re)install Version", icon ="FILE_FOLDER", emboss = False)
+        last_date = "None"
+        backup_path = os.path.join(updater.stage_path, "backup")
+        if "backup_date" in updater.json and os.path.isdir(backup_path):
+            if updater.json["backup_date"] == "":
+                last_date = "Date not found"
+            else:
+                last_date = updater.json["backup_date"]
+        backup_text = "Last Version ({})".format(last_date)
+        row.operator(AddonUpdaterRestoreBackup.bl_idname, text="", icon="FILE_REFRESH", emboss = False)
+
+    box.label(text = backup_text)
+
+def update_settings_ui_orignal(self, context, element=None):
     """Preferences - for drawing with full width inside user preferences
 
     A function that can be run inside user preferences panel for prefs UI.

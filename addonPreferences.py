@@ -9,12 +9,12 @@ from bpy.props import (StringProperty,
                         CollectionProperty,
 )
 from enum import Enum
-from .Operations import uv_drag, material_tool
-from .UI import modifiers_ui, constraints_ui
-from .AssetsUI import assetsUI, assetsDefs
-from .Minecraft import minecraftDefs
-from .Anime import AnimeProperties, AnimeDefs
+from .UI import constraints_panel, materials_panel, modifiers_panel
+from .Assets import assetsUI, assetsDefs
+from .Assets.Minecraft import minecraftDefs
+from .Assets.Anime import AnimeProperties, AnimeDefs
 from . import addon_updater_ops, icons
+from .addon_updater_ops import AddonUpdaterCheckNow, AddonUpdaterUpdateTarget, AddonUpdaterRestoreBackup
 
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -83,12 +83,12 @@ def add_hotkey():
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('object.vertex_group_down', 'Z', 'PRESS')
+		kmi = km.keymap_items.new('object.vertex_group_down', 'Z', 'PRESS', repeat=True)
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
 		km = kc.keymaps.new(name='Property Editor', space_type='PROPERTIES')
-		kmi = km.keymap_items.new('object.vertex_group_up', 'C', 'PRESS')
+		kmi = km.keymap_items.new('object.vertex_group_up', 'C', 'PRESS', repeat=True)
 		kmi.active = True
 		addon_keymaps.append((km, kmi))
 
@@ -243,13 +243,13 @@ def remove_hotkey():
     addon_keymaps.clear()
 
 def use_modifier_panel(self, context):
-    modifiers_ui.ken_modifier_panel(self, context)
+    modifiers_panel.ken_modifier_panel(self, context)
 
 def use_constraint_panel(self, context):
-    constraints_ui.ken_constraint_panel(self, context)
+    constraints_panel.ken_constraint_panel(self, context)
 
 def use_material_panel(self, context):
-    material_tool.ken_material_panel(self, context)
+    materials_panel.ken_material_panel(self, context)
 
 class UVDRAG_OT_AddHotkey(bpy.types.Operator):
 	''' Add hotkey entry '''
@@ -437,7 +437,7 @@ class AddonPref(bpy.types.AddonPreferences):
     updater_interval_days : bpy.props.IntProperty(
 		name='Days',
 		description="Number of days between checking for updates",
-		default=7,
+		default=3,
 		min=0,
 		max=31)
 
@@ -477,9 +477,8 @@ class AddonPref(bpy.types.AddonPreferences):
 
     subClasses : EnumProperty(default = "one",
                                 items = [('one', 'Settings', ''),
-                                        ('two', 'Hotkey', ''),
-                                        ('three', 'Contact / Contributors', ''),
-                                        ('four', 'Update', ''),
+                                        ('two', 'Features', ''),
+                                        ('three', 'Hotkey', ''),
                                         ])
 
     #━━━━━━━━━━━━━
@@ -488,107 +487,177 @@ class AddonPref(bpy.types.AddonPreferences):
         layout = self.layout
         script_file = os.path.realpath(__file__)
         script_directory = os.path.dirname(script_file)
+        pcoll = preview_collections["main"]
+        ken_icon = pcoll["Main"]
+        discord_icon = pcoll["Discord"]
+        youtube_icon = pcoll["Youtube"]
+        twitter_icon = pcoll["Twitter"]
+        github_icon = pcoll["Github"]
 
         if context.preferences.view.language != "en_US":
-            if context.preferences.view.use_translate_new_dataname == True:
-                layout.label(text = "Notice!!! If you are using translating, some functions are not working!", icon = "ERROR")
-            else:
-                layout.label(text = "New Data won't be translated.")
             row = layout.row()
             row.alignment = "LEFT"
+            if context.preferences.view.use_translate_new_dataname:
+                row.alert = True
+            row.label(text = "",icon = "ERROR")
             row.prop(context.preferences.view, "use_translate_new_dataname", text="New Data")
-            if context.preferences.view.use_translate_new_dataname == True:
-                row.label(text = "(Turn Off | Addon functions will be working.)")
+            if context.preferences.view.use_translate_new_dataname:
+                row.label(text = "Some functions won't work when using translating!")
+            else:
+                row.label(text = "New Data won't be translated.")
 
         row = layout.row()
-        row.prop(self, "subClasses", expand = True)
-        row.operator("addonprefs.sync", text = "", icon = "FILE_REFRESH")
-        row.scale_y = 1.25
+        box = row.box()
+        toprow = box.row()
+        toprow.label(text="Info", icon = "WINDOW")
+
+        box.separator()
+        boxrow = box.row()
+        boxrow.template_icon(icon_value=ken_icon.icon_id,scale=5)
+        col = boxrow.column()
+        col.label(text = "An addon improves Blender pipeline.")
+        colrow = col.row(align=True)
+        colrow.label(text = "Author: KEN")
+        colrow.operator("wm.url_open", text="", icon_value = youtube_icon.icon_id, emboss = False).url = "https://www.youtube.com/@Kenimation"
+        colrow.operator("wm.url_open", text="", icon_value = twitter_icon.icon_id, emboss = False).url = "https://twitter.com/KENIMATION"
+        colrow.operator("wm.url_open", text="", icon_value = discord_icon.icon_id, emboss = False).url = "https://discord.gg/zgksz7E"
+        col.label(text = "Version: 2.3")
+        addon_updater_ops.update_settings_ui(col, context)
+
+
+        box = row.box()
+        box.label(text="Registered Name", icon = "COPY_ID")
+        box.separator()
+        row = box.row()
+        row.template_list("REGISTERED_NAME_LIST", "", self, "registered_name", self, "registered_name_index")
+        col = row.column(align=True)
+        col.separator()
+        col.operator("add.registered_name", text = "", icon = "ADD", emboss = False)
+        col.operator("remove.registered_name", text = "", icon = "REMOVE", emboss = False)
+
+        row = layout.row()
+        row.prop(self, "subClasses", expand = True, emboss = False)
+        split = row.split()
+        if self.subClasses != 'one':
+            split.enabled = False
+        split.operator("addonprefs.sync", text = "", icon = "FILE_REFRESH", emboss = False)
+        split.scale_y = 1.25
 
         #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
         if self.subClasses == 'one':
-            box = layout.box()
-            box.label(text = "Registered Name:")
-            row = box.row()
-            row.template_list("REGISTERED_NAME_LIST", "", self, "registered_name", self, "registered_name_index")
-            col = row.column(align=True)
-            col.separator()
-            col.operator("add.registered_name", text = "", icon = "ADD")
-            col.operator("remove.registered_name", text = "", icon = "REMOVE")
+            
+            row = layout.row(align = True)
+            siderow = row.row()
 
-            split = box.split()
-
-            col = split.column()
-            col.label(text = "UI Settings:")
-            col = col.column()
-            row = col.row()
-            row.label(text = "", icon = "MENU_PANEL")
-            row.prop(self, "pie_menu", text = "Pie Menu")
-            col = col.column()
-            row = col.row()
-            row.label(text = "Panel Setting:")
-            col = col.column()
-            row = col.row()
-            row.label(text = "", icon = "MODIFIER")
-            row.prop(self, "use_modifier_panel", text = "Modifier Panel")
-            if self.use_modifier_panel:
-                row.prop(self, "use_old_modifier_menu", text = "Old Modifier Menu")
-            col = col.column()
-            row = col.row()
-            row.label(text = "", icon = "CONSTRAINT")
-            row.prop(self, "use_constraint_panel", text = "Constraint Panel")
-            if self.use_constraint_panel:
-                row.prop(self, "use_old_constraint_menu", text = "Old Constraint Menu")
-            col = col.column()
-            row = col.row()
-            row.label(text = "", icon = "MATERIAL")
-            row.prop(self, "use_material_panel", text = "Material Panel")
-
-            col = split.column()
+            col = siderow.column()
             col.label(text = "Category Settings:")
-            col = col.column()
             col.prop(self, "compact_panel", text = "Compact Panel")
-            col = col.column()
             col.label(text = "Panel Header:")
-            col = col.column()
-            row = col.row()
-            row.prop(self, "view", icon = "VIEW3D", text = "")
-            row.prop(self, "advanced_option", icon = "OUTLINER", text = "")
-            row.prop(self, "tools", icon = "TOOL_SETTINGS", text = "")
+            colrow = col.row()
+            colrow.prop(self, "view", icon = "VIEW3D", text = "")
+            colrow.prop(self, "advanced_option", icon = "OUTLINER", text = "")
+            colrow.prop(self, "tools", icon = "TOOL_SETTINGS", text = "")
+
+            col.label(text="UI Settings:")
+            colrow = col.row()
+            colrow.label(text = "", icon = "MENU_PANEL")
+            colrow.prop(self, "pie_menu", text = "Pie Menu")
+            col.label(text = "Panel Setting:")
+            colrow = col.row()
+            colrow.label(text = "", icon = "MODIFIER")
+            colrow.prop(self, "use_modifier_panel", text = "Modifier Panel")
+            if self.use_modifier_panel:
+                colrow.prop(self, "use_old_modifier_menu", text = "Old Modifier Menu")
+            colrow = col.row()
+            colrow.label(text = "", icon = "CONSTRAINT")
+            colrow.prop(self, "use_constraint_panel", text = "Constraint Panel")
+            if self.use_constraint_panel:
+                colrow.prop(self, "use_old_constraint_menu", text = "Old Constraint Menu")
+            colrow = col.row()
+            colrow.label(text = "", icon = "MATERIAL")
+            colrow.prop(self, "use_material_panel", text = "Material Panel")
 
             if self.registered_name:
                 if any(item.registered_name in AnimeProperties.registered_name for item in self.registered_name):
-                    box = layout.box()
-                    row = box.row()
-                    row.label(text = "Rig Settings:")
+                    siderow = row.row()
+                    col = siderow.column()
+                    col.label(text = "Rig Settings:")
                     if any(item.registered_name == AnimeProperties.registered_name[2] for item in self.registered_name):
-                        row = box.row()
-                        row.label(text = "Rig Scale:")
-                        row.prop(self, "rig_scale", text = "Rig Scale")
+                        colrow = col.row()
+                        colrow.label(text = "Rig Scale:")
+                        colrow.prop(self, "rig_scale", text = "Rig Scale")
 
-                    row = box.row()
-                    row.label(text = "Flip bone:")
-                    row.prop(self, "flip_bone", text = "Flip bone", toggle = True)
+                    colrow = col.row()
+                    colrow.label(text = "Flip bone:")
+                    colrow.prop(self, "flip_bone", text = "Flip bone", toggle = True)
                     
-                    row = box.row()
-                    row.label(text = "Arms:")
-                    row.prop(self, "armIK", expand = True)
+                    colrow = col.row()
+                    colrow.label(text = "Arms:")
+                    colrow.prop(self, "armIK", expand = True)
                     
-                    row = box.row()
-                    row.label(text = "Legs:")
-                    row.prop(self, "legIK", expand = True, text = "Legs")
+                    colrow = col.row()
+                    colrow.label(text = "Legs:")
+                    colrow.prop(self, "legIK", expand = True, text = "Legs")
 
-                    row = box.row()
+                    colrow = col.row()
                     if any(item.registered_name == AnimeProperties.registered_name[2] for item in self.registered_name):
-                        row.label(text = "Fingers(Minecraft):")
+                        col.label(text = "Fingers(Minecraft):")
                     else:
-                        row.label(text = "Fingers:")
-                    row.prop(self, "finger", expand = True, text = "Fingers")
+                        col.label(text = "Fingers:")
+                    colrow = col.row()
+                    colrow.prop(self, "finger", expand = True, text = "Fingers")
 
         #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         
         if self.subClasses == 'two':
+            layout.label(text="This addon is non-profit. However ,some addon features are based on other great people. There's credit of them. Please Support them!", icon = "INFO")
+
+            box = layout.box()
+            box.label(text="- Libraries System -")
+            box.separator()
+            col = box.column()
+            col.label(text = "Libraries allow you to have better management of the resource in the scene. Such as materials, lights, cameras, and images.")
+            col.label(text = "Modifiers and constraints have list display option.")
+            colrow = col.row(align=True)
+            colrow.label(text = "Author: KEN")
+
+            if any(item.registered_name == AnimeProperties.registered_name[1] or item.registered_name == AnimeProperties.registered_name[2] for item in self.registered_name):
+                box = layout.box()
+                box.label(text="- Minecraft Rig Preset -")
+                box.separator()
+                col = box.column()
+                col.label(text = "The Minecraft Rig is made by Thomas and remastered by BlueEvilGFX.")
+                col.label(text = "I improve on it. Let you have a better style Minecraft character.")
+                colrow = col.row(align=True)
+                colrow.label(text = "Author: Thomas")
+                colrow.operator("wm.url_open", text="", icon_value = youtube_icon.icon_id, emboss = False).url = "https://www.youtube.com/@ThomasAnimations"    
+                colrow = col.row(align=True)
+                colrow.label(text = "Remaster: BlueEvilGFX")
+                colrow.operator("wm.url_open", text="", icon_value = youtube_icon.icon_id, emboss = False).url = "https://www.youtube.com/@BlueEvilGFX"
+                colrow = col.row(align=True)
+                colrow.label(text = "Edit: KEN")
+
+            box = layout.box()
+            box.label(text="- Camera Save List | UV Drag Island -")
+            box.separator()
+            col = box.column()
+            col.label(text = "Camera Save List allows you to save and manage the camera data in scene.")
+            col.label(text = "UV Drag Island is quality of life, it gives you an easier way to move UV island.")
+            colrow = col.row(align=True)
+            colrow.label(text = "Author: Bookyakuno")
+            colrow.operator("wm.url_open", text="", icon_value = youtube_icon.icon_id, emboss = False).url = "https://www.youtube.com/@bookyakuno"     
+
+            box = layout.box()
+            box.label(text="- Camera Shakify -")
+            box.separator()
+            col = box.column()
+            col.label(text = "Camera Shakify lets you easily add realistic camera shake to your cameras.")
+            colrow = col.row(align=True)
+            colrow.label(text = "Author: EatTheFuture")
+            colrow.operator("wm.url_open", text="", icon_value = github_icon.icon_id, emboss = False).url = "https://github.com/EatTheFuture/camera_shakify?tab=readme-ov-file"
+
+        if self.subClasses == 'three':
             box = layout.box()
             col = box.column()
             col.label(text='Setup Hotkey:')
@@ -688,8 +757,8 @@ class AddonPref(bpy.types.AddonPreferences):
 
             property_editor_reg_location = "Property Editor"
             
-            col.label(text="Modifier Panel")
             if self.use_modifier_panel == True:
+                col.label(text="Modifier Panel")
                 km = kc.keymaps[property_editor_reg_location]
                 kmi = get_hotkey_entry_item(km, 'modifiers_list.apply_modifier', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
@@ -772,8 +841,8 @@ class AddonPref(bpy.types.AddonPreferences):
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
             
-            col.label(text="Constraint Panel")
             if self.use_constraint_panel == True:
+                col.label(text="Constraint Panel")
                 km = kc.keymaps[property_editor_reg_location]
                 kmi = get_hotkey_entry_item(km, 'object.add_constraint_menu', '')  # ← オペレーターと、プロパティを設定するs
                 if kmi:
@@ -864,41 +933,12 @@ class AddonPref(bpy.types.AddonPreferences):
                     col.label(text="No hotkey entry found")
                     col.operator(UVDRAG_OT_AddHotkey.bl_idname, text = "Add hotkey entry", icon = 'ZOOM_IN')
         # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-        if self.subClasses == 'three':            
-            pcoll = preview_collections["main"]
-            discord_icon = pcoll["Discord"]
-            youtube_icon = pcoll["Youtube"]
-            twitter_icon = pcoll["Twitter"]
-
-            box = layout.box()
-            box.label(text = "Contact")
-            box.label(text = "Kenimation")
-            row = box.row()
-            row.scale_y = 1.25
-            row.operator("wm.url_open", text="Kenimation Youtube Channel", icon_value = youtube_icon.icon_id).url = "https://www.youtube.com/@Kenimation"
-            row = box.row()
-            row.operator("wm.url_open", text="Kenimation Twitter", icon_value = twitter_icon.icon_id).url = "https://twitter.com/KENIMATION"
-            row = box.row()
-            row.operator("wm.url_open", text="Kenimation Discord Server", icon_value = discord_icon.icon_id).url = "https://discord.gg/zgksz7E"
-
-            if any(item.registered_name in AnimeProperties.registered_name for item in self.registered_name):
-                box = layout.box()
-                box.label(text = "Original Addons / Rig")
-                box.label(text = "BlueEvilGFXs")
-                row = box.row()
-                row.scale_y = 1.25
-                row.operator("wm.url_open", text="BlueEvilGFXs", icon_value = youtube_icon.icon_id).url = "https://www.youtube.com/channel/UCKPgR4jjSDRTqWGAd2IOL5w"
-                row.operator("wm.url_open", text="Thomas Animations", icon_value = youtube_icon.icon_id).url = "https://www.youtube.com/@ThomasAnimations"
-
-            box = layout.box()
-            box.label(text = "Functions")
-            row = box.row()
-            row.operator("wm.url_open", text="Bookyakuno", icon_value = youtube_icon.icon_id).url = "https://www.youtube.com/@bookyakuno8779"
-        
-        if self.subClasses == 'four':
+   
+        '''
             layout = self.layout
             addon_updater_ops.update_settings_ui(self, context)
+        '''
+
         #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
