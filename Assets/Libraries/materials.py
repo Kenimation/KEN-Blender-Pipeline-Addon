@@ -249,14 +249,14 @@ def draw_materials(self, context, box):
 		
 		box.label(text = "Prep Tools", icon = "TOOL_SETTINGS")
 		if state == "Object Material":
-			objmat = box.operator("prep.material", text = "Prep Materials")
+			objmat = box.operator("materials.prep", text = "Prep Materials")
 			objmat.type = "obj"
 		else:
 			row = box.row()
-			indexmat = row.operator("prep.material", text = "Prep Scene Material")
+			indexmat = row.operator("materials.prep", text = "Prep Scene Material")
 			indexmat.type = "index"
 			indexmat.mat = mat.name
-			allmat = row.operator("prep.material", text = "Prep All Materials")
+			allmat = row.operator("materials.prep", text = "Prep All Materials")
 			allmat.type = "scene"
 			   
 		row = box.row()

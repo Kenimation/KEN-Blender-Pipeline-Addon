@@ -1022,6 +1022,8 @@ def update_settings_ui(col, context, element=None):
         backup_text = "Last Version ({})".format(last_date)
         row.operator(AddonUpdaterRestoreBackup.bl_idname, text="", icon="FILE_REFRESH", emboss = False)
 
+    box.separator()
+    
     box.label(text = backup_text)
 
 def update_settings_ui_orignal(self, context, element=None):

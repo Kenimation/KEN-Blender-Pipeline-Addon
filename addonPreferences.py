@@ -9,6 +9,7 @@ from bpy.props import (StringProperty,
                         CollectionProperty,
 )
 from enum import Enum
+from . import bl_info
 from .UI import constraints_panel, materials_panel, modifiers_panel
 from .Assets import assetsUI, assetsDefs
 from .Assets.Minecraft import minecraftDefs
@@ -493,6 +494,11 @@ class AddonPref(bpy.types.AddonPreferences):
         youtube_icon = pcoll["Youtube"]
         twitter_icon = pcoll["Twitter"]
         github_icon = pcoll["Github"]
+        name = str(bl_info["name"])
+        name = f"({name})"
+        description = str(bl_info["description"])
+        author = str(bl_info["author"])
+        version = str(bl_info["version"]).replace("(", "").replace(")", "").replace(", ", ".")
 
         if context.preferences.view.language != "en_US":
             row = layout.row()
@@ -515,13 +521,24 @@ class AddonPref(bpy.types.AddonPreferences):
         boxrow = box.row()
         boxrow.template_icon(icon_value=ken_icon.icon_id,scale=5)
         col = boxrow.column()
-        col.label(text = "An addon improves Blender pipeline.")
-        colrow = col.row(align=True)
-        colrow.label(text = "Author: KEN")
+        col.label(text = description)
+        author_row = col.row(align=True)
+        colrow = author_row.row()
+        colrow.alignment = "LEFT"
+        colrow.label(text = "Author:")
+        colrow.label(text = author)
+
+        colrow = author_row.row()
+        colrow.alignment = "RIGHT"
         colrow.operator("wm.url_open", text="", icon_value = youtube_icon.icon_id, emboss = False).url = "https://www.youtube.com/@Kenimation"
         colrow.operator("wm.url_open", text="", icon_value = twitter_icon.icon_id, emboss = False).url = "https://twitter.com/KENIMATION"
         colrow.operator("wm.url_open", text="", icon_value = discord_icon.icon_id, emboss = False).url = "https://discord.gg/zgksz7E"
-        col.label(text = "Version: 2.3.1")
+
+        colrow = col.row(align=True)
+        colrow.alignment = "LEFT"
+        colrow.label(text = "Version:")
+        colrow.label(text = version)
+        col.separator()
         addon_updater_ops.update_settings_ui(col, context)
 
 
@@ -585,7 +602,7 @@ class AddonPref(bpy.types.AddonPreferences):
                     col.label(text = "Rig Settings:")
                     if any(item.registered_name == AnimeProperties.registered_name[2] for item in self.registered_name):
                         colrow = col.row()
-                        colrow.label(text = "Rig Scale:")
+                        colrow.label(text = "Anime Rig Scale:")
                         colrow.prop(self, "rig_scale", text = "Rig Scale")
 
                     colrow = col.row()
@@ -602,10 +619,9 @@ class AddonPref(bpy.types.AddonPreferences):
 
                     colrow = col.row()
                     if any(item.registered_name == AnimeProperties.registered_name[2] for item in self.registered_name):
-                        col.label(text = "Fingers(Minecraft):")
+                        colrow.label(text = "Fingers(Minecraft):")
                     else:
-                        col.label(text = "Fingers:")
-                    colrow = col.row()
+                        colrow.label(text = "Fingers:")
                     colrow.prop(self, "finger", expand = True, text = "Fingers")
 
         #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

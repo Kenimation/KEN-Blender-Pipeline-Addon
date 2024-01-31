@@ -471,44 +471,31 @@ class Import_MinecraftModel(bpy.types.Operator, ImportHelper):
             bpy.ops.wm.obj_import(filepath=filepath, filter_glob='*.obj;*.mtl')
             colname = os.path.basename(filepath)
             colname = os.path.splitext(colname)[0]
-            try:
-                str_1 = str(filepath)
-                str_list = list(str_1)
-                nPos = str_list.index('.')
-                str_list.insert(nPos, '_n')
-                n_path = "".join(str_list)
-                n_path = (n_path.replace('.obj', '.png'))
-                n_image = bpy.data.images.load(filepath=n_path, check_existing=True)
-                n_approve = 1
-            except:
-                n_approve = 0
+
             if self.type == 'one':
                 bpy.ops.transform.rotate(value=1.5708, orient_axis='Z', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL')
                 bpy.ops.object.transform_apply(rotation=True)
                 bpy.ops.transform.resize(value=(0.8, 0.8, 0.8))
             elif self.type == 'two':
                 bpy.ops.object.transform_apply(rotation=True)
-                bpy.ops.transform.resize(value=(0.1, 0.1, 0.1))
+                bpy.ops.transform.resize(value=(1.6, 1.6, 1.6))
 
             bpy.ops.object.transform_apply(scale=True) 
             for obj in context.selected_objects:
                 context.view_layer.objects.active = obj
+                obj.select_set(True)
+                bpy.ops.object.mode_set(mode = 'EDIT')
+                bpy.ops.mesh.select_all(action='SELECT')
+                if self.type == 'two':
+                    bpy.ops.mesh.tris_convert_to_quads()
+                bpy.ops.mesh.normals_make_consistent(inside=False)
+                bpy.ops.object.mode_set(mode = 'OBJECT')
                 if self.type == 'two':
                     bpy.ops.mesh.customdata_custom_splitnormals_clear()
-                mat = context.active_object.active_material
+                bpy.ops.object.shade_smooth(use_auto_smooth=True)
                 obj.name = colname
-            bpy.ops.object.mode_set(mode = 'EDIT')
-            bpy.ops.mesh.select_all(action='SELECT')
-            if self.type == 'two':
-                bpy.ops.mesh.tris_convert_to_quads()
-            bpy.ops.mesh.normals_make_consistent(inside=False)
-            bpy.ops.object.mode_set(mode = 'OBJECT')
-            bpy.ops.object.shade_smooth(use_auto_smooth=True)
-            for obj in context.selected_objects:
-                matnum = len(context.active_object.data.materials)
-                for count in range(matnum):
-                    context.object.active_material_index = count
-                    mat = obj.active_material
+                for mat in obj.data.materials:
+                    mat.name = colname
                     materials_tools.prep_material(mat)
                     materials_tools.prep_normal(mat)
             objg = assetsDefs.collections().new(name=colname)
@@ -626,6 +613,7 @@ class Import_item(bpy.types.Operator, ImportHelper):
         for file_elem in self.files:
             obj = context.scene.objects.get(file_elem.name.replace('.png', ''))
             if obj: obj.select_set(True)
+
         objg = assetsDefs.collections().new(name="Item Imported Group")
         context.scene.collection.children.link(objg)  # Add to outliner.
         for obj in context.selected_objects:
@@ -682,16 +670,6 @@ class Alpha_Import(bpy.types.Operator, ImportHelper):
             filepath = os.path.join(directory, file_elem.name)
             (path, file) = os.path.split(filepath)
             image = bpy.data.images.load(filepath=filepath, check_existing=True)
-            try:
-                str_1 = str(filepath)
-                str_list = list(str_1)
-                nPos = str_list.index('.')
-                str_list.insert(nPos, '_n')
-                n_path = "".join(str_list)
-                n_image = bpy.data.images.load(filepath=n_path, check_existing=True)
-                n_approve = 1
-            except:
-                n_approve = 0
                  
             width, height = image.size
                     
@@ -737,32 +715,18 @@ class Alpha_Import(bpy.types.Operator, ImportHelper):
                 tex_node.location = materials_tools.tex_node_loc
                 tex_node.image = image
                 bsdf = material.node_tree.nodes["Principled BSDF"]
-                if n_approve == 1:
-                    n_name = (file.replace('.png', '') + "_n.png")
-                    n_node = material.node_tree.nodes.new('ShaderNodeTexImage')
-                    n_node.location = materials_tools.n_map_node_loc
-                    n_node.image = n_image
-                    n_node.name = "Normal Map Node"
-                    n_node.interpolation = 'Closest'
-                    bpy.data.images[n_name].colorspace_settings.name = 'Non-Color'
-                    n_map = material.node_tree.nodes.new('ShaderNodeNormalMap')
-                    n_map.name = "Normal Map"
-                    n_map.location = materials_tools.n_node_loc
-                    material.node_tree.links.new(n_map.inputs['Color'], n_node.outputs['Color'])
-                    material.node_tree.links.new(bsdf.inputs['Normal'], n_map.outputs['Normal'])
-                tex_node.interpolation = 'Closest'
                 material.node_tree.links.new(bsdf.inputs['Base Color'], tex_node.outputs['Color'])
                 material.node_tree.links.new(bsdf.inputs['Alpha'], tex_node.outputs['Alpha'])
-                bsdf.subsurface_method = 'BURLEY'
-                material.blend_method = 'HASHED'
             else:
                 context.active_object.data.materials.append(material)
+            materials_tools.prep_material(material)
+            materials_tools.prep_normal(material)
             bpy.ops.object.mode_set(mode = 'EDIT')
             bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
             bpy.ops.mesh.select_all(action='SELECT')
-            bpy.ops.object.mode_set(mode = 'OBJECT') 
+            bpy.ops.object.mode_set(mode = 'OBJECT')
             if self.delete_faces == True:
-                editing_tools.scale_uv(0.75)
+                editing_tools.scale_uv(0.01)
                 bpy.ops.object.mode_set(mode = 'EDIT')
                 bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
                 bpy.ops.mesh.select_all(action='SELECT')

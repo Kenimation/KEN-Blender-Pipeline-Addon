@@ -102,7 +102,7 @@ def prep_normal(mat):
 			else:
 				node_tree.links.new(bsdf.inputs['Normal'], n_node.outputs['Normal'])
 	except:
-			print("Image Texture has no found")
+		print("Image Texture has no found")
 
 def prep_Ramp(mat):
 	node_tree = mat.node_tree
@@ -229,7 +229,7 @@ class New_Material(bpy.types.Operator):
 		return {"FINISHED"}
 
 class Prep_Material(bpy.types.Operator):
-	bl_idname = "prep.material"
+	bl_idname = "materials.prep"
 	bl_label = "Prep Material"
 	bl_options = {'REGISTER', 'UNDO'}
 

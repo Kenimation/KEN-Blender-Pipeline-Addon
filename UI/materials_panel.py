@@ -119,7 +119,7 @@ def draw_ken_material_panel(self, context):
             
         if obj.data.materials[obj.active_material_index]:
             box.label(text = "Prep Tools", icon = "TOOL_SETTINGS")
-            box.operator("prep.material", text = "Prep Materials").type = "obj"
+            box.operator("materials.prep", text = "Prep Materials").type = "obj"
 
 def ken_material_panel(self, context):
     addon_prefs = addonPreferences.getAddonPreferences(context)
@@ -152,7 +152,7 @@ def menu_prep_material(self, context):
                 # Check if a material is assigned to the slot
                 if slot.material is not None:
                     self.layout.separator()
-                    self.layout.operator("prep.material", text = "Prep Material")
+                    self.layout.operator("materials.prep", text = "Prep Material")
                     self.layout.operator("materials.clear", text = "Clear Material")
         else:
             self.layout.separator()
