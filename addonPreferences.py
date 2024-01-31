@@ -521,7 +521,7 @@ class AddonPref(bpy.types.AddonPreferences):
         colrow.operator("wm.url_open", text="", icon_value = youtube_icon.icon_id, emboss = False).url = "https://www.youtube.com/@Kenimation"
         colrow.operator("wm.url_open", text="", icon_value = twitter_icon.icon_id, emboss = False).url = "https://twitter.com/KENIMATION"
         colrow.operator("wm.url_open", text="", icon_value = discord_icon.icon_id, emboss = False).url = "https://discord.gg/zgksz7E"
-        col.label(text = "Version: 2.3")
+        col.label(text = "Version: 2.3.1")
         addon_updater_ops.update_settings_ui(col, context)
 
 

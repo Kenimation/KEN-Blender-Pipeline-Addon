@@ -488,20 +488,23 @@ class Import_MinecraftModel(bpy.types.Operator, ImportHelper):
                 bpy.ops.transform.resize(value=(0.8, 0.8, 0.8))
             elif self.type == 'two':
                 bpy.ops.object.transform_apply(rotation=True)
-                bpy.ops.transform.resize(value=(1.6, 1.6, 1.6))
+                bpy.ops.transform.resize(value=(0.1, 0.1, 0.1))
 
             bpy.ops.object.transform_apply(scale=True) 
             for obj in context.selected_objects:
                 context.view_layer.objects.active = obj
+                if self.type == 'two':
+                    bpy.ops.mesh.customdata_custom_splitnormals_clear()
                 mat = context.active_object.active_material
                 obj.name = colname
             bpy.ops.object.mode_set(mode = 'EDIT')
             bpy.ops.mesh.select_all(action='SELECT')
+            if self.type == 'two':
+                bpy.ops.mesh.tris_convert_to_quads()
             bpy.ops.mesh.normals_make_consistent(inside=False)
             bpy.ops.object.mode_set(mode = 'OBJECT')
             bpy.ops.object.shade_smooth(use_auto_smooth=True)
             for obj in context.selected_objects:
-                context.view_layer.objects.active = obj
                 matnum = len(context.active_object.data.materials)
                 for count in range(matnum):
                     context.object.active_material_index = count
@@ -602,7 +605,7 @@ class Import_item(bpy.types.Operator, ImportHelper):
             script_directory = os.path.dirname(script_file)
             script_directory = os.path.normpath(script_directory)
 
-            blendfile = os.path.join(script_directory, "Assets", "KEN_Assets.blend")
+            blendfile = os.path.join(script_directory, "Assets", "Assets", "KEN_Assets.blend")
             section = "Object"
             blendfilename = "3D Plane"
             blendfilepath  = os.path.join(blendfile,section,blendfilename)
