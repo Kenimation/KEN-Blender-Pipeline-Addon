@@ -139,7 +139,9 @@ class Images_Panel(bpy.types.Panel):
 def draw_images(self, context, box):
 	scene = context.scene
 	row = box.row()
-	imgnum = len(bpy.data.images)-2
+
+	imgnum = len([image for image in bpy.data.images if image.name != 'Render Result' and image.name != 'Viewer Node'])
+
 	row.scale_x = 1.75
 	row.label(text = "Image Resources: Total "+str(imgnum), icon = "IMAGE_DATA")
 	img_data = bpy.data.images[scene.image_index]
