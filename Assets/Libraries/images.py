@@ -155,16 +155,25 @@ def draw_images(self, context, box):
 	row.scale_x = 0.75
 	row.operator("images.clean_resources", icon = "BRUSH_DATA", text = "Clean")
 	 
-	box.label(text=img_data.name, icon='TEXTURE')
-	row = box.row()
-	row.alignment = "LEFT"
-	row.label(text="Image Size:")
-	row.label(text="%d x %d x %db" % (img_data.size[0], img_data.size[1], img_data.depth))
 
 	if context.area.ui_type == 'IMAGE_EDITOR' or context.area.ui_type == 'UV':
+		if context.space_data.image:
+			box.label(text=img_data.name, icon='TEXTURE')
+			row = box.row()
+			row.alignment = "LEFT"
+			row.label(text="Image Size:")
+			row.label(text="%d x %d x %db" % (img_data.size[0], img_data.size[1], img_data.depth))
 		box.template_ID_preview(context.space_data, "image",new = "image.new",open = "image.open", rows=3, cols=8)
 	else:
-		box.template_icon_view(context.window_manager, "images_previews",scale=10)
+		if context.window_manager.images_previews:
+			box.label(text=img_data.name, icon='TEXTURE')
+			row = box.row()
+			row.alignment = "LEFT"
+			row.label(text="Image Size:")
+			row.label(text="%d x %d x %db" % (img_data.size[0], img_data.size[1], img_data.depth))
+			box.template_icon_view(context.window_manager, "images_previews",scale=10)
+		else:
+			box.operator("image.open", icon = "FILEBROWSER", text = "Open Image", emboss=False)
 
 	box.template_list("IMAGES", "", bpy.data, "images", scene, "image_index")
 	row = box.row()
@@ -196,16 +205,18 @@ def images_previews(self, context):
 	enum_items = []
 
 	for i, image in enumerate(bpy.data.images):
-		# generates a thumbnail preview for a file.
-		enum_items.append((image.name, image.name, "", image.preview.icon_id, i))
+		if image.name != 'Render Result' and image.name != 'Viewer Node':
+			# generates a thumbnail preview for a file.
+			enum_items.append((image.name, image.name, "", image.preview.icon_id, i))
 		
 	return enum_items
 
 def update_images_previews_index(self, context):
 	for index, image in enumerate(bpy.data.images):
 		# Check if the current image's name matches the target name
-		if image.name == context.window_manager.images_previews:
-			context.scene.image_index = index
+		if image.name != 'Render Result' and image.name != 'Viewer Node':
+			if image.name == context.window_manager.images_previews:
+				context.scene.image_index = index
 
 def update_images_previews(self, context):
 	img = bpy.data.images[context.scene.image_index]

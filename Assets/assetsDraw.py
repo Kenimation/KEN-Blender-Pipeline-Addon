@@ -29,14 +29,14 @@ def drawheader(context, addon_prefs, row, obj):
 			row.operator("outliner.orphans_purge", text = "Purge").do_recursive=True
 			row.scale_x = 1
 
-def draw_tools(self, scene, obj):
+def draw_tools(addon_prefs, self, scene, obj):
 	layout = self.layout
 	box = layout.box()
 	row = box.row()
 	row.label(text = "Tools", icon = "TOOL_SETTINGS")
 	row.prop(scene, "Object_Type", text = "")
 	row.operator("object.select_by_type", text = "", icon = "RESTRICT_SELECT_OFF", emboss=False).type = scene.Object_Type
-	if any(item.registered_name == AnimeProperties.registered_name[1] or item.registered_name == AnimeProperties.registered_name[2] for item in self.registered_name):
+	if any(item.registered_name == AnimeProperties.registered_name[1] for item in addon_prefs.registered_name) or any(item.registered_name == AnimeProperties.registered_name[2] for item in addon_prefs.registered_name):
 		if scene.QuickImport == True:
 			icon = "DOWNARROW_HLT"
 		else:

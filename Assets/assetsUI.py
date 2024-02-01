@@ -62,7 +62,7 @@ class Assets_UI(bpy.types.Panel):
                 assetsDraw.draw_edit(scene, box)
 
             if addon_prefs.tools == True and scene.tools == True:
-                assetsDraw.draw_tools(self, scene, obj)
+                assetsDraw.draw_tools(addon_prefs, self, scene, obj)
 
             if obj:
                 if obj.type == 'MESH' and scene.mat == True:

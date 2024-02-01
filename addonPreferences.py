@@ -610,7 +610,7 @@ class AddonPref(bpy.types.AddonPreferences):
             colrow.prop(self, "use_material_panel", text = "Material Panel")
 
             if self.registered_name:
-                if any(item.registered_name == AnimeProperties.registered_name[1] or item.registered_name == AnimeProperties.registered_name[2] for item in self.registered_name):
+                if any(item.registered_name == AnimeProperties.registered_name[1] for item in self.registered_name) or any(item.registered_name == AnimeProperties.registered_name[2] for item in self.registered_name):
                     siderow = row.row()
                     col = siderow.column()
                     col.label(text = "Rig Settings:")
