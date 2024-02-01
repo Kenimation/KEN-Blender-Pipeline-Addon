@@ -221,13 +221,13 @@ class SelectalphaUV(bpy.types.Operator):
             selectalpha(self.threshold)
             if self.delete_faces == True:
                 bpy.ops.mesh.delete(type='FACE')
-
+            bpy.ops.object.mode_set(mode = 'OBJECT')
         except:
-             print("Selected object can't not select uv.")
+             self.report({"ERROR"}, "Cannot edit selected object.")
 
         return {'FINISHED'}
 
-def menu_prep_material(self, context):
+def menu_editing(self, context):
     if context.object.type == "MESH":
         self.layout.separator()
         self.layout.operator("select.alphauv", text = "Alpha Editing")
@@ -241,10 +241,12 @@ def register():
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
-    bpy.types.VIEW3D_MT_object_context_menu.append(menu_prep_material)
+    bpy.types.VIEW3D_MT_object_context_menu.append(menu_editing)
+    bpy.types.VIEW3D_MT_edit_mesh_context_menu.append(menu_editing)
 
 def unregister():
     from bpy.utils import unregister_class
     for cls in reversed(classes):
         unregister_class(cls)
-    bpy.types.VIEW3D_MT_object_context_menu.remove(menu_prep_material)  
+    bpy.types.VIEW3D_MT_object_context_menu.remove(menu_editing)  
+    bpy.types.VIEW3D_MT_edit_mesh_context_menu.remove(menu_editing)

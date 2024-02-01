@@ -657,7 +657,7 @@ class AddonPref(bpy.types.AddonPreferences):
             box.separator()
             col = box.column()
             col.label(text = "This feature provides you with material tools eg, Prep Materials.")
-            col.label(text = "Prep Materials help check and add normal maps automatically.")
+            col.label(text = "Prep Materials help check and add normal and emssion maps automatically.")
             col.label(text = "It also can set specular, roughness, and bump color ramp with one click.")
             colrow = col.row(align=True)
             colrow.label(text = "Author: KEN")

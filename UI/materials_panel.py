@@ -152,7 +152,7 @@ def menu_prep_material(self, context):
                 # Check if a material is assigned to the slot
                 if slot.material is not None:
                     self.layout.separator()
-                    self.layout.operator("materials.prep", text = "Prep Material")
+                    self.layout.operator("materials.prep", text = "Prep Material").type = "obj"
                     self.layout.operator("materials.clear", text = "Clear Material")
         else:
             self.layout.separator()

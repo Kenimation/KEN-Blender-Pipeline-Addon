@@ -12,6 +12,7 @@ if "bpy" in locals():
     importlib.reload(addonPreferences),
     importlib.reload(camera_shakify),
     importlib.reload(uv_drag),
+    importlib.reload(toggle_assets_brower),
     importlib.reload(vertex_groups),
     importlib.reload(clean_resources),
     importlib.reload(copytransform),
@@ -60,6 +61,7 @@ else:
         save_cams,
         camera_shakify,
         uv_drag,
+        toggle_assets_brower,
         vertex_groups,
         clean_resources,
         pose_tools,
@@ -79,6 +81,7 @@ else:
 
 module_list = (
     save_cams,
+    toggle_assets_brower,
     addonPreferences,
     minecraftUI,
     AnimeUI,

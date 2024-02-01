@@ -186,9 +186,9 @@ class VIEW3D_MT_PIE_OBJECT(Menu):
         if not ob or not ob.select_get():
             pie = layout.menu_pie()
             # 4 - LEFT
-            pie.separator()
+            pie.operator("toggle.assets_brower", text = "Toggle Assets Brower", icon='ASSET_MANAGER')
             # 6 - RIGHT
-            pie.separator()
+            pie.prop(context.space_data, "show_region_ui", icon="MENU_PANEL")
             # 2 - BOTTOM
             pie.operator("rest.cursor", text = "Rest Cursor", icon='CURSOR')
             # 8 - TOP

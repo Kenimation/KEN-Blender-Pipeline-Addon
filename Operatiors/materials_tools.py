@@ -1,11 +1,12 @@
 import bpy
 from bpy.props import StringProperty, BoolProperty, FloatProperty, IntProperty, CollectionProperty, EnumProperty
 
-n_map_node_loc= (-1100,-350)
 n_node_loc = (-800,-350)
 ramp_node_h_loc = (-650,-125)
 h_node_loc = (-200,-250)
 tex_node_loc = (-1100, 350)
+n_map_node_loc= (-1100,-350)
+
 
 def prep_material(mat):
 	node_tree = mat.node_tree
@@ -63,8 +64,9 @@ def prep_SSS(mat, type):
 def prep_normal(mat):
 	node_tree = mat.node_tree
 	bsdf = node_tree.nodes["Principled BSDF"]
+	img = node_tree.nodes["Image Texture"]
 	try:
-		matname = node_tree.nodes["Image Texture"].image.filepath
+		matname = img.image.filepath
 		str_1 = str(matname)
 		str_list = list(str_1)
 		nPos = str_list.index('.')
@@ -75,17 +77,17 @@ def prep_normal(mat):
 		get_node_h = node_tree.nodes.get("Bump Map", None)
 
 		if n_map_node is None:
-			filename = node_tree.nodes["Image Texture"].image.name
+			filename = img.image.name
 			n_name = (filename.replace('.png', '') + "_n.png")
 			n_map_node = node_tree.nodes.new('ShaderNodeTexImage')
 			n_map_node.interpolation = 'Closest'
 			n_map_node.name = "Normal Map Node"
-			n_map_node.location = n_map_node_loc
+			n_map_node.location = [img.location[0], img.location[1] - 350]
 			n_map_node.image = n_image
 			bpy.data.images[n_name].colorspace_settings.name = 'Non-Color'
 			n_node = node_tree.nodes.new('ShaderNodeNormalMap')
 			n_node.name = "Normal Map"
-			n_node.location = n_node_loc
+			n_node.location = [bsdf.location[0] - 350, bsdf.location[1] - 350]
 			node_tree.links.new(n_node.inputs['Color'], n_map_node.outputs['Color'])
 			if get_node_h is not None:
 				h_node = node_tree.nodes["Bump Map"]
@@ -104,7 +106,53 @@ def prep_normal(mat):
 	except:
 		print("Image Texture has no found")
 
-def prep_Ramp(mat):
+def prep_emssion(mat):
+	node_tree = mat.node_tree
+	if node_tree.nodes["Image Texture"]:
+		if node_tree.nodes["Principled BSDF"]:
+			bsdf = node_tree.nodes["Principled BSDF"]
+			img = node_tree.nodes["Image Texture"]
+			matname = img.image.filepath
+			str_1 = str(matname)
+			str_list = list(str_1)
+			nPos = str_list.index('.')
+			str_list.insert(nPos, '_e')
+			e_path = "".join(str_list)
+			e_image = bpy.data.images.load(filepath=e_path, check_existing=True)
+
+			e_map_node = node_tree.nodes.new('ShaderNodeTexImage')
+			e_map_node.interpolation = 'Closest'
+			e_map_node.name = "Normal Map Node"
+			e_map_node.image = e_image
+			e_map_node.location = [img.location[0], img.location[1] + 350]
+			e_node = node_tree.nodes.new('ShaderNodeEmission')
+			e_node.location = [bsdf.location[0], bsdf.location[1] - 350]
+			mix_node = node_tree.nodes.new('ShaderNodeMixShader')
+			mix_node.location = [bsdf.location[0] + 350, bsdf.location[1]]
+
+			node_tree.links.new(e_node.inputs['Color'], img.outputs['Color'])
+			node_tree.links.new(mix_node.inputs[0], e_map_node.outputs['Color'])
+			node_tree.links.new(mix_node.inputs[1], bsdf.outputs['BSDF'])
+			node_tree.links.new(mix_node.inputs[2], e_node.outputs['Emission'])
+
+			for node in node_tree.nodes:
+				# Check if the node is not the BSDF node
+				if node != bsdf and node != mix_node:
+					# Iterate over the inputs of the node
+					for input_socket in node.inputs:
+						# Check if the input has any links
+						if input_socket.links:
+							# Iterate over the links of the input
+							for link in input_socket.links:
+								# Check if the link originates from the BSDF node
+								if link.from_node == bsdf:
+									print("Input linked to BSDF:", input_socket.name, "of node", node.name)
+
+									target_node = node_tree.nodes[node.name]
+
+									node_tree.links.new(target_node.inputs[input_socket.name], mix_node.outputs[0])
+
+def prep_ramp(mat):
 	node_tree = mat.node_tree
 	bsdf = node_tree.nodes["Principled BSDF"]
 	image_node = node_tree.nodes["Image Texture"]
@@ -114,20 +162,20 @@ def prep_Ramp(mat):
 	if getramp_node_i is not None:
 		if getramp_node_s is None:
 			ramp_node_s = node_tree.nodes.new('ShaderNodeValToRGB')
-			ramp_node_s.location = (-400, 175)
+			ramp_node_s.location = [bsdf.location[0] - 350, bsdf.location[1] - 200]
 			ramp_node_s.name = "ColorRamp_Specular"
 			node_tree.links.new(ramp_node_s.inputs['Fac'], image_node.outputs['Color'])
 			node_tree.links.new(bsdf.inputs[12], ramp_node_s.outputs['Color'])
 		if getramp_node_r is None:
 			ramp_node_r = node_tree.nodes.new('ShaderNodeValToRGB')
-			ramp_node_r.location = (-400,-25)
+			ramp_node_r.location = [bsdf.location[0] - 350, bsdf.location[1]]
 			ramp_node_r.color_ramp.elements[0].color = (1, 1, 1, 1)
 			ramp_node_r.color_ramp.elements[1].color = (0, 0, 0, 1)
 			ramp_node_r.name = "ColorRamp_Roughness"
 			node_tree.links.new(ramp_node_r.inputs['Fac'], image_node.outputs['Color'])
 			node_tree.links.new(bsdf.inputs[2], ramp_node_r.outputs['Color'])
 
-def prep_Bump(mat):
+def prep_ramp(mat):
 	node_tree = mat.node_tree
 
 	bsdf = node_tree.nodes["Principled BSDF"]
@@ -259,68 +307,61 @@ class Prep_Material(bpy.types.Operator):
 		description="Prep Subsurface.",
 		default=False,
 	)
+
+	emission: BoolProperty(
+		name="Prep Emission",
+		description="Prep Emission.",
+		default=False,
+	)
 	def draw(self, context):
 		layout = self.layout
 		layout.prop(self, "SSS", toggle = True)
 		layout.prop(self, "ramp", toggle = True)
 		layout.prop(self, "bump", toggle = True)
 		layout.prop(self, "nomral", toggle = True)
+		layout.prop(self, "emission", toggle = True)
 
 	def execute(self, context):
+		def prep(self, mat):
+			prep_material(mat)
+			report = "Finish Prep Materials"
+			if self.ramp == True:
+				prep_ramp(mat)
+				report = "Finish Prep Ramp"
+			if self.bump == True:
+				prep_ramp(mat)
+				report = "Finish Prep Bump Map"
+			if self.nomral == True:
+				prep_normal(mat)
+				report = "Finish Prep Nomral Map"
+			if self.emission == True:
+				prep_emssion(mat)
+				report = "Finish Prep Emission Map"
+			if self.SSS == True:
+				prep_SSS(mat, 1)
+				report = "Finish Prep SSS"
+			else:
+				prep_SSS(mat, 0)
+			self.report({"INFO"}, report)
+
 		if self.type == "obj":
 			for obj in context.selected_objects:
-				context.view_layer.objects.active = obj
 				if obj.type == "MESH":
-					actmat = context.object.active_material_index
-					matnum = len(context.active_object.data.materials)
-					for count in range(matnum):
-						context.object.active_material_index = count
-						mat = obj.active_material
+					for mat in obj.data.materials:
 						try:
-							prep_material(mat)
-							if self.ramp == True:
-								prep_Ramp(mat)
-							if self.bump == True:
-								prep_Bump(mat)
-							if self.nomral == True:
-								prep_normal(mat)
-							if self.SSS == True:
-								prep_SSS(mat, 1)
-							else:
-								prep_SSS(mat, 0)
+							prep(self, mat)
 						except:
 							continue
 								
-						context.object.active_material_index = actmat
 
 		if self.type == "index":
 			mat = bpy.data.materials[self.mat]
-			prep_material(mat)
-			if self.ramp == True:
-				prep_Ramp(mat)
-			if self.bump == True:
-				prep_Bump(mat)
-			if self.nomral == True:
-				prep_normal(mat)
-			if self.SSS == True:
-				prep_SSS(mat, 1)
-			else:
-				prep_SSS(mat, 0)
+			prep(self, mat)
 
 		if self.type == "scene":
 			for mat in bpy.data.materials:
 				try:
-					prep_material(mat)
-					if self.ramp == True:
-						prep_Ramp(mat)
-					if self.bump == True:
-						prep_Bump(mat)
-					if self.nomral == True:
-						prep_normal(mat)
-					if self.SSS == True:
-						prep_SSS(mat, 1)
-					else:
-						prep_SSS(mat, 0)
+					prep(self, mat)
 				except:
 					continue
 		return {'FINISHED'}

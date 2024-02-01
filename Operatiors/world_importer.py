@@ -324,7 +324,7 @@ class World_Import(bpy.types.Operator, ImportHelper):
 				mat.node_tree.links.new(bsdf.inputs['Normal'], n_map.outputs['Normal'])
 				mat.blend_method = 'HASHED'
 				if self.set_ramp == True:
-					materials_tools.prep_Ramp(mat)
+					materials_tools.prep_ramp(mat)
 			except:
 				pass
 		if not mat:

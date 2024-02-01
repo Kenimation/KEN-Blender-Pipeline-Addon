@@ -41,7 +41,7 @@ def draw_tools(addon_prefs, self, scene, obj):
 			icon = "DOWNARROW_HLT"
 		else:
 			icon = "RIGHTARROW"
-		box.prop(scene, "QuickImport", text = "Quick Import", icon = icon, emboss=False)
+		box.prop(scene, "QuickImport", text = "Minecraft Import", icon = icon, emboss=False)
 		if scene.QuickImport == True:
 			QuickImport = box.box()
 			QuickImport.label(text = "Object Import")
