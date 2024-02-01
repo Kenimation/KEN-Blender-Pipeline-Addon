@@ -14,6 +14,7 @@ from .. import addonPreferences, addon_updater_ops, icons
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #                      classes
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 class Assets_UI(bpy.types.Panel):
     bl_label = "KEN Pipeline"
     bl_idname = "OBJECT_PT_KEN_Tools"
@@ -97,7 +98,7 @@ class Assets_UI(bpy.types.Panel):
                 cameras.draw_cams(self, context, box)
             
             if scene.libraries == 'four':
-                images.draw_images(scene, box)
+                images.draw_images(self, context, box)
 
         if scene.myProps == 'three':
             row = box.row()
@@ -152,6 +153,11 @@ class Assets_UI(bpy.types.Panel):
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #                   (un)register
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+def update_category():
+    bpy.utils.unregister_class(Assets_UI)
+    addon_prefs = addonPreferences.getAddonPreferences(bpy.context)
+    Assets_UI.bl_category = addon_prefs.category_name
+    bpy.utils.register_class(Assets_UI)
 
 preview_collections = {}
 
@@ -159,10 +165,8 @@ classes = (
             Assets_UI,
           )
 def register():
-    from bpy.utils import register_class
-    for cls in classes:
-        register_class(cls)
-
+    bpy.utils.register_class(Assets_UI)
+    update_category()
     icon = icons.icons("Icons")
     pcoll = icon.getColl()
     icon.load(pcoll)
@@ -170,8 +174,7 @@ def register():
 
 def unregister():
     from bpy.utils import unregister_class
-    for cls in reversed(classes):
-        unregister_class(cls)
+    unregister_class(Assets_UI)
 
     for pcoll in preview_collections.values():
         bpy.utils.previews.remove(pcoll)

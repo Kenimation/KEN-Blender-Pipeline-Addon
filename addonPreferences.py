@@ -252,6 +252,9 @@ def use_constraint_panel(self, context):
 def use_material_panel(self, context):
     materials_panel.ken_material_panel(self, context)
 
+def update_category_name(self, context):
+    assetsUI.update_category()
+
 class UVDRAG_OT_AddHotkey(bpy.types.Operator):
 	''' Add hotkey entry '''
 	bl_idname = "wpie.add_hotkey"
@@ -378,6 +381,13 @@ class AddonPref(bpy.types.AddonPreferences):
     view : bpy.props.BoolProperty(default=True, update = write_view)
     advanced_option : bpy.props.BoolProperty(default=True, update = write_advanced_option)
     tools : bpy.props.BoolProperty(default=True, update = write_tools)
+
+    category_name: StringProperty(
+        name="Category Panel Name",
+        description="Set Category Panel Name",
+        default="KEN Pipeline",
+        update=update_category_name
+    )
 
     use_material_panel: BoolProperty(
         name="Material Panel",
@@ -569,6 +579,10 @@ class AddonPref(bpy.types.AddonPreferences):
 
             col = siderow.column()
             col.label(text = "Category Settings:")
+            colrow = col.row()
+            colrow.alignment = "LEFT"
+            colrow.label(text = "Tab")
+            colrow.prop(self, "category_name", text = "")
             col.prop(self, "compact_panel", text = "Compact Panel")
             col.label(text = "Panel Header:")
             colrow = col.row()
@@ -638,7 +652,26 @@ class AddonPref(bpy.types.AddonPreferences):
             colrow = col.row(align=True)
             colrow.label(text = "Author: KEN")
 
+            box = layout.box()
+            box.label(text="- Material Tools -")
+            box.separator()
+            col = box.column()
+            col.label(text = "This feature provides you with material tools eg, Prep Materials.")
+            col.label(text = "Prep Materials help check and add normal maps automatically.")
+            col.label(text = "It also can set specular, roughness, and bump color ramp with one click.")
+            colrow = col.row(align=True)
+            colrow.label(text = "Author: KEN")
+
             if any(item.registered_name == AnimeProperties.registered_name[1] or item.registered_name == AnimeProperties.registered_name[2] for item in self.registered_name):
+                box = layout.box()
+                box.label(text="- Minecraft World importer -")
+                box.separator()
+                col = box.column()
+                col.label(text = "Let you import the Minecraft world with a prep setting.")
+                colrow = col.row(align=True)
+                colrow.label(text = "Author: TheDuckCow")
+                colrow.operator("wm.url_open", text="", icon_value = youtube_icon.icon_id, emboss = False).url = "https://www.youtube.com/@TheDuckCow"    
+                
                 box = layout.box()
                 box.label(text="- Minecraft Rig Preset -")
                 box.separator()

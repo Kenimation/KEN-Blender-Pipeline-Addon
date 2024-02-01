@@ -994,10 +994,10 @@ def update_settings_ui(col, context, element=None):
 
     elif updater.update_ready and not updater.manual_only:
         row.operator(AddonUpdaterUpdateNow.bl_idname,
-                       text="Update" + str(updater.update_version), icon = "SORT_DESC", emboss = False)
+                       text="Update" + str(updater.update_version).replace(",", "."), icon = "SORT_DESC", emboss = False)
 
     elif updater.update_ready and updater.manual_only:
-        dl_now_txt = "Download " + str(updater.update_version)
+        dl_now_txt = "Download " + str(updater.update_version).replace(",", ".")
         row.operator("wm.url_open",
                      text=dl_now_txt).url = updater.website
     else:  # i.e. that updater.update_ready == False.

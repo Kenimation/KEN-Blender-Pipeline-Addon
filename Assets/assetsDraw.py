@@ -36,23 +36,24 @@ def draw_tools(self, scene, obj):
 	row.label(text = "Tools", icon = "TOOL_SETTINGS")
 	row.prop(scene, "Object_Type", text = "")
 	row.operator("object.select_by_type", text = "", icon = "RESTRICT_SELECT_OFF", emboss=False).type = scene.Object_Type
-	if scene.QuickImport == True:
-		icon = "DOWNARROW_HLT"
-	else:
-		icon = "RIGHTARROW"
-	box.prop(scene, "QuickImport", text = "Quick Import", icon = icon, emboss=False)
-	if scene.QuickImport == True:
-		QuickImport = box.box()
-		QuickImport.label(text = "Object Import")
-		QuickImport.operator("import.mc_world", text = "Minecraft World Import")
-		row = QuickImport.row()
-		col = row.column_flow(columns = 2)
-		col.operator("import.minecraftmodel", text = "Minecraft Obj")
-		col.operator("import.minecraftjson", text = "Minecraft Json")
-		QuickImport.label(text = "Image Import")
-		row = QuickImport.row()
-		row.operator("import.alpha_image", text = "Alpha Plane")
-		row.operator("import.3d_item", text = "3D Item from file")
+	if any(item.registered_name == AnimeProperties.registered_name[1] or item.registered_name == AnimeProperties.registered_name[2] for item in self.registered_name):
+		if scene.QuickImport == True:
+			icon = "DOWNARROW_HLT"
+		else:
+			icon = "RIGHTARROW"
+		box.prop(scene, "QuickImport", text = "Quick Import", icon = icon, emboss=False)
+		if scene.QuickImport == True:
+			QuickImport = box.box()
+			QuickImport.label(text = "Object Import")
+			QuickImport.operator("import.mc_world", text = "Minecraft World Import")
+			row = QuickImport.row()
+			col = row.column_flow(columns = 2)
+			col.operator("import.minecraftmodel", text = "Minecraft Obj")
+			col.operator("import.minecraftjson", text = "Minecraft Json")
+			QuickImport.label(text = "Image Import")
+			row = QuickImport.row()
+			row.operator("import.alpha_image", text = "Alpha Plane")
+			row.operator("import.3d_item", text = "3D Item from file")
 
 	if obj:
 		if obj.type == 'MESH':

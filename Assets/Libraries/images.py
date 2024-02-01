@@ -51,7 +51,6 @@ class Images_Reload_All(bpy.types.Operator):
 		self.report({"INFO"}, "Reload all images.")
 		return {"FINISHED"}
 
-
 class IMAGES(bpy.types.UIList):
 	# The draw_item function is called for each item of the collection that is visible in the list.
 	#   data is the RNA object containing the collection,
@@ -93,7 +92,10 @@ class IMAGES(bpy.types.UIList):
 				packicon = "UGLYPACKAGE"
 
 			layout.operator("images.pack_list", text="", icon = packicon, emboss=False).img = str(img.name)
-			layout.operator("image.reload", text = "", icon = "FILE_REFRESH", emboss=False)
+			row = layout.row()
+			if img.packed_files:
+				row.enabled = False
+			row.operator("image.reload", text = "", icon = "FILE_REFRESH", emboss=False)
 			if not img.has_data:
 				layout.label(text="", icon="ERROR")
 			else:
@@ -124,16 +126,22 @@ class IMAGES(bpy.types.UIList):
 
 		return filtered,ordered
 
-def draw_images(scene, box):
+class Images_Panel(bpy.types.Panel):
+	bl_space_type = 'IMAGE_EDITOR'
+	bl_region_type = 'UI'
+	bl_category = "Image List"
+	bl_label = "KEN Image List"
+
+	def draw(self, context):
+		box = self.layout.box()
+		draw_images(self, context, box)
+
+def draw_images(self, context, box):
+	scene = context.scene
 	row = box.row()
 	imgnum = len(bpy.data.images)-2
 	row.scale_x = 1.75
-	if scene.imagepreview == True:
-		previewicon = "SEQ_PREVIEW"
-	else:
-		previewicon = "SEQ_SPLITVIEW"
-	row.prop(scene, "imagepreview", icon = previewicon, text = "", emboss=False)
-	row.label(text = "Image Resources: Total "+str(imgnum))
+	row.label(text = "Image Resources: Total "+str(imgnum), icon = "IMAGE_DATA")
 	img_data = bpy.data.images[scene.image_index]
 	row.operator("image.open", icon = "FILE_NEW", text = "", emboss=False)
 	if scene.img_fake_use == True:
@@ -145,47 +153,75 @@ def draw_images(scene, box):
 	row.scale_x = 0.75
 	row.operator("images.clean_resources", icon = "BRUSH_DATA", text = "Clean")
 	 
-	if scene.imagepreview == True:
-		row = box.row()
-		size = f"{img_data.size[0]} x {img_data.size[1]}"
-		row.label(text=f"Image Size: {size}")
-		row = box.row()
-		row.template_icon(icon_value=img_data.preview.icon_id,scale=5)
+	box.label(text=img_data.name, icon='TEXTURE')
 	row = box.row()
-	row.template_list("IMAGES", "", bpy.data, "images", scene, "image_index")
+	row.alignment = "LEFT"
+	row.label(text="Image Size:")
+	row.label(text="%d x %d x %db" % (img_data.size[0], img_data.size[1], img_data.depth))
+
+	if context.area.ui_type == 'IMAGE_EDITOR' or context.area.ui_type == 'UV':
+		box.template_ID_preview(context.space_data, "image",new = "image.new",open = "image.open", rows=3, cols=8)
+	else:
+		box.template_icon_view(context.window_manager, "images_previews",scale=10)
+
+	box.template_list("IMAGES", "", bpy.data, "images", scene, "image_index")
 	row = box.row()
-
-	row.prop(img_data, "filepath", text="", icon_value=img_data.preview.icon_id)
-
-	row.scale_x = 0.05
-	row.label(text = str(img_data.users))
-
-	row.scale_x = 1
 	if img_data.packed_files:
 		packicon = "PACKAGE"
 	else:
 		packicon = "UGLYPACKAGE"
 	row.operator("images.pack_list", text="", icon = packicon, emboss=False).img = str(img_data.name)
+	pack_row = row.row()
 
-	row.operator("image.reload", text = "", icon = "FILE_REFRESH", emboss=False)
+	if img_data.packed_files:
+		pack_row.enabled = False
+
+	pack_row.prop(img_data, "filepath", text="")
+
+	pack_row.scale_x = 0.05
+	pack_row.label(text = str(img_data.users))
+	pack_row.scale_x = 1
+
+	pack_row.operator("image.reload", text = "", icon = "FILE_REFRESH", emboss=False)
+
 	row.prop(img_data,"use_fake_user", text = "", emboss=False)
-	row.operator("images.remove_list", text = "", icon = "X", emboss=False).img = str(img_data.name)
-	row = box.row()
-	row.prop(img_data, "source", text = "")
-	row.prop(img_data.colorspace_settings, "name", text = "")
+	if img_data.use_fake_user == False:
+		row.operator("images.remove_list", text = "", icon = "X", emboss=False).img = str(img_data.name)
+	box.prop(img_data, "source", text = "Source")
+	box.prop(img_data.colorspace_settings, "name", text = "Color Space")
+
+def images_previews(self, context):
+	enum_items = []
+
+	for i, image in enumerate(bpy.data.images):
+		# generates a thumbnail preview for a file.
+		enum_items.append((image.name, image.name, "", image.preview.icon_id, i))
+		
+	return enum_items
+
+def update_images_previews_index(self, context):
+	for index, image in enumerate(bpy.data.images):
+		# Check if the current image's name matches the target name
+		if image.name == context.window_manager.images_previews:
+			context.scene.image_index = index
+
+def update_images_previews(self, context):
+	img = bpy.data.images[context.scene.image_index]
+	if context.area.ui_type == 'IMAGE_EDITOR' or context.area.ui_type == 'UV':
+		bpy.context.space_data.image = img
+	else:
+		context.window_manager.images_previews = img.name
 
 bpy.types.Scene.img_fake_use = bpy.props.BoolProperty(
 	name="Toggle Images Fake_User",
 	description="Toggle Images Fake_User",
 	update = assetsDefs.update_img_fake_use
 )
+
 bpy.types.Scene.image_index = bpy.props.IntProperty(
 	name="Image_index",
 	description="image_index",
-)
-bpy.types.Scene.imagepreview = bpy.props.BoolProperty(
-	name="Show Image Preview",
-	default=True,
+	update = update_images_previews
 )
 
 classes = (
@@ -193,12 +229,17 @@ classes = (
 			Images_List_Pack,
 			Images_Reload_All,
 			IMAGES,
+			Images_Panel,
 		  )
 
 def register(): 
 	from bpy.utils import register_class
 	for cls in classes:
 		register_class(cls)
+	bpy.types.WindowManager.images_previews = EnumProperty(
+			items=images_previews,
+			update=update_images_previews_index
+		)
   
 def unregister():
 	from bpy.utils import unregister_class
