@@ -67,29 +67,32 @@ def prep_SSS(mat, type):
 
 def prep_normal(mat):
 	node_tree = mat.node_tree
-	bsdf = node_tree.nodes["Principled BSDF"]
-	img = node_tree.nodes["Image Texture"]
-	
-	if node_tree.nodes.get("Normal Map Node", None):
-		n_map = node_tree.nodes["Normal Map Node"]
-	else:
-		n_image = get_map_img(img, '_n')
-		filename = img.image.name
-		n_name = (filename.replace('.png', '') + "_n.png")
-		n_map = node_tree.nodes.new('ShaderNodeTexImage')
-		n_map.interpolation = 'Closest'
-		n_map.name = "Normal Map Node"
-		n_map.location = [img.location[0], img.location[1] - 350]
-		n_map.image = n_image
-		bpy.data.images[n_name].colorspace_settings.name = 'Non-Color'
-	if node_tree.nodes.get("Combine Normal Map", None):
-		n_node = node_tree.nodes["Combine Normal Map"]
-	else:
-		bpy.ops.node.append_ken_preset(choice = "Combine Normal Map", x = bsdf.location[0] - 350, y = bsdf.location[1] - 350)
-		n_node = node_tree.nodes["Combine Normal Map"]
+	try:
+		bsdf = node_tree.nodes["Principled BSDF"]
+		img = node_tree.nodes["Image Texture"]
+		
+		if node_tree.nodes.get("Normal Map Node", None):
+			n_map = node_tree.nodes["Normal Map Node"]
+		else:
+			n_image = get_map_img(img, '_n')
+			filename = img.image.name
+			n_name = (filename.replace('.png', '') + "_n.png")
+			n_map = node_tree.nodes.new('ShaderNodeTexImage')
+			n_map.interpolation = 'Closest'
+			n_map.name = "Normal Map Node"
+			n_map.location = [img.location[0], img.location[1] - 350]
+			n_map.image = n_image
+			bpy.data.images[n_name].colorspace_settings.name = 'Non-Color'
+		if node_tree.nodes.get("Combine Normal Map", None):
+			n_node = node_tree.nodes["Combine Normal Map"]
+		else:
+			bpy.ops.node.append_ken_preset(choice = "Combine Normal Map", x = bsdf.location[0] - 350, y = bsdf.location[1] - 350)
+			n_node = node_tree.nodes["Combine Normal Map"]
 
-	node_tree.links.new(n_node.inputs[0], n_map.outputs['Color'])
-	node_tree.links.new(bsdf.inputs["Normal"], n_node.outputs["Normal"])
+		node_tree.links.new(n_node.inputs[0], n_map.outputs['Color'])
+		node_tree.links.new(bsdf.inputs["Normal"], n_node.outputs["Normal"])
+	except:
+		pass
 
 def prep_bump(mat):
 	node_tree = mat.node_tree
@@ -294,13 +297,13 @@ class Prep_Material(bpy.types.Operator):
 		if self.type == "obj":
 			for obj in context.selected_objects:
 				if obj.type == "MESH":
-					for mat in obj.data.materials:
-						try:
-							prep(self, mat)
-						except:
-							continue
+					if obj.data.materials:
+						for mat in obj.data.materials:
+							try:
+								prep(self, mat)
+							except:
+								continue
 								
-
 		if self.type == "index":
 			mat = bpy.data.materials[self.mat]
 			prep(self, mat)

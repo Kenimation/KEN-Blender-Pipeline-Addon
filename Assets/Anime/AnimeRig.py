@@ -180,4 +180,5 @@ bpy.types.Object.horse_hair = EnumProperty(
     items=[('Both', 'Both', ''),
             ('Left', 'Left', ''),
             ('Right', 'Right', ''),
+            ('Top', 'Top', ''),
             ])
