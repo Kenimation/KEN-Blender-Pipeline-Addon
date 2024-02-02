@@ -1,12 +1,16 @@
 import bpy
 from bpy.props import StringProperty, BoolProperty, FloatProperty, IntProperty, CollectionProperty, EnumProperty
 
-n_node_loc = (-800,-350)
-ramp_node_h_loc = (-650,-125)
-h_node_loc = (-200,-250)
 tex_node_loc = (-1100, 350)
-n_map_node_loc= (-1100,-350)
 
+def get_map_img(img, suffix):
+	img_name = img.image.filepath
+	str_1 = str(img_name)
+	str_list = list(str_1)
+	nPos = str_list.index('.')
+	str_list.insert(nPos, suffix)
+	map_path = "".join(str_list)
+	return bpy.data.images.load(filepath=map_path, check_existing=True)
 
 def prep_material(mat):
 	node_tree = mat.node_tree
@@ -65,46 +69,48 @@ def prep_normal(mat):
 	node_tree = mat.node_tree
 	bsdf = node_tree.nodes["Principled BSDF"]
 	img = node_tree.nodes["Image Texture"]
-	try:
-		matname = img.image.filepath
-		str_1 = str(matname)
-		str_list = list(str_1)
-		nPos = str_list.index('.')
-		str_list.insert(nPos, '_n')
-		n_path = "".join(str_list)
-		n_image = bpy.data.images.load(filepath=n_path, check_existing=True)
-		n_map_node = node_tree.nodes.get("Normal Map Node", None)
-		get_node_h = node_tree.nodes.get("Bump Map", None)
+	
+	if node_tree.nodes.get("Normal Map Node", None):
+		n_map = node_tree.nodes["Normal Map Node"]
+	else:
+		n_image = get_map_img(img, '_n')
+		filename = img.image.name
+		n_name = (filename.replace('.png', '') + "_n.png")
+		n_map = node_tree.nodes.new('ShaderNodeTexImage')
+		n_map.interpolation = 'Closest'
+		n_map.name = "Normal Map Node"
+		n_map.location = [img.location[0], img.location[1] - 350]
+		n_map.image = n_image
+		bpy.data.images[n_name].colorspace_settings.name = 'Non-Color'
+	if node_tree.nodes.get("Combine Normal Map", None):
+		n_node = node_tree.nodes["Combine Normal Map"]
+	else:
+		bpy.ops.node.append_ken_preset(choice = "Combine Normal Map", x = bsdf.location[0] - 350, y = bsdf.location[1] - 350)
+		n_node = node_tree.nodes["Combine Normal Map"]
 
-		if n_map_node is None:
-			filename = img.image.name
-			n_name = (filename.replace('.png', '') + "_n.png")
-			n_map_node = node_tree.nodes.new('ShaderNodeTexImage')
-			n_map_node.interpolation = 'Closest'
-			n_map_node.name = "Normal Map Node"
-			n_map_node.location = [img.location[0], img.location[1] - 350]
-			n_map_node.image = n_image
-			bpy.data.images[n_name].colorspace_settings.name = 'Non-Color'
-			n_node = node_tree.nodes.new('ShaderNodeNormalMap')
-			n_node.name = "Normal Map"
-			n_node.location = [bsdf.location[0] - 350, bsdf.location[1] - 350]
-			node_tree.links.new(n_node.inputs['Color'], n_map_node.outputs['Color'])
-			if get_node_h is not None:
-				h_node = node_tree.nodes["Bump Map"]
-				node_tree.links.new(h_node.inputs['Normal'], n_node.outputs['Normal'])
-				node_tree.links.new(bsdf.inputs['Normal'], h_node.outputs['Normal'])
-			else:
-				node_tree.links.new(bsdf.inputs['Normal'], n_node.outputs['Normal'])
-		else:
-			n_node = node_tree.nodes["Normal Map"]
-			if get_node_h is not None:
-				h_node = node_tree.nodes["Bump Map"]
-				node_tree.links.new(h_node.inputs['Normal'], n_node.outputs['Normal'])
-				node_tree.links.new(bsdf.inputs['Normal'], h_node.outputs['Normal'])
-			else:
-				node_tree.links.new(bsdf.inputs['Normal'], n_node.outputs['Normal'])
-	except:
-		print("Image Texture has no found")
+	node_tree.links.new(n_node.inputs[0], n_map.outputs['Color'])
+	node_tree.links.new(bsdf.inputs["Normal"], n_node.outputs["Normal"])
+
+def prep_bump(mat):
+	node_tree = mat.node_tree
+	bsdf = node_tree.nodes["Principled BSDF"]
+	img = node_tree.nodes["Image Texture"]
+
+	if node_tree.nodes.get("Combine Normal Map", None):
+		n_node = node_tree.nodes["Combine Normal Map"]
+	else:
+		bpy.ops.node.append_ken_preset(choice = "Combine Normal Map", x = bsdf.location[0] - 350, y = bsdf.location[1] - 350)
+		n_node = node_tree.nodes["Combine Normal Map"]
+
+	if node_tree.nodes.get("ColorRamp_Bump", None):
+		bump_ramp = node_tree.nodes["ColorRamp_Bump"]
+	else:
+		bump_ramp = node_tree.nodes.new('ShaderNodeValToRGB')
+		bump_ramp.name = "ColorRamp_Bump"
+		bump_ramp.location = (n_node.location[0] -350, n_node.location[1])
+	node_tree.links.new(bump_ramp.inputs['Fac'], img.outputs['Color'])
+	node_tree.links.new(n_node.inputs[2], bump_ramp.outputs['Color'])
+	node_tree.links.new(bsdf.inputs["Normal"], n_node.outputs["Normal"])
 
 def prep_emssion(mat):
 	node_tree = mat.node_tree
@@ -112,25 +118,19 @@ def prep_emssion(mat):
 		if node_tree.nodes["Principled BSDF"]:
 			bsdf = node_tree.nodes["Principled BSDF"]
 			img = node_tree.nodes["Image Texture"]
-			matname = img.image.filepath
-			str_1 = str(matname)
-			str_list = list(str_1)
-			nPos = str_list.index('.')
-			str_list.insert(nPos, '_e')
-			e_path = "".join(str_list)
-			e_image = bpy.data.images.load(filepath=e_path, check_existing=True)
-
+			e_image = get_map_img(img, '_e')
 			e_map_node = node_tree.nodes.new('ShaderNodeTexImage')
 			e_map_node.interpolation = 'Closest'
 			e_map_node.name = "Normal Map Node"
 			e_map_node.image = e_image
 			e_map_node.location = [img.location[0], img.location[1] + 350]
-			e_node = node_tree.nodes.new('ShaderNodeEmission')
-			e_node.location = [bsdf.location[0], bsdf.location[1] - 350]
+			bpy.ops.node.append_ken_preset(choice = "Emission Object", x = bsdf.location[0], y = bsdf.location[1] - 350)
+			e_node = node_tree.nodes["Emission Object"]
 			mix_node = node_tree.nodes.new('ShaderNodeMixShader')
 			mix_node.location = [bsdf.location[0] + 350, bsdf.location[1]]
 
-			node_tree.links.new(e_node.inputs['Color'], img.outputs['Color'])
+			node_tree.links.new(e_node.inputs[0], img.outputs['Color'])
+			node_tree.links.new(e_node.inputs[2], img.outputs['Color'])
 			node_tree.links.new(mix_node.inputs[0], e_map_node.outputs['Color'])
 			node_tree.links.new(mix_node.inputs[1], bsdf.outputs['BSDF'])
 			node_tree.links.new(mix_node.inputs[2], e_node.outputs['Emission'])
@@ -146,7 +146,6 @@ def prep_emssion(mat):
 							for link in input_socket.links:
 								# Check if the link originates from the BSDF node
 								if link.from_node == bsdf:
-									print("Input linked to BSDF:", input_socket.name, "of node", node.name)
 
 									target_node = node_tree.nodes[node.name]
 
@@ -174,58 +173,6 @@ def prep_ramp(mat):
 			ramp_node_r.name = "ColorRamp_Roughness"
 			node_tree.links.new(ramp_node_r.inputs['Fac'], image_node.outputs['Color'])
 			node_tree.links.new(bsdf.inputs[2], ramp_node_r.outputs['Color'])
-
-def prep_ramp(mat):
-	node_tree = mat.node_tree
-
-	bsdf = node_tree.nodes["Principled BSDF"]
-	image_node = node_tree.nodes["Image Texture"]
-	getramp_node_i = node_tree.nodes.get("Image Texture", None)
-	get_node_n = node_tree.nodes.get("Normal Map", None)
-	get_node_h = node_tree.nodes.get("Bump Map", None)
-	get_rampnode_h = node_tree.nodes.get("ColorRamp_Bump", None)
-
-	if getramp_node_i is not None:
-		if get_node_h is None:
-			if get_rampnode_h is None:
-				ramp_node_h = node_tree.nodes.new('ShaderNodeValToRGB')
-				h_node = node_tree.nodes.new('ShaderNodeBump')
-				h_node.location = h_node_loc
-				h_node.name = "Bump Map"
-				ramp_node_h.location = ramp_node_h_loc
-				ramp_node_h.name = "ColorRamp_Bump"
-				node_tree.links.new(ramp_node_h.inputs['Fac'], image_node.outputs['Color'])
-				node_tree.links.new(h_node.inputs['Height'], ramp_node_h.outputs['Color'])
-				node_tree.links.new(bsdf.inputs['Normal'], h_node.outputs['Normal'])
-			else:
-				ramp_node_h = node_tree.nodes["ColorRamp_Bump"]
-				h_node = node_tree.nodes.new('ShaderNodeBump')
-				h_node.location = h_node_loc
-				h_node.name = "Bump Map"
-				ramp_node_h.location = ramp_node_h_loc
-				node_tree.links.new(ramp_node_h.inputs['Fac'], image_node.outputs['Color'])
-				node_tree.links.new(h_node.inputs['Height'], ramp_node_h.outputs['Color'])
-				node_tree.links.new(bsdf.inputs['Normal'], h_node.outputs['Normal'])
-		else:
-			if get_rampnode_h is None:
-				ramp_node_h = node_tree.nodes.new('ShaderNodeValToRGB')
-				ramp_node_h.location = ramp_node_h_loc
-				ramp_node_h.name = "ColorRamp_Bump"
-				h_node = node_tree.nodes['Bump Map']
-				node_tree.links.new(ramp_node_h.inputs['Fac'], image_node.outputs['Color'])
-				node_tree.links.new(h_node.inputs['Height'], ramp_node_h.outputs['Color'])
-				node_tree.links.new(bsdf.inputs['Normal'], h_node.outputs['Normal'])
-			else:
-				h_node = node_tree.nodes['Bump Map']
-				ramp_node_h = node_tree.nodes['ColorRamp_Bump']
-				node_tree.links.new(ramp_node_h.inputs['Fac'], image_node.outputs['Color'])
-				node_tree.links.new(h_node.inputs['Height'], ramp_node_h.outputs['Color'])
-				node_tree.links.new(bsdf.inputs['Normal'], h_node.outputs['Normal'])
-
-		if get_node_n is not None:
-			n_node = node_tree.nodes["Normal Map"]
-			h_node = node_tree.nodes["Bump Map"]
-			node_tree.links.new(h_node.inputs['Normal'], n_node.outputs['Normal'])
 
 class Add_Image(bpy.types.Operator):
 	bl_idname = "add.image"
@@ -329,7 +276,7 @@ class Prep_Material(bpy.types.Operator):
 				prep_ramp(mat)
 				report = "Finish Prep Ramp"
 			if self.bump == True:
-				prep_ramp(mat)
+				prep_bump(mat)
 				report = "Finish Prep Bump Map"
 			if self.nomral == True:
 				prep_normal(mat)

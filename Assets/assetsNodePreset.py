@@ -2,8 +2,68 @@ import bpy
 import os
 from .. import icons
 
+class APPEND_OT_kennode(bpy.types.Operator):
+	bl_idname = 'node.append_ken_preset'
+	bl_description = 'Append Node Setup'
+	bl_category = 'Node'
+	bl_label = 'Add Setup'
+
+	shader_type: bpy.props.StringProperty(
+		default="OBJECT"
+	)
+
+	choice: bpy.props.StringProperty()
+
+	x: bpy.props.FloatProperty(
+		default=0.0,
+	)
+	y: bpy.props.FloatProperty(
+		default=0.0,
+	)
+
+	def execute(self, context):
+
+		script_file = os.path.realpath(os.path.dirname(__file__))
+		script_directory = os.path.dirname(script_file)
+		script_directory = os.path.join(script_directory, "Assets", "Assets")
+		script_directory = os.path.normpath(script_directory)
+		blendfile = os.path.join(script_directory, "KEN Node_Preset.blend")
+
+		node_group_name = self.choice
+		location = (self.x , self.y)
+
+		with bpy.data.libraries.load(blendfile) as (data_from, data_to):
+			data_to.node_groups = [name for name in data_from.node_groups if name == node_group_name]
+
+		if node_group_name in bpy.data.node_groups:
+			node_group = bpy.data.node_groups[node_group_name]
+
+			# Create a new material or use an existing one
+			if self.shader_type == "OBJECT":
+				material = context.object.active_material
+
+				# Set the cursor location in the material's Node Tree
+				if material and material.use_nodes:
+					tree = material.node_tree
+					nodes = tree.nodes
+					node = nodes.new("ShaderNodeGroup")
+					node.name = node_group_name
+					node.node_tree = node_group
+					node.location = location
+
+			elif self.shader_type == "WORLD":
+				world = context.scene.world
+				if world and world.use_nodes:
+					tree = world.node_tree
+					nodes = tree.nodes
+					node = nodes.new("ShaderNodeGroup")
+					node.node_tree = node_group
+					node.location = location
+
+		return {"FINISHED"}
+
 class ADD_OT_kennode(bpy.types.Operator):
-	bl_idname = 'add.kennode'
+	bl_idname = 'node.add_ken_preset'
 	bl_description = 'Add Node Setup'
 	bl_category = 'Node'
 	bl_label = 'Add Setup'
@@ -120,7 +180,11 @@ def kennode_menu(self, context):
 
 preview_collections = {}
 
-classes=(ADD_OT_kennode,ADD_MT_kennode)
+classes=(
+	APPEND_OT_kennode,
+	ADD_OT_kennode,
+	ADD_MT_kennode
+	)
 
 def register():
 	from bpy.utils import register_class
