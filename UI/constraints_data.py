@@ -9,6 +9,16 @@ class DATA_constraints:
         pass
 
     @staticmethod
+
+    def draw_transform_cache_subpanel(layout, con, template_func):
+        if con.cache_file is None:
+            return
+        
+        layout.use_property_split = True
+        layout.use_property_decorate = True
+        template_func(con, "cache_file")
+
+    @staticmethod
     def draw_influence(layout, con, owner):
         layout.separator()
         if con.type in {'IK', 'SPLINE_IK'}:
@@ -500,8 +510,29 @@ class DATA_constraints:
 
         self.draw_influence(layout, con, owner)
 
+        layout.use_property_split = True
+        layout.use_property_decorate = True
+
+        col = layout.column()
+        col.active = not con.use_eval_time
+        col.prop(con, "transform_channel", text="Channel")
+        self.space_template(col, con, target=True, owner=False, separator=False)
+
+        sub = col.column(align=True)
+        sub.prop(con, "min", text="Range Min")
+        sub.prop(con, "max", text="Max")
+
+        layout.use_property_split = True
+        layout.use_property_decorate = True
+
+        layout.prop(con, "action")
+        layout.prop(con, "use_bone_object_action")
+
+        col = layout.column(align=True)
+        col.prop(con, "frame_start", text="Frame Start")
+        col.prop(con, "frame_end", text="End")
+
     def LOCKED_TRACK(self, layout, ob, con, owner):
-        
         
         layout.use_property_split = True
         layout.use_property_decorate = True
@@ -606,8 +637,81 @@ class DATA_constraints:
 
         self.draw_influence(layout, con, owner)
 
+        layout.separator()
+
+        layout.use_property_split = False
+        layout.use_property_decorate = False
+
+        row = layout.row()
+
+        row.label(text = "Map From")
+
+        row.prop(con, "map_from", expand=True)
+
+        from_axes = [con.map_to_x_from, con.map_to_y_from, con.map_to_z_from]
+
+        if con.map_from == 'ROTATION':
+            layout.prop(con, "from_rotation_mode", text="Rotation Mode")
+
+        ext = "" if con.map_from == 'LOCATION' else "_rot" if con.map_from == 'ROTATION' else "_scale"
+
+        row = layout.row(align=True)
+        row.label(text = "Min")
+        x = row.row()
+        x.active = "X" in from_axes
+        x.prop(con, "from_min_x" + ext, text="")
+        y = row.row()
+        y.active = "Y" in from_axes
+        y.prop(con, "from_min_y" + ext, text="")
+        z = row.row()
+        z.active = "X" in from_axes
+        z.prop(con, "from_min_z" + ext, text="")
+
+        row = layout.row(align=True)
+        row.label(text = "Max")
+        x = row.row()
+        x.active = "X" in from_axes
+        x.prop(con, "from_max_x" + ext, text="")
+        y = row.row()
+        y.active = "Y" in from_axes
+        y.prop(con, "from_max_y" + ext, text="")
+        z = row.row()
+        z.active = "X" in from_axes
+        z.prop(con, "from_max_z" + ext, text="")
+
+        row = layout.row(align=True)
+
+        row.label(text = "Map To")
+
+        row.prop(con, "map_to", expand=True)
+
+        if con.map_to == 'ROTATION':
+            layout.prop(con, "to_euler_order", text="Euler Order")
+
+        ext = "" if con.map_to == 'LOCATION' else "_rot" if con.map_to == 'ROTATION' else "_scale"
+
+        row = layout.row(align=True)
+        row.label(text = "Source Axis")
+        row.prop(con, "map_to_x_from", expand=False, text="")
+        row.prop(con, "map_to_y_from", expand=False, text="")
+        row.prop(con, "map_to_z_from", expand=False, text="")
+
+        row = layout.row(align=True)
+        row.label(text = "Min")
+        row.prop(con, "to_min_x" + ext, text="")
+        row.prop(con, "to_min_y" + ext, text="")
+        row.prop(con, "to_min_z" + ext, text="")
+
+        row = layout.row(align=True)
+        row.label(text = "Max")
+        row.prop(con, "to_max_x" + ext, text="")
+        row.prop(con, "to_max_y" + ext, text="")
+        row.prop(con, "to_max_z" + ext, text="")
+
+        layout.prop(con, "mix_mode" + ext, text="Mix Mode", text_ctxt=i18n_contexts.constraint)
+
+
     def SHRINKWRAP(self, layout, ob, con, owner):
-        
         
         layout.use_property_split = True
         layout.use_property_decorate = True
@@ -663,13 +767,51 @@ class DATA_constraints:
 
     def SPLINE_IK(self, layout, ob, con, owner):
         
-        
         layout.use_property_split = True
         layout.use_property_decorate = True
 
         self.target_template(layout, con)
-
+        
         self.draw_influence(layout, con, owner)
+
+        layout.use_property_split = True
+        layout.use_property_decorate = True
+
+        col = layout.column()
+        col.prop(con, "chain_count")
+        col.prop(con, "use_even_divisions")
+        col.prop(con, "use_chain_offset")
+
+        layout.use_property_split = True
+        layout.use_property_decorate = True
+
+        layout.prop(con, "use_curve_radius")
+
+        layout.prop(con, "y_scale_mode")
+        layout.prop(con, "xz_scale_mode")
+
+        if con.xz_scale_mode in {'INVERSE_PRESERVE', 'VOLUME_PRESERVE'}:
+            layout.prop(con, "use_original_scale")
+
+        if con.xz_scale_mode == 'VOLUME_PRESERVE':
+            col = layout.column()
+            col.prop(con, "bulge", text="Volume Variation")
+
+            row = col.row(heading="Volume Min")
+            row.prop(con, "use_bulge_min", text="")
+            sub = row.row()
+            sub.active = con.use_bulge_min
+            sub.prop(con, "bulge_min", text="")
+
+            row = col.row(heading="Max")
+            row.prop(con, "use_bulge_max", text="")
+            sub = row.row()
+            sub.active = con.use_bulge_max
+            sub.prop(con, "bulge_max", text="")
+
+            row = layout.row()
+            row.active = con.use_bulge_min or con.use_bulge_max
+            row.prop(con, "bulge_smooth", text="Smooth")
 
     def PIVOT(self, layout, ob, con, owner):
         
@@ -796,6 +938,14 @@ class DATA_constraints:
 
         self.draw_influence(layout, con, owner)
 
+        self.draw_transform_cache_subpanel(layout, con, layout.template_cache_file_velocity)
+
+        self.draw_transform_cache_subpanel(layout, con, layout.template_cache_file_procedural)
+
+        self.draw_transform_cache_subpanel(layout, con, layout.template_cache_file_time_settings)
+
+        self.draw_transform_cache_subpanel(layout, con, layout.template_cache_file_layers)
+
     def ARMATURE(self, layout, ob, con, owner):
         
         
@@ -817,6 +967,32 @@ class DATA_constraints:
 
         if not con.targets:
             layout.label(text="No target bones added", icon='ERROR')
+        else:
+            layout.use_property_split = True
+            layout.use_property_decorate = True
+
+            for i, tgt in enumerate(con.targets):
+                has_target = tgt.target is not None
+
+                box = layout.box()
+                header = box.row()
+                header.use_property_split = False
+
+                split = header.split(factor=0.45, align=True)
+                split.prop(tgt, "target", text="")
+
+                row = split.row(align=True)
+                row.active = has_target
+                if has_target:
+                    row.prop_search(tgt, "subtarget", tgt.target.data, "bones", text="")
+                else:
+                    row.prop(tgt, "subtarget", text="", icon='BONE_DATA')
+
+                header.operator("constraint.remove_target", text="", icon='X').index = i
+
+                row = box.row()
+                row.active = has_target and tgt.subtarget != ""
+                row.prop(tgt, "weight", slider=True, text="Weight")
 
     def IK(self, layout, ob, con, owner):
         

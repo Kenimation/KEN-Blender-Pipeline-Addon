@@ -107,13 +107,8 @@ def draw_tools(addon_prefs, self, scene, obj):
 				box.prop(scene, "BoneTool", text = "Bone Tool", icon = icon, emboss=False)
 				if scene.BoneTool == True:
 					BoneTool = box.box()
-					BoneTool.label(text = "Constraints Driver")
-					row = BoneTool.row()
-					row.prop(scene, "Constraints_Type", text = "")
-					row.prop(scene, "Rig_Prop", text = "")
-					row = BoneTool.row()
-					row.operator("add.constraintsdriver", text = "Add")
-					row.operator("remove.constraintsdriver", text = "Remove")
+					BoneTool.label(text = "Constraints Shape Bone")
+					BoneTool.operator("add.copyrotationshape", text = "Shape Bone Rotation")
 					BoneTool.label(text = "Damped Track Child")
 					row = BoneTool.row()
 					row.operator("add.dampedtrackchild", text = "Track Child")
@@ -121,6 +116,13 @@ def draw_tools(addon_prefs, self, scene, obj):
 					row = BoneTool.row()
 					row.operator("add.copyrotationparent", text = "Copy Parent Rotation")
 					row.prop(scene, "Copy_Rotation_Influence", slider = True)
+					BoneTool.label(text = "Constraints Driver")
+					row = BoneTool.row()
+					row.prop(scene, "Constraints_Type", text = "")
+					row.prop(scene, "Rig_Prop", text = "")
+					row = BoneTool.row()
+					row.operator("add.constraintsdriver", text = "Add")
+					row.operator("remove.constraintsdriver", text = "Remove")
 					BoneTool.label(text = "Damped Track Loop")
 					row = BoneTool.row()
 					row.prop(scene, "Track_Prefix", text = "")
@@ -239,6 +241,8 @@ def draw_properties(addon_prefs, context, row, obj, pcoll):
 					else:
 						rig_icon = ken_icon
 					row.prop(obj, "ken_mc_rig", icon_value = rig_icon.icon_id, text = "", emboss=False)
+			else:
+				row.prop(scene, "object_properties", icon = "ARMATURE_DATA", text = "")
 		else:
 			row.prop(scene, "object_properties", icon = "ARMATURE_DATA", text = "")
 			
@@ -270,7 +274,8 @@ def drawbone_properties(box, context, obj):
 	row = box.row()
 	row.prop(obj.data, "show_axes", text = "Axes")
 	row.prop(obj.data, "axes_position", text = "Position")
-	box.prop(obj.data, "relation_line_position", text = "Relations", expand = True)
+	row = box.row()
+	row.prop(obj.data, "relation_line_position", text = "Relations", expand = True)
 	box.label(text = "Bone Properties")
 	if obj.mode == "EDIT":
 		box.prop(actobj, "parent", text = "Parent")

@@ -7,13 +7,13 @@ from .. import addonPreferences
 from bpy.types import Operator, Panel, Menu
 from bpy.props import IntProperty
 
-con_targer = ["CHILD_OF", "TRACK_TO", "FOLLOW_PATH", "COPY_ROTATION", "COPY_LOCATION", "COPY_SCALE", "COPY_TRANSFORMS", "ACTION", "LOCKED_TRACK", "LIMIT_DISTANCE", "STRETCH_TO", "FLOOR", "CLAMP_TO", "TRANSFORM", "SHRINKWRAP", "DAMPED_TRACK", "SPLINE_IK", "PIVOT", "IK"]
+con_target = ["CHILD_OF", "TRACK_TO", "FOLLOW_PATH", "COPY_ROTATION", "COPY_LOCATION", "COPY_SCALE", "COPY_TRANSFORMS", "ACTION", "LOCKED_TRACK", "LIMIT_DISTANCE", "STRETCH_TO", "FLOOR", "CLAMP_TO", "TRANSFORM", "SHRINKWRAP", "DAMPED_TRACK", "SPLINE_IK", "PIVOT", "IK"]
 
 def is_constraint_disabled(con):
 	"""Checks if the name of the modifier should be diplayed with a red
 	background.
 	"""
-	if con.type in con_targer:
+	if con.type in con_target:
 		if not con.target:
 			return True
 		
@@ -33,7 +33,10 @@ class Disable_constraint(bpy.types.Operator):
 	def execute(self, context):
 		ob = context.object
 		if self.owner == 'BONE':
-			bone = context.pose_bone
+			try:
+				bone = context.pose_bone
+			except:
+				bone = context.active_pose_bone
 			con = bone.constraints.get(self.con)
 			mat = ob.matrix_world @ bone.matrix
 		else:
@@ -512,15 +515,19 @@ class Constraints_OT_CopyToSelected_ListConstraintsAll(Operator):
 		owner = self.owner
 		obj = context.object
 		if owner == 'OBJECT':
-			for con in context.object.constraints[:]:
+			for con in obj.constraints[:]:
 				bpy.ops.constraint.copy_to_selected(constraint=con.name, owner = owner)
 
-				self.report(type={"INFO"}, message= "All Constraints has selected to the active object")
+			self.report(type={"INFO"}, message= "All Constraints have been copy to selected to the object.")
+			
 		elif owner == 'BONE':
-			for con in context.active_pose_bone.constraints[:]:
-				bpy.ops.constraint.copy_to_selected(constraint=con.name, owner = owner)
+			act_bone = context.active_pose_bone
+			for con in act_bone.constraints[:]:
+				for bone in context.selected_pose_bones:
+					if bone != act_bone:
+						bone.constraints.copy(con)
 
-				self.report(type={"INFO"}, message= "All Constraints has selected to the active bone")
+			self.report(type={"INFO"}, message= "All Constraints have been copy to selected to the bone.")
 
 		return {'FINISHED'}
 
@@ -534,12 +541,16 @@ class Constraints_OT_CopyToSelected_ListConstraints(Operator):
 	owner: bpy.props.StringProperty(options={'HIDDEN'})
 
 	def execute(self, context):
-		bpy.ops.constraint.copy_to_selected(constraint=self.name, owner = self.owner)
-
 		if self.owner == "OBJECT":
-			self.report(type={"INFO"}, message= self.name + " Constraint has selected to the active object")
+			bpy.ops.constraint.copy_to_selected(constraint=self.name, owner = self.owner)
+			self.report(type={"INFO"}, message= self.name + " Constraint has been copy to selected to the object.")
 		elif self.owner == "BONE":
-			self.report(type={"INFO"}, message= self.name + " Constraint has selected to the active bone")
+			act_bone = context.active_pose_bone
+			for bone in context.selected_pose_bones:
+				if bone != act_bone:
+					bone.constraints.copy(act_bone.constraints[self.name])
+
+			self.report(type={"INFO"}, message= self.name + " Constraint has been copy to selected to the bone.")
 
 		return {'FINISHED'}
 

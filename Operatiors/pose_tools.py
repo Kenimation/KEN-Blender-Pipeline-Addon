@@ -48,6 +48,31 @@ class DampedTrackChild(Operator):
                         
         return {'FINISHED'}
 
+class Copy_Rotation_Shape(Operator):
+    bl_idname = "add.copyrotationshape"
+    bl_label = "Add Copy Rotation Shape"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        obj = context.active_object
+
+        # Check if an armature object is selected
+        if obj.type == 'ARMATURE':
+            
+            for bone in obj.pose.bones:
+                if bone.bone.select:
+                    # Create a Damped Track constraint
+                    constraint = bone.constraints.new(type='COPY_ROTATION')
+                    bone_name = bone.name.replace(".Bone", "")
+                    # Set the target bone as the child bone
+                    constraint.target = obj
+                    constraint.subtarget = bone_name
+                    constraint.mix_mode = 'AFTER'
+                    constraint.target_space = 'LOCAL'
+                    constraint.owner_space = 'LOCAL'
+                        
+        return {'FINISHED'}
+
 class Copy_Rotation_Parent(Operator):
     bl_idname = "add.copyrotationparent"
     bl_label = "Add Copy Rotation Parent"
@@ -71,7 +96,6 @@ class Copy_Rotation_Parent(Operator):
                         constraint.mix_mode = 'AFTER'
                         constraint.target_space = 'LOCAL'
                         constraint.owner_space = 'LOCAL'
-
                         
         return {'FINISHED'}
 
@@ -181,6 +205,7 @@ bpy.types.Scene.Constraints_Type = bpy.props.EnumProperty(
 classes = (
     DampedTrackLoop,
     DampedTrackChild,
+    Copy_Rotation_Shape,
     Copy_Rotation_Parent,
     ConstraintsDriver,
     ConstraintsDriverRemove
